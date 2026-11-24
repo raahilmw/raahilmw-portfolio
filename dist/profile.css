@@ -263,7 +263,7 @@
   .print-scene {aspect-ratio: 1.25}
   .profile-prose {grid-row: 3; margin-top: 1.45rem}
   .name-first {font-size: clamp(3.6rem,11.5vw,4.5rem)}
-  .name-last {font-size: clamp(2.6rem,8.4vw,3.3rem)}
+  .name-last {font-size: clamp(2.05rem,10.5vw,3.3rem)}
 }
 @media (prefers-reduced-motion: no-preference) {
   .print-back,.print-landscape,.forest-ink,.print-contour,.print-figure {transition: transform .33s cubic-bezier(.2,.72,.27,1)}
