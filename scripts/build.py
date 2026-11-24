@@ -91,11 +91,11 @@ def page(title,active,body,path='/',description=None):
 
 def portrait():
     # Publishing without a photo also has a complete editorial layout.
-    photo = OUT / 'assets' / 'raahil-portrait.jpg'
+    photo = OUT / 'assets' / 'raahil-portrait.webp'
     if not photo.exists():
         return ''
-    return (f'<figure class="profile-photo"><img src="{asset_url("assets/raahil-portrait.jpg")}" '
-            'alt="Raahil Muhammad Wildan wearing glasses and adjusting his tie." '
+    return (f'<figure class="profile-photo"><img src="{asset_url("assets/raahil-portrait.webp")}" '
+            'width="800" height="1000" alt="Raahil Muhammad Wildan adjusting his tie." '
             'loading="lazy" decoding="async"></figure>')
 
 def article_card():
