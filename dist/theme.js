@@ -13,7 +13,7 @@
       button.setAttribute('aria-label', `Switch to ${target} mode`);
       button.setAttribute('title', `Switch to ${target} mode`);
     });
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'light' ? '#f1eee7' : '#1c211e');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'light' ? '#eef3f8' : '#0b111b');
     document.dispatchEvent(new CustomEvent('themechange', { detail: { theme } }));
   }
   apply(hasPreference ? saved : system.matches ? 'light' : 'dark');

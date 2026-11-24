@@ -1,25 +1,13 @@
-# raahilmw / Palimpsest
+# raahilmw
 
-An editorial security research portfolio for Raahil Muhammad Wildan. The Palimpsest direction combines warm paper, graphite typography, vermilion accents, layered research notes, and a dark graphite appearance.
+Raahil Muhammad Wildan’s security research portfolio. Run `python scripts/build.py` to regenerate the eight static pages in `dist/`.
 
-## Build and edit
+- Shared content and navigation live in `scripts/build.py`. The optional profile photo slot checks `dist/assets/profile.webp`, `profile.png`, then `profile.jpg` and currently displays a monogram.
+- The home scene restores the forest photograph and Three.js specimen from the first design. The particle interaction follows the MengTo hover-particle-dissolve skill.
+- The About field uses locally bundled Matter.js. Drag tiles by mouse or touch, or focus one and move it with the arrow keys. Scrolling down drops them. Reset tiles or return to the top to restore the layout. Reduced motion skips directly to the resting positions.
+- The theme switch remembers the visitor’s setting. The workflow demonstration runs on sample data in the browser.
+- The Writeups section links to the author’s original [Medium article](https://medium.com/@raahil.mw/how-i-got-paid-for-turning-an-image-fetcher-into-an-arbitrary-file-read-0d15679bae00).
 
-Run `python scripts/build.py` to assemble the eight static HTML pages from shared templates. No external Python packages or frontend build dependencies are needed. The deployable output is `dist/`.
+## Credits
 
-- Page content and shared layout: `scripts/build.py`
-- Design, responsive layouts, and both appearances: `dist/style.css`
-- Saved/system appearance: `dist/theme.js`
-- Mobile navigation, paper interactions, clipboard, and workflow demo: `dist/app.js`
-- Original profile photograph: `dist/assets/profile.jpg` when supplied. The builder uses a monogram if the original file is unavailable.
-
-Routes: Home, About, Writeups, one case-study page, Projects, one browser-only workflow demonstration, Certifications, and Contact. Certifications use an explicit empty state; no qualifications, experience, clients, or awards are invented. Contact uses the supplied handle and verified Medium profile.
-
-The local case study is a concise companion to the author's original Medium report. Its impact statements preserve the report's evidence limits. The workflow demonstration uses only sample data and makes no network requests.
-
-## References
-
-- Original Palimpsest concept developed in this conversation.
-- About page composition inspired by https://danielneath.com/about, using original content.
-- Applied `light-mode-paper-technical` and `editorial-portfolio-chapters` from MengTo/Skills (MIT).
-- Case-study source: https://medium.com/@raahil.mw/how-i-got-paid-for-turning-an-image-fetcher-into-an-arbitrary-file-read-0d15679bae00
-- Locally served Manrope and IBM Plex Mono from Google Fonts.
+[Saltmere](https://threeui.com/saltmere) for the visual reference, [Daniel Neath](https://danielneath.com/about) for the draggable About reference, [MengTo/Skills](https://github.com/MengTo/Skills) for the particle interaction, and [Unsplash](https://images.unsplash.com/photo-1511497584788-876760111969) for the forest photograph. Manrope and IBM Plex Mono are served locally. The scene uses Three.js 0.169.0 (MIT) and the About field uses Matter.js 0.20.0 (MIT).
