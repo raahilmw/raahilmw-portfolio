@@ -2,7 +2,7 @@
 
 Raahil Muhammad Wildan’s security research portfolio. Run `python scripts/build.py` to regenerate the eight static pages in `dist/`.
 
-- Shared content and navigation live in `scripts/build.py`. The About layout uses the transparent portrait at `dist/assets/raahil-portrait.webp`.
+- Shared content and navigation live in `scripts/build.py`. The About spread layers the existing transparent portrait over a two-ink forest print and the Home map contours. The background follows MengTo’s Bayer dither treatment. The staggered name and print register once on entry, with a static composition for reduced motion. Instrument Serif is bundled under its OFL license.
 - The home scene restores the forest photograph and Three.js specimen from the first design. The particle interaction follows the MengTo hover-particle-dissolve skill.
 - The About field uses locally bundled Matter.js. Drag tiles by mouse or touch, or focus one and move it with the arrow keys. Scrolling down drops them. Pick up a label at a corner to swing it. Return to the top to re-float the labels. Reduced motion skips directly to the resting positions.
 - The About profile includes a section index, professional timeline and education based on the owner’s [LinkedIn](https://www.linkedin.com/in/raahilmw/). Home and About share the social links in the `SOCIAL` dictionary.

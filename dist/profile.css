@@ -185,35 +185,96 @@
   .map-automation span {max-width: 8ch}
 }
 
-/* A full-width nameplate opens the profile. The biography reads as two short columns. */
+/* The portrait is a photographic cutout over two offset, screen-printed plates. */
+@font-face {
+  font-family: 'Instrument Serif'; font-style: italic; font-weight: 400; font-display: swap;
+  src: url('/assets/instrument-serif-italic.woff') format('woff');
+}
 .profile-spread {
-  padding-block: clamp(25px,5vw,72px) clamp(48px,8vw,110px);
-  display: grid; grid-template-columns: minmax(0,1fr); align-items: center;
+  --print-paper: #abc0a9; --print-ink: #204a49; --print-back: #768da0;
+  --signature: #bdd4bc; --keyline: #d7e2c6;
+  display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.04fr);
+  gap: clamp(32px,6.2vw,92px); align-items: center;
+  padding-block: clamp(18px,3vw,46px) clamp(55px,7vw,96px);
 }
-.profile-masthead {min-width: 0}
-.profile-byline {display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 1.5rem;
-  color: var(--muted); font-size: .94rem; line-height: 1.5}
-.profile-byline span:first-child {color: var(--accent); font-family: var(--mono)}
-.profile-masthead h1 {
-  margin-top: clamp(15px,2.7vw,35px); font: 600 clamp(2.8rem,7.8vw,6rem)/.99 var(--sans);
-  letter-spacing: -.04em; text-wrap: initial;
+[data-theme=light] .profile-spread {
+  --print-paper: #c5d1ac; --print-ink: #365c53; --print-back: #8499ae;
+  --signature: #3b5b4c; --keyline: #f4f4df;
 }
-.profile-masthead h1 em {font-weight: 400; color: var(--ink)}
-.profile-narrative {
-  grid-column: 1/-1; display: grid; grid-template-columns: minmax(0,.9fr) minmax(0,1.05fr);
-  align-items: start; gap: clamp(30px,7vw,96px); border-top: 1px solid var(--edge);
-  margin-top: clamp(26px,4.3vw,62px); padding-top: clamp(21px,3.3vw,48px);
+.researcher-print {width: 100%; margin: 0; min-width: 0}
+.print-scene {isolation: isolate; position: relative; aspect-ratio: 1.07; overflow: hidden}
+.print-back, .print-landscape, .print-contour, .print-figure {position: absolute; pointer-events: none}
+.print-back {
+  inset: 14% 9% 1.8% 0; background: var(--print-back);
+  clip-path: polygon(0 14%,16% 14%,16% 0,100% 0,100% 87%,75% 87%,75% 100%,0 100%);
+  transform: translate(calc(var(--mx,0) * -4px), calc(var(--my,0) * -3px));
 }
-.profile-intro {max-width: 31ch; font: 500 clamp(1.25rem,2.1vw,1.88rem)/1.42 var(--sans); color: var(--ink); letter-spacing: -.03em}
-.profile-story {max-width: 64ch; font-size: 1.03rem; line-height: 1.73}
-.profile-story p+p {margin-top: 1em}
-.profile-story .profile-actions {margin-top: 1.5rem}
-.profile-spread:has(.profile-photo) {grid-template-columns: minmax(0,1.5fr) minmax(190px,.65fr); column-gap: clamp(28px,6vw,88px)}
-.profile-photo {max-width: 330px; width: 100%; justify-self: end}
-.profile-photo img {width: 100%; height: auto; display: block}
-@media(max-width:700px) {
-  .profile-spread:has(.profile-photo), .profile-narrative {grid-template-columns: minmax(0,1fr)}
-  .profile-narrative {gap: 22px}
-  .profile-photo {justify-self: start; width: min(85%,310px); margin-top: 1.75rem}
-  .profile-intro {max-width: 36ch}
+.print-landscape {
+  inset: 7% 0 5.5% 4%; background: var(--print-paper);
+  clip-path: polygon(0 14%,19% 14%,19% 0,100% 0,100% 78%,85% 78%,85% 100%,0 100%);
+  transform: translate(calc(var(--mx,0) * -5px),calc(var(--my,0) * -4px));
+}
+.forest-ink {
+  position: absolute; inset: -2%; background: var(--print-ink); image-rendering: pixelated;
+  mask: url('/assets/profile-forest-ink.png') center/cover no-repeat;
+  transform: translate(calc(var(--mx,0) * -3px),calc(var(--my,0) * -2px));
+}
+.print-contour {
+  inset: 40% 2% 0 52%;
+  background: linear-gradient(160deg,#afc7d6,#849cad);
+  clip-path: polygon(0 34%,21% 34%,21% 0,100% 0,100% 68%,83% 68%,83% 100%,0 100%);
+  transform: translate(calc(var(--mx,0) * 5px),calc(var(--my,0) * 3px));
+}
+.print-contour::before {
+  content: ''; position: absolute; inset: 0; background: #32595b;
+  mask: url('/assets/research-contours.png') 46% 49%/300% 170%; opacity: .85;
+}
+.print-figure {inset: 0 6% 0 1.5%; display: flex; align-items: flex-end; justify-content: center;
+  transform: translate(calc(var(--mx,0) * 2px),0)}
+.print-figure img {width: 100%; height: 100%; display: block; object-fit: contain; object-position: center bottom;
+  filter: drop-shadow(-2px 0 0 var(--keyline)) drop-shadow(2px -1px 0 var(--keyline))}
+.researcher-print figcaption {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  gap: .35rem .75rem; margin-top: .8rem; color: var(--muted); font: 400 .81rem/1.5 var(--mono);
+}
+.researcher-print figcaption span:first-child {color: var(--ink)}
+.researcher-print figcaption i {flex: 1; height: 1px; min-width: .9rem; background: var(--edge)}
+.profile-text {min-width: 0; max-width: 60ch}
+.profile-heading h1 {margin: 0; color: var(--ink); font-size: inherit; text-wrap: initial}
+.name-mask {display: block; overflow: hidden; padding-bottom: .07em}
+.name-first, .name-last {display: block; width: fit-content}
+.name-first {font: 600 clamp(3.9rem,7vw,5.9rem)/.99 var(--sans); letter-spacing: -.04em}
+.name-last {padding-right: .07em; color: var(--signature);
+  font: italic 400 clamp(2.55rem,4.75vw,4.15rem)/1.05 'Instrument Serif',Georgia,serif; letter-spacing: -.018em}
+.profile-prose {margin-top: clamp(19px,2.35vw,32px); font-size: clamp(1rem,1.15vw,1.1rem); line-height: 1.61}
+.profile-prose .profile-intro {color: var(--ink); font-size: clamp(1.15rem,1.56vw,1.49rem); line-height: 1.46; letter-spacing: -.014em}
+.profile-prose p+p {margin-top: .88em}
+.profile-prose .profile-actions {margin-top: 1.2rem}
+.profile-spread:not(:has(.researcher-print)) {grid-template-columns: minmax(0,1fr)}
+@media (min-width:701px) and (max-width:950px) {
+  .profile-spread {gap: 30px; grid-template-columns: minmax(0,.87fr) minmax(0,1.13fr)}
+  .print-scene {aspect-ratio: .87}
+}
+@media (max-width:700px) {
+  .profile-spread {grid-template-columns: minmax(0,1fr); gap: 0; max-width: 540px; align-items: start}
+  .profile-text {display: contents}
+  .profile-heading {grid-row: 1; margin-bottom: 1.35rem}
+  .researcher-print {grid-row: 2}
+  .print-scene {aspect-ratio: 1.25}
+  .profile-prose {grid-row: 3; margin-top: 1.45rem}
+  .name-first {font-size: clamp(3.6rem,11.5vw,4.5rem)}
+  .name-last {font-size: clamp(2.6rem,8.4vw,3.3rem)}
+}
+@media (prefers-reduced-motion: no-preference) {
+  .print-back,.print-landscape,.forest-ink,.print-contour,.print-figure {transition: transform .33s cubic-bezier(.2,.72,.27,1)}
+  .profile-landed .print-landscape {animation: ink-plate-in .76s cubic-bezier(.16,.84,.28,1) backwards}
+  .profile-landed .print-back {animation: underprint-in .72s cubic-bezier(.16,.84,.28,1) backwards}
+  .profile-landed .print-contour {animation: underprint-in .68s .05s cubic-bezier(.16,.84,.28,1) backwards}
+  .profile-landed .print-figure img {animation: subject-in .82s cubic-bezier(.2,.78,.2,1) backwards}
+  .profile-landed .name-first,.profile-landed .name-last {animation: lift-type .68s cubic-bezier(.16,.8,.18,1) backwards}
+  .profile-landed .name-last {animation-delay: .08s}
+  @keyframes ink-plate-in {from {translate: 7% -3%; opacity: .6}}
+  @keyframes underprint-in {from {translate: -6% 3%}}
+  @keyframes subject-in {from {transform: translateY(3%)}}
+  @keyframes lift-type {from {transform: translateY(75%)}}
 }

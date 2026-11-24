@@ -81,7 +81,7 @@ def page(title,active,body,path='/',description=None):
     description = description or 'Raahil Muhammad Wildan — penetration testing, bug hunting, security automation, and published research.'
     output = OUT / path.lstrip('/') / 'index.html'
     output.parent.mkdir(parents=True,exist_ok=True)
-    extra = {'Home':'<script type="module" src="/artifact.js"></script>', 'About':f'<script src="/assets/matter.min.js" defer></script><script src="{asset_url("field.js")}" defer></script>'}.get(active,'')
+    extra = {'Home':'<script type="module" src="/artifact.js"></script>', 'About':f'<script src="/assets/matter.min.js" defer></script><script src="{asset_url("field.js")}" defer></script><script src="{asset_url("portrait-motion.js")}" defer></script>'}.get(active,'')
     if active == 'Home':
         extra += f'<script defer src="{asset_url("assets/scrollcraft.js")}"></script><script defer src="{asset_url("research-map.js")}"></script>'
     profile_css = f'<link rel="stylesheet" href="{asset_url("profile.css")}">' if active in ('Home','About') else ''
@@ -90,13 +90,18 @@ def page(title,active,body,path='/',description=None):
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>{escape(title)} — raahilmw</title><meta name="description" content="{escape(description,quote=True)}"><link rel="canonical" href="{ORIGIN}{path}"><script src="{asset_url('theme.js')}"></script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/fonts.css"><link rel="stylesheet" href="{asset_url('style.css')}">{profile_css}</head><body class="page-{active.lower()}">{header(active)}{intro}<main id="content">{body}</main>{footer()}<script src="{asset_url('app.js')}" defer></script>{extra}</body></html>''')
 
 def portrait():
-    # Publishing without a photo also has a complete editorial layout.
-    photo = OUT / 'assets' / 'raahil-portrait.webp'
-    if not photo.exists():
+    photo = 'assets/raahil-portrait.webp'
+    if not (OUT / photo).exists():
         return ''
-    return (f'<figure class="profile-photo"><img src="{asset_url("assets/raahil-portrait.webp")}" '
-            'width="800" height="1000" alt="Raahil Muhammad Wildan adjusting his tie." '
-            'loading="lazy" decoding="async"></figure>')
+    return f'''<figure class="researcher-print">
+      <div class="print-scene">
+        <div class="print-back" aria-hidden="true"></div>
+        <div class="print-landscape" aria-hidden="true"><div class="forest-ink"></div></div>
+        <div class="print-contour" aria-hidden="true"></div>
+        <div class="print-figure"><img src="{asset_url(photo)}" width="800" height="1000" alt="Raahil Muhammad Wildan adjusting his tie." loading="lazy" decoding="async"></div>
+      </div>
+      <figcaption><span>@raahilmw</span><i aria-hidden="true"></i><span>Tangerang Selatan, Indonesia</span></figcaption>
+    </figure>'''
 
 def article_card():
     return f'''<article class="research-card"><a class="research-cover" href="{ARTICLE}" aria-label="Read the image fetcher case study"><span class="mono">WEB SECURITY</span>
@@ -190,13 +195,15 @@ about = f'''
 {''.join(map(tile,tiles))}</div><div class="field-caption"><p>Grab and toss a tile. Scroll to let it fall.</p><span class="sr-only" id="field-keys">Use the arrow keys to move a focused tile.</span></div>
 </div></div></section>
 <section id="about-me" class="shell profile-spread" aria-labelledby="researcher-name">
-<div class="profile-masthead"><div class="profile-byline"><span>@raahilmw</span><span>Tangerang Selatan, Indonesia</span></div>
-<h1 id="researcher-name">Raahil Muhammad<br><em>Wildan.</em></h1></div>
 {portrait()}
-<div class="profile-narrative"><p class="profile-intro">I’m a cybersecurity student who tests web applications and APIs. I’m especially interested in what happens when a request reaches the wrong part of a system.</p>
-<div class="profile-story"><p>Before I started hunting bugs, I worked in a data center and taught routing. I still think in terms of a request’s journey. Where does it go? Which service decides what the user can see? If I find myself checking the same thing twice, I’ll usually write a small tool for it.</p>
-<p>One bug I reported started with a feature that fetched pictures. It turned out the server could read a local file, too. My writeup walks through how I confirmed the impact and what the team could change to prevent it.</p>
-<div class="profile-actions"><button type="button" class="contact-action copy-action" data-copy="{EMAIL}" data-message="Email copied." aria-label="Copy email address {EMAIL}"><span class="copy-emblem">{icon('copy')}</span><span>Copy email</span></button></div></div></div></section>
+<div class="profile-text"><header class="profile-heading">
+<h1 id="researcher-name"><span class="name-mask"><span class="name-first">Raahil</span></span> <span class="name-mask"><em class="name-last">Muhammad Wildan.</em></span></h1>
+</header>
+<div class="profile-prose"><p class="profile-intro">I’m a cybersecurity student and bug hunter. I test web apps and APIs, especially the places where one user’s access ends and another’s begins.</p>
+<p>I got my start in a data center and taught network routing. I still like to trace a request from one system to the next. When a check keeps coming up, I write a small tool for it.</p>
+<p>One report started with a feature that fetched pictures. It turned out the server could read its own files through it. I wrote up what I could verify and how the team could fix it.</p>
+<div class="profile-actions"><button type="button" class="contact-action copy-action" data-copy="{EMAIL}" data-message="Email copied." aria-label="Copy email address {EMAIL}"><span class="copy-emblem">{icon('copy')}</span><span>Copy email</span></button></div></div>
+</div></section>
 <div class="shell about-index-layout"><nav class="about-index" aria-label="On this page">{label('On this page')}{index_links}</nav>
 <div class="about-chapters">
 <section id="expertise" class="about-chapter"><h2>Expertise</h2><ul class="expertise-list">{''.join(map(expertise_stamp, expertise))}</ul></section>
