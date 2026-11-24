@@ -13,7 +13,7 @@
   let toastTimer;
   function notify(message){const toast=document.querySelector('#toast');toast.textContent=message;toast.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('visible'),3400);}
   document.querySelectorAll('[data-copy]').forEach(button=>button.addEventListener('click',async()=>{
-    try{await navigator.clipboard.writeText(button.dataset.copy);notify(button.dataset.copy==='raahilmw'?'Handle copied: raahilmw':'Article link copied.');}
+    try{await navigator.clipboard.writeText(button.dataset.copy);notify(button.dataset.message || (button.dataset.copy==='raahilmw'?'Handle copied: raahilmw':'Article link copied.'));}
     catch{notify('Copy: '+button.dataset.copy);}
   }));
 

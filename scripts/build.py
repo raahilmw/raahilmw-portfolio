@@ -35,6 +35,41 @@ def header(active):
 <div class="header-controls"><button class="theme-toggle icon-button" type="button" aria-label="Change appearance"><span class="theme-sun">{icon('sun')}</span><span class="theme-moon">{icon('moon')}</span></button><button class="menu-toggle icon-button" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Open navigation"><span></span><span></span></button></div></header>
 <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation" hidden>{nav_links(active)}</nav>'''
 
+LINKEDIN = 'https://www.linkedin.com/in/raahilmw/'
+SOCIAL = {
+    'GitHub': 'https://github.com/raahilmw',
+    'LinkedIn': LINKEDIN,
+    'Email': '',
+    'Instagram': '',
+    'Discord': '',
+    'Hack The Box': '',
+    'TryHackMe': '',
+    'X': '',
+}
+
+def social_link(name, compact=False):
+    key = name.lower().replace(' ', '')
+    target = SOCIAL[name]
+    attrs = f'class="{"platform-link" if compact else "social-card"} platform-{key}"'
+    graphic = f'<img src="/assets/social/{key}.svg" alt="" width="24" height="24">'
+    if compact:
+        content = f'{graphic}<span>{name}</span>'
+    else:
+        content = f'<span class="card-art">{graphic}</span><span class="card-label">{name}</span>'
+    if not target:
+        return f'<span {attrs} data-unlisted title="Profile not linked">{content}<small class="card-status">Not linked</small></span>'
+    if target.startswith('copy:'):
+        value = escape(target.removeprefix('copy:'),quote=True)
+        return f'<button type="button" {attrs} data-copy="{value}" data-message="Discord username copied." aria-label="Copy Discord username {value}" title="{value}">{content}</button>'
+    external = '' if target.startswith('mailto:') else ' target="_blank" rel="noreferrer"'
+    return f'<a {attrs} href="{escape(target,quote=True)}"{external}>{content}</a>'
+
+def social_deck():
+    cards = ''.join(social_link(name) for name in ('GitHub','LinkedIn','Email','Instagram','Discord'))
+    platforms = ''.join(social_link(name, compact=True) for name in ('Hack The Box','TryHackMe','X'))
+    return f'<div class="social-set"><div class="social-cards">{cards}</div><div class="platform-row">{platforms}</div></div>'
+
+
 def footer():
     return f'''<footer class="site-footer shell">{wordmark()}<span>© Raahil Muhammad Wildan</span><a href="{MEDIUM}" target="_blank" rel="noreferrer">Medium</a><a href="/contact/">Contact</a></footer><div class="toast" role="status" aria-live="polite" id="toast"></div>'''
 
@@ -43,8 +78,10 @@ def page(title,active,body,path='/',description=None):
     output = OUT / path.lstrip('/') / 'index.html'
     output.parent.mkdir(parents=True,exist_ok=True)
     extra = {'Home':'<script type="module" src="/artifact.js"></script>', 'About':'<script src="/assets/matter.min.js" defer></script><script src="/field.js" defer></script>'}.get(active,'')
+    profile_css = '<link rel="stylesheet" href="/profile.css">' if active in ('Home','About') else ''
+    intro = '<dialog id="site-intro" aria-label="Portfolio introduction"><div class="intro-ground" aria-hidden="true"></div><div class="intro-center" aria-hidden="true"><span class="pixel-logo"></span></div><button class="intro-skip" type="button">Skip intro</button></dialog><script src="/intro.js"></script>'
     output.write_text(f'''<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>{escape(title)} — raahilmw</title><meta name="description" content="{escape(description,quote=True)}"><link rel="canonical" href="{ORIGIN}{path}"><script src="/theme.js"></script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/fonts.css"><link rel="stylesheet" href="/style.css"></head><body class="page-{active.lower()}">{header(active)}<main id="content">{body}</main>{footer()}<script src="/app.js" defer></script>{extra}</body></html>''')
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>{escape(title)} — raahilmw</title><meta name="description" content="{escape(description,quote=True)}"><link rel="canonical" href="{ORIGIN}{path}"><script src="/theme.js"></script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/fonts.css"><link rel="stylesheet" href="/style.css">{profile_css}</head><body class="page-{active.lower()}">{header(active)}{intro}<main id="content">{body}</main>{footer()}<script src="/app.js" defer></script>{extra}</body></html>''')
 
 profile_file = next((name for name in ('profile.webp', 'profile.png', 'profile.jpg') if (OUT / 'assets' / name).is_file()), None)
 
@@ -67,32 +104,71 @@ home = f'''
 <a class="specimen-tag tag-top" href="{ARTICLE}"><span class="tag-glyph">{icon('book')}</span><span><small>Field note</small>Local file read</span></a>
 <button class="artifact-control" id="artifact-control" type="button" hidden><span aria-hidden="true">✧</span> Inspect surface</button></div>
 </div><div class="hero-baseline shell"><span>@raahilmw</span><a href="#selected">Scroll to explore <span aria-hidden="true">↓</span></a></div></section>
+<section class="shell home-connect" aria-labelledby="home-connect-title"><div>{label("Find me online")}<h2 id="home-connect-title">Connect.</h2></div>{social_deck()}</section>
 <section class="section shell" id="selected"><div class="section-heading"><div>{label('Fieldwork')}<h2>Selected research.</h2></div><a class="underlined" href="/writeups/">All writeups</a></div>{article_card()}</section>
 <section class="section shell practice"><div>{label('About the researcher')}<h2>Hi, I’m Raahil.</h2><p>I look at the assumptions people build into web applications and APIs. When a test starts to repeat itself, I turn it into a tool.</p><a class="underlined" href="/about/">More about me</a></div><div class="practice-list"><a href="/writeups/">Penetration testing</a><a href="{ARTICLE}">Bug hunting</a><a href="/projects/">Security automation</a></div></section>'''
 page('Security research','Home',home)
 
-# Centres of the tiles as fractions of their available travel area (wide, narrow).
+# Positions represent fractions of a tile's travel across the wide or narrow field.
 tiles = [
-    ('Penetration testing','scan',.14,.16,.16,.12,-9),
-    ('Bug hunting','bug',.78,.12,.88,.22,8),
-    ('APIs','brackets',.93,.44,.94,.43,-7),
-    ('Automation','flow',.81,.78,.80,.83,6),
-    ('Web security','web',.23,.76,.12,.77,9),
-    ('Trust boundaries','bounds',.08,.48,.11,.34,-4),
-    ('Field notes','note',.52,.89,.44,.94,-7),
+    ('Penetration testing','scan',.11,.15,.08,.08,-8),
+    ('Bug hunting','bug',.61,.30,.75,.25,9),
+    ('APIs','brackets',.92,.18,.89,.07,-7),
+    ('Automation','flow',.76,.74,.85,.79,7),
+    ('Web security','web',.21,.74,.13,.78,7),
+    ('Trust boundaries','bounds',.10,.47,.02,.45,-5),
+    ('Field notes','note',.46,.82,.44,.92,-8),
+    ('OWASP','bug',.38,.10,.49,.18,-4),
+    ('Python','brackets',.80,.40,.89,.46,8),
+    ('Networking','bounds',.48,.54,.35,.60,-7),
+    ('VAPT','scan',.93,.79,.77,.64,-10),
+    ('HTTP','note',.30,.41,.22,.30,12),
+    ('Research','web',.03,.90,.04,.91,-4),
 ]
 glyph = {'scan':'⌖','bug':'✳','brackets':'{ }','flow':'⌁','web':'◎','bounds':'⌗','note':'≡'}
 def tile(entry):
     text,mark,x,y,mx,my,angle=entry
     return f'<button type="button" class="field-tile tile-{mark}" data-x="{x}" data-y="{y}" data-mx="{mx}" data-my="{my}" data-angle="{angle}" style="--px:{100*x}%;--py:{100*y}%;--mx:{100*mx}%;--my:{100*my}%;--angle:{angle}deg" aria-describedby="field-keys"><span aria-hidden="true">{glyph[mark]}</span>{text}</button>'
-about=f'''
-<section class="field-scroll"><div class="field-sticky shell"><div class="field-card"><div class="field-board" aria-label="Interactive research interests">
-<div class="field-title">{label('About')}<h1>Hi, I’m <em>Raahil.</em></h1></div>
-{''.join(map(tile,tiles))}</div>
-<div class="field-caption"><p>Drag the tiles. Scroll down to drop them.</p><span class="sr-only" id="field-keys">Use the arrow keys to move a focused tile. Use Home to reset the tiles.</span><button type="button" class="reset-board">{icon('reset')}Reset tiles</button></div>
+
+# Dates and roles are from the owner's public LinkedIn profile.
+roles = [
+    ('From Sep 2026','Offensive Security Intern','VINIX7'),
+    ('From Jul 2026','Penetration Testing Intern','JAH Training Center'),
+    ('Dec 2023 – May 2024','Data Center Engineering Intern','PT Usaha Adi Sanggoro (ASNET)'),
+    ('Jul – Nov 2023','IT Service Management Intern','Lintasarta'),
+    ('Mar 2023','CCNA Trainer','SMK Negeri 36 Jakarta'),
+    ('Jun 2022','MTCRE Trainer','SMK Informatika Utama'),
+    ('Feb 2022','Fiber Optic Trainer','IDN Boarding School'),
+]
+education = [
+    ('From 2024','Bachelor of Technology in Information Technology','Asia e University'),
+    ('From 2024','Diploma in Informatics and Information Technology','CEP-CCIT FTUI · Cyber Security'),
+]
+
+def timeline(entries):
+    return '<ul class="timeline">' + ''.join(f'<li><span class="year">{date}</span><div><h3>{role}</h3><p>{org}</p></div></li>' for date,role,org in entries) + '</ul>'
+
+about_parts = [('about-me','About me'),('expertise','Expertise'),('tools','Tools & standards'),('experience','Experience'),('education','Education'),('connect','Connect')]
+index_links = ''.join(f'<a href="#{anchor}">{escape(name)}</a>' for anchor,name in about_parts)
+about = f'''
+<section class="field-scroll" aria-label="Interactive research interests"><div class="field-sticky"><div class="field-card"><div class="field-board">
+{''.join(map(tile,tiles))}</div><div class="field-caption"><p>Drag a tile. Scroll to let them fall.</p><span class="sr-only" id="field-keys">Use the arrow keys to move a focused tile. Use Home to reset the tiles.</span><button type="button" class="reset-board">{icon('reset')}Reset tiles</button></div>
 </div></div></section>
-<section class="section shell about-profile">{portrait()}<div class="bio">{label('Behind the handle')}<h2>Raahil Muhammad<br>Wildan.</h2><p class="bio-lead">I’m a penetration tester, bug hunter, and security automation builder. Online, I go by <strong>raahilmw</strong>.</p><p>I’m interested in the assumptions hiding inside everyday features. One of my writeups started with a simple question about an image fetcher: what could the server read?</p><p>I document the behavior I can verify and build tools for the parts of an investigation I repeat.</p><div class="hero-actions"><a class="button" href="{ARTICLE}">Read that finding</a><a class="underlined" href="/contact/">Get in touch</a></div></div></section>
-<section class="section shell practice"><div>{label('My practice')}<h2>What I work on.</h2></div><div class="practice-list"><a href="/writeups/">Application and API security</a><a href="/projects/">Security automation</a><a href="/certifications/">Learning and certifications</a></div></section>'''
+<section id="about-me" class="shell about-profile">{portrait()}<div class="bio">{label('About me')}<h1>Raahil Muhammad<br>Wildan<span class="red">.</span></h1>
+<p class="bio-lead">I’m a cybersecurity student in Tangerang Selatan, Indonesia. I test web applications and APIs, hunt bugs, and write tools for the checks I run more than once.</p>
+<p>I started in network engineering. Teaching routing and working in a data center taught me to follow a request from one system to the next. I use that same habit now to work out where an application puts its trust.</p>
+<p>One investigation started with an image URL. The server could read a local file through a feature built to fetch pictures. I wrote up what I could verify and how the team could prevent it.</p>
+<div class="hero-actions"><a class="button" href="{LINKEDIN}" target="_blank" rel="noreferrer">View LinkedIn</a><a class="underlined" href="{ARTICLE}">Read the image-fetcher writeup</a></div></div></section>
+<div class="shell about-index-layout"><nav class="about-index" aria-label="On this page">{label('On this page')}{index_links}</nav>
+<div class="about-chapters">
+<section id="expertise" class="about-chapter"><h2>Expertise</h2><dl class="expertise-lines">
+<div><dt>Web &amp; API testing</dt><dd>I trace requests across trust boundaries, review access decisions, and record the impact of unexpected behavior.</dd></div>
+<div><dt>Bug hunting</dt><dd>I follow small inconsistencies in application behavior and collect the evidence behind a finding.</dd></div>
+<div><dt>Security automation</dt><dd>I use scripts to organize observations and make repeated checks easier to review.</dd></div></dl></section>
+<section id="tools" class="about-chapter"><h2>Tools &amp; standards</h2><div class="tool-list"><span>Python</span><span>HTTP</span><span>OWASP</span><span>Cisco networking</span><span>MikroTik routing</span></div></section>
+<section id="experience" class="about-chapter"><h2>Experience</h2>{timeline(roles)}</section>
+<section id="education" class="about-chapter"><h2>Education</h2>{timeline(education)}<a class="underlined record-source" href="{LINKEDIN}" target="_blank" rel="noreferrer">Career and education on LinkedIn</a></section>
+<section id="connect" class="about-chapter"><h2>Let’s connect.</h2>{social_deck()}<a class="underlined" href="{MEDIUM}" target="_blank" rel="noreferrer">Read my research on Medium</a></section></div></div>'''
 page('About','About',about,'/about/')
 
 writeups=f'''<section class="page-intro shell">{label('THE RESEARCH NOTEBOOK')}<h1>Writeups<span class="red">.</span></h1><p>Findings, the questions behind them,<br>and what the evidence actually says.</p><div class="intro-rule"><span class="mono">PUBLISHED NOTES</span><span class="mono">WEB SECURITY / INVESTIGATION / DISCLOSURE</span></div></section><section class="shell writeups-index">{article_card()}</section>'''

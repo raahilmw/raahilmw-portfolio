@@ -92,3 +92,18 @@ svg{width:1.2em;height:1.2em;fill:none;stroke:currentColor;stroke-width:1.5;stro
 }
 @media(max-width:400px){.field-caption{gap:5px}.reset-board{padding-inline:9px}.reset-board svg{display:none}.hero-actions{gap:14px}.hero-baseline{font-size:.75rem}.field-tile{font-size:.8rem}.section-heading{flex-wrap:wrap}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* First-visit reveal. Without JavaScript the dialog stays closed. */
+.intro-open{overflow:hidden}
+#site-intro{position:fixed;inset:0;margin:0;padding:0;border:0;width:100%;height:100%;max-width:none;max-height:none;overflow:hidden;background:transparent;color:var(--ink)}
+#site-intro:not([open]){display:none}
+#site-intro::backdrop{background:transparent}
+.intro-ground{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,var(--panel),var(--bg) 72%);animation:curtain-clear .56s 1.21s ease-in-out both}
+.intro-ground:before{content:"";position:absolute;inset:0;background-image:radial-gradient(var(--edge) .8px, transparent 1px);background-size:22px 22px;opacity:.48;mask-image:radial-gradient(ellipse at center,black,transparent 80%)}
+.intro-center{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+.pixel-logo{width:min(38vw,32vh,218px);aspect-ratio:1;display:grid;grid-template:repeat(17,1fr)/repeat(17,1fr);color:var(--accent);animation:logo-flight .66s 1.08s cubic-bezier(.54,.03,.21,.99) both}
+.pixel-logo i{background:currentColor;animation:pixel-assemble .38s var(--beat) cubic-bezier(.17,.72,.3,1) both}
+.intro-skip{position:absolute;left:clamp(16px,4vw,65px);bottom:max(18px,env(safe-area-inset-bottom));min-height:44px;padding:8px 17px;border-radius:5px;background:var(--panel);border:1px solid var(--edge);font:.83rem var(--mono)}
+@keyframes pixel-assemble{from{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.35)}to{opacity:1;transform:none}}
+@keyframes logo-flight{from{transform:none}to{transform:translate(var(--land-x),var(--land-y)) scale(var(--land-scale))}}
+@keyframes curtain-clear{from{opacity:1}to{opacity:0}}
