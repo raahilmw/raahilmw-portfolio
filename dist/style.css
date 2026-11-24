@@ -127,3 +127,56 @@ svg{width:1.2em;height:1.2em;fill:none;stroke:currentColor;stroke-width:1.5;stro
 @media(max-height:430px) and (max-width:540px){.boot-layout{grid-template-columns:55px 1fr;gap:10px}.boot-sigil{width:55px}.boot-console{font-size:.79rem}}
 .contact-record strong a[href^="mailto:"]{overflow-wrap:anywhere}
 @media(max-width:480px){.contact-record:has(a[href^="mailto:"]){grid-template-columns:1fr;justify-items:start;row-gap:7px}}
+
+/* The new palette opens like an iris from the appearance switch. */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root), ::view-transition-new(root) {
+    mix-blend-mode: normal;
+    animation: none;
+  }
+  ::view-transition-new(root) {
+    animation: eclipse-reveal .59s cubic-bezier(.22,.65,.19,1) both;
+  }
+  @keyframes eclipse-reveal {
+    from {clip-path: circle(19px at var(--eclipse-center))}
+    to {clip-path: circle(var(--eclipse-radius) at var(--eclipse-center))}
+  }
+  .theme-pulse body::after {
+    content: ""; position: fixed; inset: 0; z-index: 18; pointer-events: none;
+    background: radial-gradient(circle at var(--eclipse-center),var(--accent), transparent 70%);
+    animation: eclipse-glimmer .46s ease-out both;
+  }
+  @keyframes eclipse-glimmer {
+    from {opacity: .27; clip-path: circle(20px at var(--eclipse-center))}
+    to {opacity: 0; clip-path: circle(var(--eclipse-radius) at var(--eclipse-center))}
+  }
+}
+.theme-toggle {position: relative; isolation: isolate}
+.theme-toggle span {position: absolute; inset: 0; transition: transform .4s ease, opacity .3s}
+.theme-toggle .theme-moon, [data-theme=light] .theme-toggle .theme-sun {
+  display: grid !important; opacity: 0; transform: rotate(-70deg) scale(.5);
+}
+[data-theme=light] .theme-toggle .theme-moon {opacity: 1; transform: none}
+
+@media(max-width:980px) {
+  .menu-toggle span {transform-origin: center; transition: transform .32s cubic-bezier(.25,.85,.3,1.2)}
+  .menu-toggle[aria-expanded=true] span:first-child {transform: translateY(2.5px) rotate(45deg)}
+  .menu-toggle[aria-expanded=true] span:last-child {transform: translateY(-2.5px) rotate(-45deg)}
+  .mobile-nav {
+    left: auto; right: 4.5vw; width: min(300px,91vw); max-height: calc(100dvh - var(--header));
+    overflow-y: auto; border-radius: 14px 3px 14px 14px; transform-origin: top right;
+  }
+  .mobile-nav:not([hidden]) {animation: unfold-map .36s cubic-bezier(.2,.82,.25,1) both}
+  .mobile-nav.closing {animation: fold-map .18s ease-in both; pointer-events: none}
+  .mobile-nav:not(.closing) a {animation: plot-link .28s ease-out backwards; animation-delay: var(--beat,0s)}
+  .mobile-nav a:nth-child(2) {--beat: .035s} .mobile-nav a:nth-child(3) {--beat: .07s}
+  .mobile-nav a:nth-child(4) {--beat: .105s} .mobile-nav a:nth-child(5) {--beat: .14s}
+  .mobile-nav a:nth-child(6) {--beat: .175s}
+  @keyframes unfold-map {
+    from {clip-path: polygon(95% 0,100% 0,100% 4%,95% 4%); transform: translateY(-3px)}
+    48% {clip-path: polygon(0 0,100% 0,100% 30%,0 20%)}
+    to {clip-path: polygon(0 0,100% 0,100% 100%,0 100%); transform: none}
+  }
+  @keyframes fold-map {to {opacity: 0; clip-path: inset(0 0 95% 88%); transform: translateY(-3px)}}
+  @keyframes plot-link {from {opacity: 0; transform: translate(5px,-3px)}}
+}

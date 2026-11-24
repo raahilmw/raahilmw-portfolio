@@ -1,6 +1,6 @@
 from pathlib import Path
+from hashlib import sha256
 from html import escape
-import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'dist'
@@ -38,7 +38,6 @@ def header(active):
 
 LINKEDIN = 'https://www.linkedin.com/in/raahilmw/'
 EMAIL = 'raahil.mw@gmail.com'
-RESUME = '/assets/raahil-muhammad-wildan-resume.pdf'
 SOCIAL = {
     'GitHub': 'https://github.com/raahilmw',
     'LinkedIn': LINKEDIN,
@@ -73,24 +72,26 @@ def social_deck():
 def footer():
     return f'''<footer class="site-footer shell">{wordmark()}<span>© Raahil Muhammad Wildan</span><a href="{MEDIUM}" target="_blank" rel="noreferrer">Medium</a><a href="/contact/">Contact</a></footer><div class="toast" role="status" aria-live="polite" id="toast"></div>'''
 
+def asset_url(name):
+    revision = sha256((OUT / name).read_bytes()).hexdigest()[:12]
+    return f'/{name}?v={revision}'
+
+
 def page(title,active,body,path='/',description=None):
     description = description or 'Raahil Muhammad Wildan — penetration testing, bug hunting, security automation, and published research.'
     output = OUT / path.lstrip('/') / 'index.html'
     output.parent.mkdir(parents=True,exist_ok=True)
-    extra = {'Home':'<script type="module" src="/artifact.js"></script>', 'About':'<script src="/assets/matter.min.js" defer></script><script src="/field.js" defer></script>'}.get(active,'')
-    profile_css = '<link rel="stylesheet" href="/profile.css">' if active in ('Home','About') else ''
+    extra = {'Home':'<script type="module" src="/artifact.js"></script>', 'About':f'<script src="/assets/matter.min.js" defer></script><script src="{asset_url("field.js")}" defer></script>'}.get(active,'')
+    profile_css = f'<link rel="stylesheet" href="{asset_url("profile.css")}">' if active in ('Home','About') else ''
     intro = '<dialog id="site-intro" aria-label="Portfolio introduction"><div class="intro-ground" aria-hidden="true"></div><div class="intro-center" aria-hidden="true"><div class="boot-layout"><div class="boot-sigil"><span class="pixel-logo"></span></div><div class="boot-console"><div class="boot-host"><i></i>raahilmw@observatory <span>/ bash</span></div><div class="boot-prompt boot-first"><b>~ $</b><samp>whoami</samp></div><div class="boot-answer">raahilmw</div><div class="boot-prompt boot-command"><b>~ $</b><samp>sudo -u raahilmw ./open</samp></div><div class="boot-response">Field notes mounted.</div><div class="boot-ready">~/portfolio $ <i></i></div></div></div></div><button class="intro-skip" type="button">Skip intro</button></dialog><script src="/intro.js"></script>'
     output.write_text(f'''<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>{escape(title)} — raahilmw</title><meta name="description" content="{escape(description,quote=True)}"><link rel="canonical" href="{ORIGIN}{path}"><script src="/theme.js"></script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/fonts.css"><link rel="stylesheet" href="/style.css">{profile_css}</head><body class="page-{active.lower()}">{header(active)}{intro}<main id="content">{body}</main>{footer()}<script src="/app.js" defer></script>{extra}</body></html>''')
-
-profile_file = next((name for name in ('profile.webp', 'profile.png', 'profile.jpg') if (OUT / 'assets' / name).is_file()), None)
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>{escape(title)} — raahilmw</title><meta name="description" content="{escape(description,quote=True)}"><link rel="canonical" href="{ORIGIN}{path}"><script src="{asset_url('theme.js')}"></script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/fonts.css"><link rel="stylesheet" href="{asset_url('style.css')}">{profile_css}</head><body class="page-{active.lower()}">{header(active)}{intro}<main id="content">{body}</main>{footer()}<script src="{asset_url('app.js')}" defer></script>{extra}</body></html>''')
 
 def portrait():
-    if profile_file:
-        visual = f'<img src="/assets/{profile_file}" alt="Portrait of Raahil Muhammad Wildan" loading="lazy">'
-    else:
-        visual = '<div class="portrait-monogram" aria-label="Raahil Muhammad Wildan monogram" role="img"><span>R<span>mw</span></span></div>'
-    return f'<figure class="portrait"><div class="portrait-crop">{visual}</div><figcaption>@raahilmw</figcaption></figure>'
+    return ('<figure class="portrait"><div class="portrait-crop">'
+            '<img src="/assets/raahil-pixel-portrait.webp" width="1122" height="1402" '
+            'alt="Pixel portrait of Raahil adjusting his tie, with forested hills behind him.">'
+            '</div><figcaption>@raahilmw</figcaption></figure>')
 
 def article_card():
     return f'''<article class="research-card"><a class="research-cover" href="{ARTICLE}" aria-label="Read the image fetcher case study"><span class="mono">WEB SECURITY</span>
@@ -109,26 +110,20 @@ home = f'''
 <section class="section shell practice"><div>{label('About the researcher')}<h2>Hi, I’m Raahil.</h2><p>I look at the assumptions people build into web applications and APIs. When a test starts to repeat itself, I turn it into a tool.</p><a class="underlined" href="/about/">More about me</a></div><div class="practice-list"><a href="/writeups/">Penetration testing</a><a href="{ARTICLE}">Bug hunting</a><a href="/projects/">Security automation</a></div></section>'''
 page('Security research','Home',home)
 
-# Positions represent fractions of a tile's travel across the wide or narrow field.
 tiles = [
-    ('Penetration testing','scan',.11,.15,.08,.08,-8),
-    ('Bug hunting','bug',.61,.30,.75,.25,9),
-    ('APIs','brackets',.92,.18,.89,.07,-7),
-    ('Automation','flow',.76,.74,.85,.79,7),
-    ('Web security','web',.21,.74,.13,.78,7),
-    ('Trust boundaries','bounds',.10,.47,.02,.45,-5),
-    ('Field notes','note',.46,.82,.44,.92,-8),
-    ('OWASP','bug',.38,.10,.49,.18,-4),
-    ('Python','brackets',.80,.40,.89,.46,8),
-    ('Networking','bounds',.48,.54,.35,.60,-7),
-    ('VAPT','scan',.93,.79,.77,.64,-10),
-    ('HTTP','note',.30,.41,.22,.30,12),
-    ('Research','web',.03,.90,.04,.91,-4),
+    ('Penetration testing','scan',-5), ('IDOR','bug',7), ('APIs','brackets',-4),
+    ('Burp Suite','tool',5), ('Web security','web',-4), ('Dalfox','tool',-7),
+    ('Trust boundaries','bounds',4), ('XSS','bug',-6), ('Python','brackets',5),
+    ('Networking','bounds',-4), ('VAPT','scan',6), ('Nuclei','tool',-5),
+    ('Automation','flow',3), ('HTTP','note',6), ('SSRF','bug',-3),
+    ('Bug hunting','web',5), ('Nmap','tool',-4), ('Field notes','note',5),
+    ('OWASP','bounds',-6), ('Research','scan',3), ('Access control','brackets',-3),
 ]
-glyph = {'scan':'⌖','bug':'✳','brackets':'{ }','flow':'⌁','web':'◎','bounds':'⌗','note':'≡'}
+glyph = {'scan':'⌖','bug':'✳','brackets':'{ }','flow':'⌁','web':'◎','bounds':'⌗','note':'≡','tool':'⌘'}
+
 def tile(entry):
-    text,mark,x,y,mx,my,angle=entry
-    return f'<button type="button" class="field-tile tile-{mark}" data-x="{x}" data-y="{y}" data-mx="{mx}" data-my="{my}" data-angle="{angle}" style="--px:{100*x}%;--py:{100*y}%;--mx:{100*mx}%;--my:{100*my}%;--angle:{angle}deg" aria-describedby="field-keys"><span aria-hidden="true">{glyph[mark]}</span>{text}</button>'
+    text, mark, angle = entry
+    return f'<button type="button" class="field-tile tile-{mark}" data-angle="{angle}" aria-describedby="field-keys"><span aria-hidden="true">{glyph[mark]}</span>{text}</button>'
 
 # Dates and roles are from the owner's public LinkedIn profile.
 roles = [
@@ -136,15 +131,38 @@ roles = [
     ('From Jul 2026','Penetration Testing Intern','JAH Training Center'),
     ('From Sep 2026','Offensive Security Intern','VINIX7'),
 ]
-expertise = ['Penetration Testing', 'Web Exploitation', 'Security Automation']
-tool_names = ['Burp Suite', 'Nuclei', 'Nmap', 'Wireshark', 'Python', 'Bash']
+# Three small pixel stamps cut on a common 16 by 16 grid.
+expertise = [
+    ('Penetration Testing', 'scope', [
+        '      ####', '       ##', '    ########', '   ##  ##  ##', '  ##        ##',
+        '  #    ##    #', '###### ## ######', '###### ## ######', '  #    ##    #',
+        '  ##        ##', '   ##  ##  ##', '    ########', '       ##', '      ####']),
+    ('Web Exploitation', 'web', [
+        '   ##########', '  ##   ##   ##', ' ##   #  #   ##', ' ##   #  #   ##',
+        ' ##############', ' ##   #  #   ##', ' ##   #', ' ##   #   ##',
+        '  ########  ##', '   ##   ##    ##', '    ######  #####', '          ## ##',
+        '              ##']),
+    ('Security Automation', 'pulse', [
+        '        #####', '       #####', '      #####', '     #####', '    #####',
+        '   ##########', '  ##########', '       ####', '      ####', '     ###',
+        '    ###', '   ##', '  #']),
+]
+
+def expertise_stamp(entry):
+    name, motif, pixels = entry
+    cells = ' '.join(f'M{x} {y}h1v1h-1z' for y, row in enumerate(pixels) for x, pixel in enumerate(row) if pixel == '#')
+    art = f'<svg viewBox="-1 -1 18 17" aria-hidden="true" shape-rendering="crispEdges"><path d="{cells}"/></svg>'
+    return f'<li class="stamp-{motif}"><span class="stamp-art">{art}</span><span>{name}</span></li>'
+
+tool_names = ['Burp Suite', 'Dalfox', 'Nuclei', 'Nmap', 'Wireshark', 'Python', 'Bash']
 education = [
     ('From 2024','Bachelor of Technology in Information Technology','Asia e University'),
     ('From 2024','Diploma in Informatics and Information Technology','CEP-CCIT FTUI · Cyber Security'),
 ]
 
 def timeline(entries):
-    return '<ul class="timeline">' + ''.join(f'<li><span class="year">{date}</span><div><h3>{role}</h3><p>{org}</p></div></li>' for date,role,org in entries) + '</ul>'
+    items = ''.join(f'<li><span class="year">{date}</span><div><h3>{title}</h3><p>{detail}</p></div></li>' for date, title, detail in entries)
+    return f'<ol class="career-track">{items}</ol>'
 
 about_parts = [('about-me','About me'),('expertise','Expertise'),('tools','Tools'),('experience','Experience'),('education','Education'),('connect','Connect')]
 index_links = ''.join(f'<a href="#{anchor}">{escape(name)}</a>' for anchor,name in about_parts)
@@ -153,17 +171,17 @@ about = f'''
 {''.join(map(tile,tiles))}</div><div class="field-caption"><p>Grab and toss a tile. Scroll to let it fall.</p><span class="sr-only" id="field-keys">Use the arrow keys to move a focused tile.</span></div>
 </div></div></section>
 <section id="about-me" class="shell about-profile">{portrait()}<div class="bio">{label('About me')}<h1>Raahil Muhammad<br>Wildan<span class="red">.</span></h1>
-<p class="bio-lead">I’m a cybersecurity student in Tangerang Selatan, Indonesia. I test web applications and APIs, hunt bugs, and write tools for the checks I run more than once.</p>
-<p>I started in network engineering. Teaching routing and working in a data center taught me to follow a request from one system to the next. I use that same habit now to work out where an application puts its trust.</p>
-<p>One investigation started with an image URL. The server could read a local file through a feature built to fetch pictures. I wrote up what I could verify and how the team could prevent it.</p>
-<div class="profile-actions"><button type="button" class="contact-action copy-action" data-copy="{EMAIL}" data-message="Email copied." aria-label="Copy email address {EMAIL}"><span class="copy-emblem">{icon('copy')}</span><span>Copy email</span></button><a class="contact-action resume-action" href="{RESUME}" target="_blank" rel="noreferrer" aria-label="Open résumé (PDF)">Resume <span aria-hidden="true">↗</span></a></div></div></section>
+<p class="bio-lead">I’m a cybersecurity student in Tangerang Selatan, Indonesia. I test web applications and APIs, and I’m especially interested in what happens when a request reaches the wrong part of a system.</p>
+<p>Before I started hunting bugs, I worked in a data center and taught routing. I still think in terms of a request’s journey. Where does it go? Which service decides what the user can see? If I find myself checking the same thing twice, I’ll usually write a small tool for it.</p>
+<p>One bug I reported started with a feature that fetched pictures. It turned out the server could read a local file, too. My writeup walks through how I confirmed the impact and what the team could change to prevent it.</p>
+<div class="profile-actions"><button type="button" class="contact-action copy-action" data-copy="{EMAIL}" data-message="Email copied." aria-label="Copy email address {EMAIL}"><span class="copy-emblem">{icon('copy')}</span><span>Copy email</span></button></div></div></section>
 <div class="shell about-index-layout"><nav class="about-index" aria-label="On this page">{label('On this page')}{index_links}</nav>
 <div class="about-chapters">
-<section id="expertise" class="about-chapter"><h2>Expertise</h2><ul class="expertise-list">{''.join(f'<li>{name}</li>' for name in expertise)}</ul></section>
+<section id="expertise" class="about-chapter"><h2>Expertise</h2><ul class="expertise-list">{''.join(map(expertise_stamp, expertise))}</ul></section>
 <section id="tools" class="about-chapter"><h2>Tools</h2><ul class="tool-list">{''.join(f'<li>{name}</li>' for name in tool_names)}</ul></section>
-<section id="experience" class="about-chapter"><h2>Experience</h2><ol class="career-track">{''.join(f'<li><span class="year">{date}</span><div><h3>{org}</h3><p>{role}</p></div></li>' for date,role,org in roles)}</ol></section>
-<section id="education" class="about-chapter"><h2>Education</h2>{timeline(education)}<a class="underlined record-source" href="{LINKEDIN}" target="_blank" rel="noreferrer">Career and education on LinkedIn</a></section>
-<section id="connect" class="about-chapter"><h2>Let’s connect.</h2>{social_deck()}<a class="underlined" href="{MEDIUM}" target="_blank" rel="noreferrer">Read my research on Medium</a></section></div></div>'''
+<section id="experience" class="about-chapter"><h2>Experience</h2>{timeline((date, org, role) for date, role, org in roles)}</section>
+<section id="education" class="about-chapter"><h2>Education</h2>{timeline(education)}</section>
+<section id="connect" class="about-chapter"><h2>Let’s connect.</h2>{social_deck()}</section></div></div>'''
 page('About','About',about,'/about/')
 
 writeups=f'''<section class="page-intro shell">{label('THE RESEARCH NOTEBOOK')}<h1>Writeups<span class="red">.</span></h1><p>Findings, the questions behind them,<br>and what the evidence actually says.</p><div class="intro-rule"><span class="mono">PUBLISHED NOTES</span><span class="mono">WEB SECURITY / INVESTIGATION / DISCLOSURE</span></div></section><section class="shell writeups-index">{article_card()}</section>'''
@@ -190,7 +208,4 @@ page('Certifications','Certifications',certs,'/certifications/')
 
 contact=f'''<section class="contact-page shell">{label('OPEN A CONVERSATION')}<h1>Let’s compare<br>notes<span class="red">.</span></h1><p class="contact-intro">Security research, interesting systems,<br>and questions worth following.</p><div class="contact-records"><div class="contact-record"><span class="mono">EMAIL</span><div><strong><a href="mailto:{EMAIL}">{EMAIL}</a></strong></div><button class="button" type="button" data-copy="{EMAIL}" data-message="Email copied.">{icon('copy')}Copy email</button></div><div class="contact-record"><span class="mono">THE HANDLE</span><div><strong>@raahilmw</strong><span>The handle I use for security research.</span></div><button class="button" type="button" data-copy="raahilmw">{icon('copy')}Copy handle</button></div><div class="contact-record"><span class="mono">THE WRITING</span><div><strong>Medium</strong><span>Published research and the full field notes.</span></div><a class="button" href="{MEDIUM}" target="_blank" rel="noreferrer">Visit my Medium</a></div></div></section>'''
 page('Contact','Contact',contact,'/contact/')
-if __name__ == '__main__' and '--resume' in sys.argv:
-    from make_resume import write_resume
-    write_resume(OUT / RESUME.lstrip('/'), EMAIL, LINKEDIN, roles, education, expertise, tool_names, REPORT)
-print('Built 8 Saltmere-inspired pages. Profile photo: ' + ('included' if profile_file else 'awaiting original file; monogram used.'))
+print('Built 8 portfolio pages.')

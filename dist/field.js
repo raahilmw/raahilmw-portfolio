@@ -28,13 +28,47 @@
     Body.setPosition(body, { x: clamp(x, halfX, width - halfX), y: clamp(y, halfY, height - halfY) });
     draw(tile);
   }
+  // Pack measured, rotated labels into loose rows. The field can grow on small screens.
+  function arrange(boardWidth) {
+    const margin = boardWidth < 600 ? 12 : 22;
+    const gap = boardWidth < 600 ? 8 : 16;
+    const rows = [];
+    let row;
+    tiles.forEach(tile => {
+      tile.w = tile.el.offsetWidth;
+      tile.h = tile.el.offsetHeight;
+      tile.tilt = Number(tile.el.dataset.angle) * Math.PI / 180;
+      const cos = Math.abs(Math.cos(tile.tilt)), sin = Math.abs(Math.sin(tile.tilt));
+      tile.span = tile.w * cos + tile.h * sin;
+      const rise = tile.w * sin + tile.h * cos;
+      if (!row || row.width + gap + tile.span > boardWidth - margin * 2) {
+        row = { tiles: [], width: 0, height: 0 };
+        rows.push(row);
+      }
+      if (row.tiles.length) row.width += gap;
+      row.width += tile.span;
+      row.height = Math.max(row.height, rise);
+      row.tiles.push(tile);
+    });
+    const contentHeight = rows.reduce((sum, item) => sum + item.height + gap, margin * 2 - gap);
+    board.style.minHeight = Math.ceil(contentHeight) + 'px';
+    const space = Math.max(0, board.clientHeight - contentHeight) / (rows.length + 1);
+    let y = margin + space;
+    rows.forEach((item, i) => {
+      const extra = Math.max(0, boardWidth - 2 * margin - item.width);
+      const stretch = extra / (item.tiles.length + 1);
+      let x = margin + stretch * (i % 2 ? 1.3 : .7);
+      item.tiles.forEach(tile => {
+        tile.origin = { x: x + tile.span / 2, y: y + item.height / 2 };
+        x += tile.span + gap + stretch;
+      });
+      y += item.height + gap + space;
+    });
+  }
   function home(tile) {
-    const { body, el } = tile;
-    const narrow = window.matchMedia('(max-width: 700px)').matches;
-    const x = Number(narrow ? el.dataset.mx : el.dataset.x);
-    const y = Number(narrow ? el.dataset.my : el.dataset.y);
-    Body.setAngle(body, Number(el.dataset.angle) * Math.PI / 180);
-    move(tile, tile.w / 2 + x * (width - tile.w), tile.h / 2 + y * (height - tile.h));
+    const { body } = tile;
+    Body.setAngle(body, tile.tilt);
+    move(tile, tile.origin.x, tile.origin.y);
     tile.anchor = { ...body.position, angle: body.angle };
     if (!reduced.matches) {
       move(tile, body.position.x + Math.cos(tile.phase) * 12, body.position.y - 14);
@@ -128,10 +162,12 @@
     run();
   }
   function layout() {
-    const w = board.clientWidth, h = board.clientHeight;
-    if (!w || !h) return;
-    if (w === width && h === height && tiles.every(t => t.w === t.el.offsetWidth && t.h === t.el.offsetHeight)) return;
+    const w = board.clientWidth;
+    if (!w || !board.clientHeight) return;
+    if (w === width && board.clientHeight === height && tiles.every(t => t.w === t.el.offsetWidth && t.h === t.el.offsetHeight)) return;
     stop();
+    arrange(w);
+    const h = board.clientHeight;
     const before = tiles.map(tile => tile.body && ({ x: tile.body.position.x / width, y: tile.body.position.y / height, angle: tile.body.angle, ax: tile.anchor.x / width, ay: tile.anchor.y / height, tilt: tile.anchor.angle }));
     tiles.forEach(release);
     stop();
@@ -146,12 +182,11 @@
       Bodies.rectangle(w + 40, h / 2, 80, h + 160, wall)
     ]);
     tiles.forEach((tile, index) => {
-      tile.w = tile.el.offsetWidth; tile.h = tile.el.offsetHeight;
       tile.body = Bodies.rectangle(w / 2, h / 2, tile.w, tile.h, {
         friction: .55, frictionAir: .014, restitution: .20, chamfer: { radius: 5 }
       });
       Composite.add(engine.world, tile.body);
-      if (before[index]) {
+      if (dropped && before[index]) {
         tile.anchor = { x: before[index].ax*w, y: before[index].ay*h, angle: before[index].tilt };
         Body.setAngle(tile.body, before[index].angle);
         move(tile, before[index].x * w, before[index].y * h);
