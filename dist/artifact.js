@@ -9,7 +9,7 @@ const envCanvas=document.createElement('canvas');envCanvas.width=1024;envCanvas.
 scene.add(new THREE.HemisphereLight(0xb5c8eb,0x151c2c,2));const key=new THREE.DirectionalLight(0xd5e1ff,4);key.position.set(-3,5,4);scene.add(key);const rim=new THREE.DirectionalLight(0x7e9cec,4);rim.position.set(4,1,-2);scene.add(rim);const warm=new THREE.DirectionalLight(0xc7bba5,1.4);warm.position.set(-2,-2,3);scene.add(warm);
 const pivot=new THREE.Group();pivot.rotation.set(.3,-.4,-.35);pivot.position.set(-.05,-.05,0);scene.add(pivot);
 const geometry=new THREE.TorusKnotGeometry(1.02,.29,144,4,2,3);geometry.computeVertexNormals();
-const uniform={uBrush:{value:new THREE.Vector3(0,0,1)},uExposure:{value:0},uTime:{value:0},uRadius:{value:1.1}};
+const uniform={uBrush:{value:new THREE.Vector3(0,0,1)},uExposure:{value:0},uTime:{value:0},uRadius:{value:1.1},uPointColor:{value:new THREE.Vector3(.55,.67,.86)},uPointHighlight:{value:new THREE.Vector3(.9,.86,.73)}};
 const erosion='float brushDistance=length(vRest-uBrush)/uRadius; float grainNoise=sin(vRest.x*19.0+sin(vRest.z*13.0))*sin(vRest.y*17.0)*0.07; float threshold=brushDistance+grainNoise;';
 const material=new THREE.MeshPhysicalMaterial({color:0x93a0b8,metalness:.8,roughness:.35,clearcoat:.25,flatShading:true});
 material.onBeforeCompile=shader=>{Object.assign(shader.uniforms,uniform);shader.vertexShader='varying vec3 vRest;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvRest=position;');shader.fragmentShader='uniform vec3 uBrush;uniform float uExposure;uniform float uRadius;varying vec3 vRest;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <clipping_planes_fragment>','#include <clipping_planes_fragment>\n'+erosion+'\nif(uExposure>0.005 && threshold<uExposure) discard;');};
@@ -24,7 +24,7 @@ const count=matchMedia('(max-width:760px)').matches?11000:24000;const pointPosit
 let seed=46721;const random=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
 for(let i=0;i<count;i++){const target=random()*total;let lo=0,hi=areas.length-1;while(lo<hi){const mid=(lo+hi)>>1;if(areas[mid]<target)lo=mid+1;else hi=mid;}const tri=triangles[lo],u=Math.sqrt(random()),v=random(),weights=[1-u,u*(1-v),u*v];for(let c=0;c<3;c++){let p=0,n=0;for(let k=0;k<3;k++){p+=positions.array[(tri+k)*3+c]*weights[k];n+=normals.array[(tri+k)*3+c]*weights[k];}pointPositions[i*3+c]=p;pointNormals[i*3+c]=n;}seeds[i]=random();}
 source.dispose();const pointsGeometry=new THREE.BufferGeometry();pointsGeometry.setAttribute('position',new THREE.BufferAttribute(pointPositions,3));pointsGeometry.setAttribute('aNormal',new THREE.BufferAttribute(pointNormals,3));pointsGeometry.setAttribute('aSeed',new THREE.BufferAttribute(seeds,1));
-const pointsMaterial=new THREE.ShaderMaterial({uniforms:uniform,transparent:true,depthWrite:false,vertexShader:`uniform vec3 uBrush;uniform float uExposure;uniform float uRadius;uniform float uTime;attribute vec3 aNormal;attribute float aSeed;varying float vAlpha;varying float vSeed;void main(){vec3 vRest=position;${erosion} float exposed=smoothstep(threshold-.08,threshold+.03,uExposure)*step(.005,uExposure);float drift=aSeed<.65?.08:(aSeed<.91?.28:.65);vec3 flow=vec3(sin(uTime*.5+aSeed*23.),cos(uTime*.4+aSeed*31.),sin(uTime*.35+aSeed*15.));vec3 moved=position+(normalize(aNormal)*.15+flow*drift)*exposed*uExposure;vec4 mv=modelViewMatrix*vec4(moved,1.);gl_Position=projectionMatrix*mv;gl_PointSize=clamp((1.4+aSeed*1.3)*6./-mv.z,1.,4.);vAlpha=exposed*.85;vSeed=aSeed;}`,fragmentShader:'varying float vAlpha;varying float vSeed;void main(){float d=length(gl_PointCoord-.5);if(d>.5||vAlpha<.005)discard;vec3 color=mix(vec3(.55,.67,.86),vec3(.9,.86,.73),step(.95,vSeed));gl_FragColor=vec4(color,vAlpha*smoothstep(.5,.18,d));}'});pivot.add(new THREE.Points(pointsGeometry,pointsMaterial));
+const pointsMaterial=new THREE.ShaderMaterial({uniforms:uniform,transparent:true,depthWrite:false,vertexShader:`uniform vec3 uBrush;uniform float uExposure;uniform float uRadius;uniform float uTime;attribute vec3 aNormal;attribute float aSeed;varying float vAlpha;varying float vSeed;void main(){vec3 vRest=position;${erosion} float exposed=smoothstep(threshold-.08,threshold+.03,uExposure)*step(.005,uExposure);float drift=aSeed<.65?.08:(aSeed<.91?.28:.65);vec3 flow=vec3(sin(uTime*.5+aSeed*23.),cos(uTime*.4+aSeed*31.),sin(uTime*.35+aSeed*15.));vec3 moved=position+(normalize(aNormal)*.15+flow*drift)*exposed*uExposure;vec4 mv=modelViewMatrix*vec4(moved,1.);gl_Position=projectionMatrix*mv;gl_PointSize=clamp((1.4+aSeed*1.3)*6./-mv.z,1.,4.);vAlpha=exposed*.85;vSeed=aSeed;}`,fragmentShader:'uniform vec3 uPointColor;uniform vec3 uPointHighlight;varying float vAlpha;varying float vSeed;void main(){float d=length(gl_PointCoord-.5);if(d>.5||vAlpha<.005)discard;vec3 color=mix(uPointColor,uPointHighlight,step(.95,vSeed));gl_FragColor=vec4(color,vAlpha*smoothstep(.5,.18,d));}'});pivot.add(new THREE.Points(pointsGeometry,pointsMaterial));
 // A quiet ring anchors the floating sculpture without covering the scenery.
 const ring=new THREE.Mesh(new THREE.TorusGeometry(1.35,.005,6,100),new THREE.MeshBasicMaterial({color:0xa2b8e6,transparent:true,opacity:.18}));ring.rotation.x=Math.PI/2;ring.position.y=-1.8;scene.add(ring);
 const dustGeo=new THREE.BufferGeometry();const dust=new Float32Array(90*3);for(let i=0;i<dust.length;i++)dust[i]=(random()-.5)*6;dustGeo.setAttribute('position',new THREE.BufferAttribute(dust,3));const dustPoints=new THREE.Points(dustGeo,new THREE.PointsMaterial({size:.012,color:0xb6caeb,transparent:true,opacity:.35,depthWrite:false}));scene.add(dustPoints);
@@ -44,3 +44,16 @@ function loop(now){frame=0;render(now);}
 document.addEventListener('visibilitychange',()=>{cancelAnimationFrame(frame);frame=0;if(!document.hidden&&visible&&!reduced.matches){last=performance.now();frame=requestAnimationFrame(loop);}});
 reduced.addEventListener('change',()=>{cancelAnimationFrame(frame);frame=0;uniform.uExposure.value=0;if(!reduced.matches&&visible)frame=requestAnimationFrame(loop);else render(performance.now());});
 resize();
+
+function applyArtifactTheme(){
+ const light=document.documentElement.dataset.theme==='light';
+ material.color.setHex(light?0x5e7193:0x93a0b8);
+ wireMat.color.setHex(light?0x526f9c:0xb5c5e9);
+ ring.material.color.setHex(light?0x416493:0xa2b8e6);
+ dustPoints.material.color.setHex(light?0x506f9c:0xb6caeb);
+ uniform.uPointColor.value.set(...(light?[.24,.34,.53]:[.55,.67,.86]));
+ uniform.uPointHighlight.value.set(...(light?[.48,.4,.3]:[.9,.86,.73]));
+ if(reduced.matches)render(performance.now());
+}
+applyArtifactTheme();
+document.addEventListener('themechange',applyArtifactTheme);

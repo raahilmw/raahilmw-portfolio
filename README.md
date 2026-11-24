@@ -6,10 +6,14 @@ A responsive, static portfolio for penetration testing, bug hunting, and securit
 
 - Content and identity: `dist/index.html`
 - Styling and responsive layouts: `dist/style.css`
+- Light/dark appearance and collection sections: `dist/theme.css`
+- Saved appearance, device preference, and cross-tab synchronization: `dist/theme.js`
 - Navigation, dialogs, copy handle, simulated workflow, and contours: `dist/app.js`
 - Three.js artifact and surface particles: `dist/artifact.js`
 
 No build step, account, backend, analytics, or external runtime dependencies are required. The workflow is an illustrative browser-only simulation. No requests are sent to a target. Contact currently uses the supplied handle; replace it with real contact links when available.
+
+The header includes Writeups and Projects in desktop and mobile navigation. Both currently use explicit empty states. Add real public content to those sections when available. The original forest artwork is retained in both appearances.
 
 ## Design sources and assets
 

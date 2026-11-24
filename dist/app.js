@@ -85,11 +85,12 @@ function createContours() {
   drawContours();
 }
 function drawContours(now=0) {
-  contourFrame=0;ctx.clearRect(0,0,width,height);ctx.lineWidth=.65;ctx.strokeStyle='#8b9fc52b';ctx.stroke(contourPath);
-  if(highlight&&!reduceMotion.matches){const gradient=ctx.createRadialGradient(highlight.x,highlight.y,0,highlight.x,highlight.y,180);gradient.addColorStop(0,'#abbff4aa');gradient.addColorStop(1,'#abbff400');ctx.strokeStyle=gradient;ctx.stroke(contourPath);}
-  if(pulseStart&&pulseOrigin&&!reduceMotion.matches){ const t=(now-pulseStart)/1500;if(t<1){const radius=t*Math.hypot(width,height);const gradient=ctx.createRadialGradient(pulseOrigin.x,pulseOrigin.y,Math.max(0,radius-80),pulseOrigin.x,pulseOrigin.y,Math.max(1,radius+60));gradient.addColorStop(0,'#bed0ff00');gradient.addColorStop(.55,`rgba(190,208,255,${.55*(1-t)})`);gradient.addColorStop(1,'#bed0ff00');ctx.strokeStyle=gradient;ctx.lineWidth=1;ctx.stroke(contourPath);contourFrame=requestAnimationFrame(drawContours);}else pulseStart=0;}
+  contourFrame=0;const themeColors=getComputedStyle(document.documentElement);ctx.clearRect(0,0,width,height);ctx.lineWidth=.65;ctx.strokeStyle=themeColors.getPropertyValue('--contour-line').trim();ctx.stroke(contourPath);
+  if(highlight&&!reduceMotion.matches){const gradient=ctx.createRadialGradient(highlight.x,highlight.y,0,highlight.x,highlight.y,180);gradient.addColorStop(0,themeColors.getPropertyValue('--contour-highlight').trim());gradient.addColorStop(1,'transparent');ctx.strokeStyle=gradient;ctx.stroke(contourPath);}
+  if(pulseStart&&pulseOrigin&&!reduceMotion.matches){ const t=(now-pulseStart)/1500;if(t<1){const radius=t*Math.hypot(width,height);const gradient=ctx.createRadialGradient(pulseOrigin.x,pulseOrigin.y,Math.max(0,radius-80),pulseOrigin.x,pulseOrigin.y,Math.max(1,radius+60));gradient.addColorStop(0,'transparent');gradient.addColorStop(.55,`rgba(${themeColors.getPropertyValue('--contour-pulse').trim()},${.55*(1-t)})`);gradient.addColorStop(1,'transparent');ctx.strokeStyle=gradient;ctx.lineWidth=1;ctx.stroke(contourPath);contourFrame=requestAnimationFrame(drawContours);}else pulseStart=0;}
 }
 const scheduleContours=()=>{if(!contourFrame)contourFrame=requestAnimationFrame(drawContours);};
+document.addEventListener('themechange',scheduleContours);
 contact.addEventListener('pointermove',event=>{if(event.pointerType==='touch')return;const r=contact.getBoundingClientRect();highlight={x:event.clientX-r.left,y:event.clientY-r.top};scheduleContours();},{passive:true});
 contact.addEventListener('pointerleave',()=>{highlight=null;scheduleContours();});
 contact.addEventListener('pointerdown',event=>{if(event.target.closest('button,a')||reduceMotion.matches)return;const r=contact.getBoundingClientRect();pulseOrigin={x:event.clientX-r.left,y:event.clientY-r.top};pulseStart=performance.now();scheduleContours();});
