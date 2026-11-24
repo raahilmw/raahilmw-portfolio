@@ -1,0 +1,280 @@
+/* The social cards reuse their labels and destinations on the home and profile pages. */
+.home-connect{display:grid;grid-template-columns:minmax(14rem,.65fr) 1.35fr;align-items:center;gap:clamp(26px,6vw,84px);padding:clamp(35px,5vw,74px) 0;border-bottom:1px solid var(--line)}
+.home-connect .eyebrow{margin-bottom:6px}.home-connect h2{font-size:clamp(2.6rem,4vw,4.4rem)}
+.social-set{width:100%;max-width:620px}
+/* An edge-to-edge gravity field, followed by the person and the career record. */
+.page-about .field-scroll{padding-bottom:clamp(42px,9svh,100px)}
+.page-about .field-sticky{padding-top:0}
+.page-about .field-card{border:0;border-bottom:1px solid var(--edge);border-radius:0;background:var(--bg);box-shadow:none}
+.page-about .field-board{height:clamp(280px,37svh,430px);max-width:1550px;margin:auto;background:transparent}
+.page-about .field-board:before{background:radial-gradient(var(--edge) .75px,transparent 1px);background-size:22px 22px;mask-image:linear-gradient(to bottom,transparent,#0008 35%,#0007 80%,transparent)}
+.page-about .field-tile{padding:.35em .65em;letter-spacing:.015em;border-radius:4px;text-transform:uppercase;font:600 clamp(.86rem,1.55vw,1.53rem)/1.3 var(--mono);box-shadow:2px 4px 0 #090e1818}
+.page-about .tile-scan,.page-about .tile-web{--tile-bg:var(--raised);--tile-ink:var(--ink);border-color:var(--edge)}
+.page-about .tile-bounds,.page-about .tile-note{--tile-bg:var(--panel);--tile-ink:var(--muted);border-color:var(--edge)}
+.page-about .tile-flow,.page-about .tile-bug{--tile-bg:#bfcbff;--tile-ink:#182746}
+.page-about .tile-brackets{--tile-bg:#394b6a;--tile-ink:#f5f7ff}
+.page-about .field-tile:nth-child(4n+1){font-size:clamp(.98rem,2.1vw,2.05rem)}
+.page-about .field-tile:nth-child(4n+3){font-size:clamp(.77rem,1.15vw,1.15rem)}
+.page-about .field-caption{border:0;width:min(1240px,91%);margin:auto;padding:6px 0 10px}
+
+.page-about .about-profile{grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);gap:clamp(2.3rem,7vw,7rem);padding:clamp(1rem,3vw,3rem) 0 clamp(3rem,7vw,7rem);align-items:center}
+.page-about .portrait{max-width:510px;justify-self:center}
+.page-about .portrait-crop{aspect-ratio:4/4.1;border-radius:4px;position:relative}
+.page-about .portrait-crop img{object-fit:cover;object-position:50% 38%}.page-about .portrait-crop img.cutout{object-fit:contain;object-position:center bottom}
+.page-about .portrait figcaption{display:flex;justify-content:space-between;gap:8px;margin-top:11px;padding-top:7px;border-top:1px solid var(--line)}
+.bio h1{font-size:clamp(3.15rem,5.8vw,6.2rem);line-height:.98;font-weight:600;margin-bottom:24px}.bio .bio-lead{font-size:clamp(1.08rem,1.55vw,1.38rem);line-height:1.52;color:var(--ink)}
+.about-index-layout{display:grid;grid-template-columns:minmax(150px,.47fr) minmax(0,1.4fr);gap:clamp(2rem,9vw,9rem);border-top:1px solid var(--edge);padding-block:clamp(2.2rem,5vw,5rem) 4rem}
+.about-index{position:sticky;top:24px;align-self:start;display:grid;justify-items:start;gap:5px}
+.about-index .eyebrow{margin-bottom:8px}.about-index a{font-size:.95rem;color:var(--muted);padding:4px 0}.about-index a:hover,.about-index a:focus-visible{color:var(--accent)}
+.about-chapter{padding-bottom:clamp(2.5rem,5vw,5rem);margin-bottom:clamp(2.5rem,5vw,5rem);border-bottom:1px solid var(--line);scroll-margin-top:25px}
+.about-chapter:last-child{margin-bottom:0;padding-bottom:0;border:0}
+.about-chapter h2{font-size:clamp(2rem,3.8vw,3.8rem);margin-bottom:clamp(1.4rem,3vw,2.5rem)}
+.about-chapter .social-set{margin-bottom:20px}
+@media(max-width:840px){
+  .home-connect{grid-template-columns:1fr;gap:21px}.home-connect>div:first-child{display:flex;gap:18px;align-items:baseline;flex-wrap:wrap}.home-connect .eyebrow{display:none}
+  .home-connect .social-set{max-width:585px}
+}
+@media(max-width:700px){
+  .page-about .field-board{height:clamp(305px,46svh,400px)}.page-about .about-profile{grid-template-columns:1fr;gap:28px;padding-bottom:3rem}
+  .page-about .portrait{max-width:460px;justify-self:start}.page-about .portrait-crop{aspect-ratio:1.15}
+  .about-index-layout{grid-template-columns:1fr;gap:2rem}
+  .about-index{position:static;display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap}.about-index .eyebrow{flex-basis:100%;margin:0}.about-index a{font-size:.85rem;border-bottom:1px solid var(--edge)}
+  .platform-row{gap:4px 14px}.platform-link{font-size:.8rem}
+}
+@media(max-width:460px){
+
+  .page-about .field-tile{gap:.3em;padding-inline:.45em}.page-about .field-tile span{font-size:.88em}
+}
+
+/* Reserve room for each disc, the moving ring and its label. */
+.social-set{min-width:0;max-width:630px}
+.social-orbits{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,5.25rem),1fr));gap:12px 8px;align-items:start}
+.social-orb{--tint:#a7b8e0;--phase:0s;display:flex;flex-direction:column;align-items:center;gap:10px;padding:7px 0 5px;color:var(--ink);min-width:0;text-align:center;border-radius:40px}
+.platform-linkedin{--tint:#8bc9ea;--phase:-1.4s}.platform-email{--tint:#c9d3e8;--phase:-2.8s}.platform-instagram{--tint:#cbb5d5;--phase:-4s}.platform-discord{--tint:#9facdf;--phase:-5.1s}
+.orb-disc{display:grid;place-items:center;position:relative;isolation:isolate;width:clamp(48px,5.3vw,67px);aspect-ratio:1;border-radius:50%;border:1px solid var(--edge);color:var(--tint);background:radial-gradient(ellipse at 32% 20%,color-mix(in srgb,var(--tint) 30%,var(--panel)),var(--panel) 77%);transition:transform .3s,box-shadow .3s}
+.orb-disc:before,.orb-disc:after{content:'';position:absolute;inset:-5px;border-radius:50%;pointer-events:none}
+.orb-disc:before{border:1px solid color-mix(in srgb,var(--tint) 23%,transparent)}
+.orb-disc:after{background:radial-gradient(circle at 50% 2px,var(--tint) 1.6px,transparent 2.5px);animation:orb-trace 9s linear var(--phase) infinite}
+.orb-disc img{width:22px;height:22px;opacity:.95}
+[data-theme=light] .orb-disc img,[data-theme=light] .platform-link img{filter:brightness(.24)}
+.social-orb:is(:hover,:focus-visible) .orb-disc{transform:translateY(-2px);box-shadow:0 0 18px color-mix(in srgb,var(--tint) 23%,transparent)}
+.orb-label{font:500 .87rem/1.4 var(--mono)}
+@keyframes orb-trace{to{transform:rotate(1turn)}}
+.platform-row{display:flex;align-items:center;flex-wrap:wrap;gap:6px 22px;border-top:1px solid var(--line);margin-top:17px;padding-top:11px}
+.platform-link{display:inline-flex;min-height:36px;align-items:center;gap:7px;font-size:.86rem;color:var(--muted)}.platform-link img{width:17px;height:17px}
+.card-status{font:400 .72rem/1.3 var(--sans);color:var(--muted)}[data-unlisted]{cursor:default}
+/* Compact contact control with a full-height touch area. */
+.profile-actions {margin-top: 20px}
+.copy-action {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 13px 0 8px;
+  border-radius: 8px; border: 1px solid var(--edge); background: var(--panel); color: var(--ink);
+  font: 500 .875rem/1 var(--mono);
+}
+.copy-action:hover, .copy-action:focus-visible {background: var(--raised); border-color: var(--accent)}
+.copy-emblem {display: grid; place-items: center; width: 26px; height: 26px; border-radius: 5px; color: var(--accent); background: var(--raised)}
+.copy-emblem svg {width: 15px; height: 15px}
+
+.expertise-list, .tool-list {list-style: none; margin: 0; padding: 0}
+.tool-list {display: flex; flex-wrap: wrap; gap: 10px}
+.expertise-list {display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: clamp(8px,1.4vw,16px)}
+.expertise-list li {
+  --stamp: #bdcaff; display: flex; flex-direction: column; align-items: flex-start;
+  justify-content: space-between; gap: 1.15rem; position: relative; isolation: isolate; overflow: hidden;
+  padding: clamp(13px,1.5vw,23px); min-height: 9.6rem; border-top: 2px solid var(--stamp);
+  background: linear-gradient(145deg,color-mix(in srgb,var(--stamp) 12%,var(--panel)),var(--panel) 75%);
+  clip-path: polygon(0 0,100% 0,100% calc(100% - 11px),calc(100% - 11px) 100%,0 100%);
+  font: 600 clamp(1.03rem,1.7vw,1.4rem)/1.19 var(--sans); letter-spacing: -.032em;
+}
+.expertise-list li::after {
+  content: ''; position: absolute; z-index: -1; inset: 0; opacity: .42;
+  background: repeating-radial-gradient(circle at 102% -15%,transparent 0 11px,color-mix(in srgb,var(--stamp) 22%,transparent) 12px,transparent 13px 22px);
+  mask-image: linear-gradient(240deg,#000,transparent 72%);
+}
+.expertise-list .stamp-web {--stamp: #9ed0c5}
+.expertise-list .stamp-pulse {--stamp: #dbc39d}
+[data-theme=light] .stamp-scope {--stamp: #465f9b}
+[data-theme=light] .stamp-web {--stamp: #316d64}
+[data-theme=light] .stamp-pulse {--stamp: #805c37}
+.stamp-art {color: var(--stamp); display: block; line-height: 0}
+.stamp-art svg {width: 36px; height: 36px; stroke: none; fill: currentColor}
+@media (max-width: 530px) {
+  .expertise-list {grid-template-columns: 1fr; gap: 7px}
+  .expertise-list li {flex-direction: row; justify-content: flex-start; align-items: center; min-height: 4rem; border-top: 0; border-left: 2px solid var(--stamp)}
+  .stamp-art svg {width: 29px; height: 29px}
+}
+.tool-list li{padding:7px 13px;color:var(--muted);background:var(--panel);border:1px solid var(--edge);border-radius:24px;font:.88rem var(--mono)}
+.career-track{list-style:none;padding:0 0 0 22px;margin:0;position:relative}
+.career-track:before{content:'';position:absolute;left:5px;top:21px;bottom:32px;width:1px;background:linear-gradient(var(--edge),var(--accent));transform-origin:top}
+.career-track li{position:relative;display:grid;grid-template-columns:minmax(100px,.65fr) 1.5fr;gap:12px;padding:14px 0 22px}
+.career-track li:before{content:'';position:absolute;left:-21px;top:18px;width:9px;height:9px;border-radius:50%;background:var(--panel);border:1px solid var(--accent)}
+.career-track li:last-child:before{background:var(--accent);box-shadow:0 0 0 4px var(--panel)}
+.career-track .year{font:.82rem/1.55 var(--mono);color:var(--muted)}
+.career-track h3{font:600 clamp(1.12rem,1.9vw,1.55rem)/1.3 var(--sans);letter-spacing:-.025em}.career-track p{margin-top:4px}
+@media(prefers-reduced-motion:no-preference){
+  .career-track.is-visible:before{animation:trace-career .95s ease-out both}
+  .career-track.is-visible li{animation:career-arrive .58s ease-out both}
+  .career-track.is-visible li:nth-child(2){animation-delay:.17s}.career-track.is-visible li:nth-child(3){animation-delay:.34s}
+}
+@keyframes trace-career{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes career-arrive{from{opacity:.2;transform:translateY(9px)}to{opacity:1;transform:none}}
+@media(max-width:460px){.career-track li{grid-template-columns:1fr;gap:3px}.social-orbits{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px 6px}.orb-label{font-size:.82rem}}
+@media(prefers-reduced-motion:reduce){.orb-disc:after{animation:none}.orb-disc{transition:none}}
+
+
+.page-about .tile-tool {
+  --tile-bg: color-mix(in srgb,#6ba599 17%,var(--panel));
+  --tile-ink: #c0ded9;
+  border-color: color-mix(in srgb,#83c2b4 39%,var(--edge));
+}
+[data-theme=light] .page-about .tile-tool {--tile-ink: #24534f}
+.field-board:not([data-ready]) {
+  display: flex; flex-wrap: wrap; align-content: space-evenly; justify-content: space-evenly; gap: 5px;
+}
+.field-board:not([data-ready]) .field-tile {position: static; transform: none; flex: none}
+.page-about .portrait {width: min(100%,410px)}
+.page-about .portrait-crop {aspect-ratio: 4 / 5}
+.page-about .portrait-crop img {object-position: center}
+@media(max-width:700px) {
+  .page-about .portrait {width: min(82vw,340px); justify-self: center}
+  .page-about .field-tile {font-size: .85rem}
+  .page-about .field-tile:nth-child(4n+1) {font-size: .96rem}
+}
+
+/* A terrain diagram for the three paths out of the researcher introduction. */
+.research-map {
+  --trail: #9acfc6; position: relative; isolation: isolate; align-self: center;
+  width: 100%; aspect-ratio: 500/262; min-height: 205px;
+}
+[data-theme=light] .research-map {--trail: #365f60}
+.map-contours {
+  position: absolute; inset: -5% -1%; pointer-events: none;
+  background-image: url('/assets/research-contours.png');
+  background-size: 100% 100%; opacity: .53;
+  mask-image: radial-gradient(ellipse 66% 57% at 50% 52%,#000 40%,transparent 91%);
+}
+[data-theme=light] .map-contours {filter: brightness(.55); opacity: .65}
+.map-trail {width: 100%; height: 100%; position: absolute; inset: 0; overflow: hidden}
+.map-trail path {vector-effect: non-scaling-stroke; fill: none}
+.trail-guide {stroke: var(--air); stroke-width: 1; stroke-dasharray: 1 4}
+.trail-ink {stroke: var(--trail); stroke-width: 1.7; stroke-dasharray: 1 1; stroke-dashoffset: 0}
+@media (prefers-reduced-motion:no-preference) {
+  .sc-ready .trail-ink {stroke-dashoffset: clamp(0,calc(1.12 - var(--sc-p,.65) * var(--trace-speed,2)),1)}
+}
+.map-point {
+  position: absolute; left: var(--x); top: var(--y); transform: translate(-12px,-22px);
+  min-height: 44px; display: flex; align-items: center; gap: 3px;
+  font: 600 clamp(.84rem,1.45vw,1.12rem)/1.2 var(--sans); letter-spacing: -.02em;
+  text-decoration: none; border-radius: 4px;
+}
+.map-testing {--x: 15%; --y: 64.12%}
+.map-hunting {--x: 41.6%; --y: 25.95%}
+.map-automation {--x: 62.4%; --y: 71.76%}
+.map-point i {width: 24px; height: 24px; display: grid; place-items: center; position: relative; flex-shrink: 0}
+.map-point i::before, .map-point i::after {
+  content: ''; position: absolute; border-radius: 50%; background: var(--bg); border: 1px solid var(--trail);
+}
+.map-point i::before {inset: 3px; transform: scale(.82); transition: transform .26s ease-out}
+.map-point i::after {inset: 9px; background: var(--trail); border: 0}
+.map-point span {background: var(--bg); padding: 4px 5px; border-radius: 2px; max-width: 12ch}
+.map-point:is(:hover,:focus-visible) {color: var(--trail)}
+.map-point:is(:hover,:focus-visible) i::before {transform: scale(1.27)}
+@media(max-width:700px) {
+  .research-map {max-width: 540px; justify-self: center}
+}
+@media(max-width:400px) {
+  .map-automation span {max-width: 8ch}
+}
+
+/* The portrait is a photographic cutout over two offset, screen-printed plates. */
+@font-face {
+  font-family: 'Instrument Serif'; font-style: italic; font-weight: 400; font-display: swap;
+  src: url('/assets/instrument-serif-italic.woff') format('woff');
+}
+.profile-spread {
+  --print-paper: #abc0a9; --print-ink: #204a49; --print-back: #768da0;
+  --signature: #bdd4bc; --keyline: #d7e2c6;
+  display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.04fr);
+  gap: clamp(32px,6.2vw,92px); align-items: center;
+  padding-block: clamp(18px,3vw,46px) clamp(55px,7vw,96px);
+}
+[data-theme=light] .profile-spread {
+  --print-paper: #c5d1ac; --print-ink: #365c53; --print-back: #8499ae;
+  --signature: #3b5b4c; --keyline: #f4f4df;
+}
+.researcher-print {width: 100%; margin: 0; min-width: 0}
+.print-scene {isolation: isolate; position: relative; aspect-ratio: 1.07; overflow: hidden}
+.print-back, .print-landscape, .print-contour, .print-figure {position: absolute; pointer-events: none}
+.print-back {
+  inset: 14% 9% 1.8% 0; background: var(--print-back);
+  clip-path: polygon(0 14%,16% 14%,16% 0,100% 0,100% 87%,75% 87%,75% 100%,0 100%);
+  transform: translate(calc(var(--mx,0) * -4px), calc(var(--my,0) * -3px));
+}
+.print-landscape {
+  inset: 7% 0 5.5% 4%; background: var(--print-paper);
+  clip-path: polygon(0 14%,19% 14%,19% 0,100% 0,100% 78%,85% 78%,85% 100%,0 100%);
+  transform: translate(calc(var(--mx,0) * -5px),calc(var(--my,0) * -4px));
+}
+.forest-ink {
+  position: absolute; inset: -2%; background: var(--print-ink); image-rendering: pixelated;
+  mask: url('/assets/profile-forest-ink.png') center/cover no-repeat;
+  transform: translate(calc(var(--mx,0) * -3px),calc(var(--my,0) * -2px));
+}
+.print-contour {
+  inset: 40% 2% 0 52%;
+  background: linear-gradient(160deg,#afc7d6,#849cad);
+  clip-path: polygon(0 34%,21% 34%,21% 0,100% 0,100% 68%,83% 68%,83% 100%,0 100%);
+  transform: translate(calc(var(--mx,0) * 5px),calc(var(--my,0) * 3px));
+}
+.print-contour::before {
+  content: ''; position: absolute; inset: 0; background: #32595b;
+  mask: url('/assets/research-contours.png') 46% 49%/300% 170%; opacity: .85;
+}
+.print-figure {inset: 0 6% 0 1.5%; display: flex; align-items: flex-end; justify-content: center;
+  transform: translate(calc(var(--mx,0) * 2px),0)}
+.print-figure img {width: 100%; height: 100%; display: block; object-fit: contain; object-position: center bottom;
+  filter: drop-shadow(-2px 0 0 var(--keyline)) drop-shadow(2px -1px 0 var(--keyline))}
+.researcher-print figcaption {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  gap: .35rem .75rem; margin-top: .8rem; color: var(--muted); font: 400 .81rem/1.5 var(--mono);
+}
+.researcher-print figcaption span:first-child {color: var(--ink)}
+.researcher-print figcaption i {flex: 1; height: 1px; min-width: .9rem; background: var(--edge)}
+.profile-text {min-width: 0; max-width: 60ch}
+.profile-heading h1 {margin: 0; color: var(--ink); font-size: inherit; text-wrap: initial}
+.name-mask {display: block; overflow: hidden; padding-bottom: .07em}
+.name-first, .name-last {display: block; width: fit-content}
+.name-first {font: 600 clamp(3.9rem,7vw,5.9rem)/.99 var(--sans); letter-spacing: -.04em}
+.name-last {padding-right: .07em; color: var(--signature);
+  font: italic 400 clamp(2.55rem,4.75vw,4.15rem)/1.05 'Instrument Serif',Georgia,serif; letter-spacing: -.018em}
+.profile-prose {margin-top: clamp(19px,2.35vw,32px); font-size: clamp(1rem,1.15vw,1.1rem); line-height: 1.61}
+.profile-prose .profile-intro {color: var(--ink); font-size: clamp(1.15rem,1.56vw,1.49rem); line-height: 1.46; letter-spacing: -.014em}
+.profile-prose p+p {margin-top: .88em}
+.profile-prose .profile-actions {margin-top: 1.2rem}
+.profile-spread:not(:has(.researcher-print)) {grid-template-columns: minmax(0,1fr)}
+@media (min-width:701px) and (max-width:950px) {
+  .profile-spread {gap: 30px; grid-template-columns: minmax(0,.87fr) minmax(0,1.13fr)}
+  .print-scene {aspect-ratio: .87}
+}
+@media (max-width:700px) {
+  .profile-spread {grid-template-columns: minmax(0,1fr); gap: 0; max-width: 540px; align-items: start}
+  .profile-text {display: contents}
+  .profile-heading {grid-row: 1; margin-bottom: 1.35rem}
+  .researcher-print {grid-row: 2}
+  .print-scene {aspect-ratio: 1.25}
+  .profile-prose {grid-row: 3; margin-top: 1.45rem}
+  .name-first {font-size: clamp(3.6rem,11.5vw,4.5rem)}
+  .name-last {font-size: clamp(2.05rem,10.5vw,3.3rem)}
+}
+@media (prefers-reduced-motion: no-preference) {
+  .print-back,.print-landscape,.forest-ink,.print-contour,.print-figure {transition: transform .33s cubic-bezier(.2,.72,.27,1)}
+  .profile-landed .print-landscape {animation: ink-plate-in .76s cubic-bezier(.16,.84,.28,1) backwards}
+  .profile-landed .print-back {animation: underprint-in .72s cubic-bezier(.16,.84,.28,1) backwards}
+  .profile-landed .print-contour {animation: underprint-in .68s .05s cubic-bezier(.16,.84,.28,1) backwards}
+  .profile-landed .print-figure img {animation: subject-in .82s cubic-bezier(.2,.78,.2,1) backwards}
+  .profile-landed .name-first,.profile-landed .name-last {animation: lift-type .68s cubic-bezier(.16,.8,.18,1) backwards}
+  .profile-landed .name-last {animation-delay: .08s}
+  @keyframes ink-plate-in {from {translate: 7% -3%; opacity: .6}}
+  @keyframes underprint-in {from {translate: -6% 3%}}
+  @keyframes subject-in {from {transform: translateY(3%)}}
+  @keyframes lift-type {from {transform: translateY(75%)}}
+}
