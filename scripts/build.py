@@ -33,7 +33,7 @@ def header(active):
     return f'''<a class="skip-link" href="#content">Skip to content</a>{ICONS}
 <header class="site-header shell">{wordmark()}
 <nav class="desktop-nav" aria-label="Main navigation">{nav_links(active)}</nav>
-<div class="header-controls"><button class="theme-toggle icon-button" type="button" aria-label="Change appearance"><span class="theme-sun">{icon('sun')}</span><span class="theme-moon">{icon('moon')}</span></button><button class="menu-toggle icon-button" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Open navigation"><span></span><span></span></button></div></header>
+<div class="header-controls"><button class="theme-toggle icon-button" type="button" aria-label="Change appearance"><span class="theme-sun">{icon('sun')}</span><span class="theme-moon">{icon('moon')}</span></button><button class="menu-toggle icon-button" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Open navigation"><svg class="menu-signal" viewBox="0 0 32 32" aria-hidden="true"><path d="M5 12 Q16 12 27 12"/><path d="M5 20 Q16 20 27 20"/></svg></button></div></header>
 <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation" hidden>{nav_links(active)}</nav>'''
 
 LINKEDIN = 'https://www.linkedin.com/in/raahilmw/'
@@ -70,7 +70,7 @@ def social_deck():
 
 
 def footer():
-    return f'''<footer class="site-footer shell">{wordmark()}<span>© Raahil Muhammad Wildan</span><a href="{MEDIUM}" target="_blank" rel="noreferrer">Medium</a><a href="/contact/">Contact</a></footer><div class="toast" role="status" aria-live="polite" id="toast"></div>'''
+    return f'''<footer class="site-footer shell">{wordmark()}<span>2026 raahilmw</span><a href="{MEDIUM}" target="_blank" rel="noreferrer">Medium</a><a href="/contact/">Contact</a></footer><div class="toast" role="status" aria-live="polite" id="toast"></div>'''
 
 def asset_url(name):
     revision = sha256((OUT / name).read_bytes()).hexdigest()[:12]
@@ -82,20 +82,39 @@ def page(title,active,body,path='/',description=None):
     output = OUT / path.lstrip('/') / 'index.html'
     output.parent.mkdir(parents=True,exist_ok=True)
     extra = {'Home':'<script type="module" src="/artifact.js"></script>', 'About':f'<script src="/assets/matter.min.js" defer></script><script src="{asset_url("field.js")}" defer></script>'}.get(active,'')
+    if active == 'Home':
+        extra += f'<script defer src="{asset_url("assets/scrollcraft.js")}"></script><script defer src="{asset_url("research-map.js")}"></script>'
     profile_css = f'<link rel="stylesheet" href="{asset_url("profile.css")}">' if active in ('Home','About') else ''
     intro = '<dialog id="site-intro" aria-label="Portfolio introduction"><div class="intro-ground" aria-hidden="true"></div><div class="intro-center" aria-hidden="true"><div class="boot-layout"><div class="boot-sigil"><span class="pixel-logo"></span></div><div class="boot-console"><div class="boot-host"><i></i>raahilmw@observatory <span>/ bash</span></div><div class="boot-prompt boot-first"><b>~ $</b><samp>whoami</samp></div><div class="boot-answer">raahilmw</div><div class="boot-prompt boot-command"><b>~ $</b><samp>sudo -u raahilmw ./open</samp></div><div class="boot-response">Field notes mounted.</div><div class="boot-ready">~/portfolio $ <i></i></div></div></div></div><button class="intro-skip" type="button">Skip intro</button></dialog><script src="/intro.js"></script>'
     output.write_text(f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>{escape(title)} — raahilmw</title><meta name="description" content="{escape(description,quote=True)}"><link rel="canonical" href="{ORIGIN}{path}"><script src="{asset_url('theme.js')}"></script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/fonts.css"><link rel="stylesheet" href="{asset_url('style.css')}">{profile_css}</head><body class="page-{active.lower()}">{header(active)}{intro}<main id="content">{body}</main>{footer()}<script src="{asset_url('app.js')}" defer></script>{extra}</body></html>''')
 
 def portrait():
-    return ('<figure class="portrait"><div class="portrait-crop">'
-            '<img src="/assets/raahil-pixel-portrait.webp" width="1122" height="1402" '
-            'alt="Pixel portrait of Raahil adjusting his tie, with forested hills behind him.">'
-            '</div><figcaption>@raahilmw</figcaption></figure>')
+    # Publishing without a photo also has a complete editorial layout.
+    photo = OUT / 'assets' / 'raahil-portrait.jpg'
+    if not photo.exists():
+        return ''
+    return (f'<figure class="profile-photo"><img src="{asset_url("assets/raahil-portrait.jpg")}" '
+            'alt="Raahil Muhammad Wildan wearing glasses and adjusting his tie." '
+            'loading="lazy" decoding="async"></figure>')
 
 def article_card():
     return f'''<article class="research-card"><a class="research-cover" href="{ARTICLE}" aria-label="Read the image fetcher case study"><span class="mono">WEB SECURITY</span>
 <div class="boundary-art" aria-hidden="true"><i></i><i></i><i></i><b></b><em></em></div><span class="cover-sub mono">Image fetcher / trust boundary</span></a><div class="research-copy"><div class="entry-meta"><time datetime="2026-10-07">07 Oct 2026</time><span>Case study</span></div><h3><a href="{ARTICLE}">The image fetcher that read local files.</a></h3><p>Where a backend’s idea of an image URL crossed into the server’s filesystem.</p><div class="tag-list"><span>SSRF</span><span>File read</span></div><a class="underlined" href="{ARTICLE}">Read the writeup</a></div></article>'''
+
+def research_map():
+    trail = 'M-16 216 C30 218 30 168 75 168 S136 166 146 128 S157 68 208 68 S260 101 255 131 S260 188 312 188 S395 172 436 141 S487 125 520 132'
+    links = [
+        ('testing', 'Penetration testing', '/writeups/'),
+        ('hunting', 'Bug hunting', ARTICLE),
+        ('automation', 'Security automation', '/projects/'),
+    ]
+    points = ''.join(f'<a class="map-point map-{key}" href="{href}"><i aria-hidden="true"></i><span>{name}</span></a>' for key,name,href in links)
+    return f'''<nav class="research-map" aria-label="Explore my research" data-sc-act="flow">
+    <div class="map-contours" aria-hidden="true"></div>
+    <svg class="map-trail" viewBox="0 0 500 262" preserveAspectRatio="none" aria-hidden="true">
+      <path class="trail-guide" d="{trail}"/><path class="trail-ink" pathLength="1" d="{trail}"/>
+    </svg>{points}</nav>'''
 
 home = f'''
 <section class="home-hero"><div class="hero-layout shell">
@@ -107,7 +126,7 @@ home = f'''
 </div><div class="hero-baseline shell"><span>@raahilmw</span><a href="#selected">Scroll to explore <span aria-hidden="true">↓</span></a></div></section>
 <section class="shell home-connect" aria-labelledby="home-connect-title"><div>{label("Find me online")}<h2 id="home-connect-title">Connect.</h2></div>{social_deck()}</section>
 <section class="section shell" id="selected"><div class="section-heading"><div>{label('Fieldwork')}<h2>Selected research.</h2></div><a class="underlined" href="/writeups/">All writeups</a></div>{article_card()}</section>
-<section class="section shell practice"><div>{label('About the researcher')}<h2>Hi, I’m Raahil.</h2><p>I look at the assumptions people build into web applications and APIs. When a test starts to repeat itself, I turn it into a tool.</p><a class="underlined" href="/about/">More about me</a></div><div class="practice-list"><a href="/writeups/">Penetration testing</a><a href="{ARTICLE}">Bug hunting</a><a href="/projects/">Security automation</a></div></section>'''
+<section class="section shell practice"><div>{label('About the researcher')}<h2>Hi, I’m Raahil.</h2><p>I look at the assumptions people build into web applications and APIs. When a test starts to repeat itself, I turn it into a tool.</p><a class="underlined" href="/about/">More about me</a></div>{research_map()}</section>'''
 page('Security research','Home',home)
 
 tiles = [
@@ -170,11 +189,14 @@ about = f'''
 <section class="field-scroll" aria-label="Interactive research interests"><div class="field-sticky"><div class="field-card"><div class="field-board">
 {''.join(map(tile,tiles))}</div><div class="field-caption"><p>Grab and toss a tile. Scroll to let it fall.</p><span class="sr-only" id="field-keys">Use the arrow keys to move a focused tile.</span></div>
 </div></div></section>
-<section id="about-me" class="shell about-profile">{portrait()}<div class="bio">{label('About me')}<h1>Raahil Muhammad<br>Wildan<span class="red">.</span></h1>
-<p class="bio-lead">I’m a cybersecurity student in Tangerang Selatan, Indonesia. I test web applications and APIs, and I’m especially interested in what happens when a request reaches the wrong part of a system.</p>
-<p>Before I started hunting bugs, I worked in a data center and taught routing. I still think in terms of a request’s journey. Where does it go? Which service decides what the user can see? If I find myself checking the same thing twice, I’ll usually write a small tool for it.</p>
+<section id="about-me" class="shell profile-spread" aria-labelledby="researcher-name">
+<div class="profile-masthead"><div class="profile-byline"><span>@raahilmw</span><span>Tangerang Selatan, Indonesia</span></div>
+<h1 id="researcher-name">Raahil Muhammad<br><em>Wildan.</em></h1></div>
+{portrait()}
+<div class="profile-narrative"><p class="profile-intro">I’m a cybersecurity student who tests web applications and APIs. I’m especially interested in what happens when a request reaches the wrong part of a system.</p>
+<div class="profile-story"><p>Before I started hunting bugs, I worked in a data center and taught routing. I still think in terms of a request’s journey. Where does it go? Which service decides what the user can see? If I find myself checking the same thing twice, I’ll usually write a small tool for it.</p>
 <p>One bug I reported started with a feature that fetched pictures. It turned out the server could read a local file, too. My writeup walks through how I confirmed the impact and what the team could change to prevent it.</p>
-<div class="profile-actions"><button type="button" class="contact-action copy-action" data-copy="{EMAIL}" data-message="Email copied." aria-label="Copy email address {EMAIL}"><span class="copy-emblem">{icon('copy')}</span><span>Copy email</span></button></div></div></section>
+<div class="profile-actions"><button type="button" class="contact-action copy-action" data-copy="{EMAIL}" data-message="Email copied." aria-label="Copy email address {EMAIL}"><span class="copy-emblem">{icon('copy')}</span><span>Copy email</span></button></div></div></div></section>
 <div class="shell about-index-layout"><nav class="about-index" aria-label="On this page">{label('On this page')}{index_links}</nav>
 <div class="about-chapters">
 <section id="expertise" class="about-chapter"><h2>Expertise</h2><ul class="expertise-list">{''.join(map(expertise_stamp, expertise))}</ul></section>

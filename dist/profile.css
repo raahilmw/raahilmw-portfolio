@@ -139,3 +139,81 @@
   .page-about .field-tile {font-size: .85rem}
   .page-about .field-tile:nth-child(4n+1) {font-size: .96rem}
 }
+
+/* A terrain diagram for the three paths out of the researcher introduction. */
+.research-map {
+  --trail: #9acfc6; position: relative; isolation: isolate; align-self: center;
+  width: 100%; aspect-ratio: 500/262; min-height: 205px;
+}
+[data-theme=light] .research-map {--trail: #365f60}
+.map-contours {
+  position: absolute; inset: -5% -1%; pointer-events: none;
+  background-image: url('/assets/research-contours.png');
+  background-size: 100% 100%; opacity: .53;
+  mask-image: radial-gradient(ellipse 66% 57% at 50% 52%,#000 40%,transparent 91%);
+}
+[data-theme=light] .map-contours {filter: brightness(.55); opacity: .65}
+.map-trail {width: 100%; height: 100%; position: absolute; inset: 0; overflow: hidden}
+.map-trail path {vector-effect: non-scaling-stroke; fill: none}
+.trail-guide {stroke: var(--air); stroke-width: 1; stroke-dasharray: 1 4}
+.trail-ink {stroke: var(--trail); stroke-width: 1.7; stroke-dasharray: 1 1; stroke-dashoffset: 0}
+@media (prefers-reduced-motion:no-preference) {
+  .sc-ready .trail-ink {stroke-dashoffset: clamp(0,calc(1.12 - var(--sc-p,.65) * var(--trace-speed,2)),1)}
+}
+.map-point {
+  position: absolute; left: var(--x); top: var(--y); transform: translate(-12px,-22px);
+  min-height: 44px; display: flex; align-items: center; gap: 3px;
+  font: 600 clamp(.84rem,1.45vw,1.12rem)/1.2 var(--sans); letter-spacing: -.02em;
+  text-decoration: none; border-radius: 4px;
+}
+.map-testing {--x: 15%; --y: 64.12%}
+.map-hunting {--x: 41.6%; --y: 25.95%}
+.map-automation {--x: 62.4%; --y: 71.76%}
+.map-point i {width: 24px; height: 24px; display: grid; place-items: center; position: relative; flex-shrink: 0}
+.map-point i::before, .map-point i::after {
+  content: ''; position: absolute; border-radius: 50%; background: var(--bg); border: 1px solid var(--trail);
+}
+.map-point i::before {inset: 3px; transform: scale(.82); transition: transform .26s ease-out}
+.map-point i::after {inset: 9px; background: var(--trail); border: 0}
+.map-point span {background: var(--bg); padding: 4px 5px; border-radius: 2px; max-width: 12ch}
+.map-point:is(:hover,:focus-visible) {color: var(--trail)}
+.map-point:is(:hover,:focus-visible) i::before {transform: scale(1.27)}
+@media(max-width:700px) {
+  .research-map {max-width: 540px; justify-self: center}
+}
+@media(max-width:400px) {
+  .map-automation span {max-width: 8ch}
+}
+
+/* A full-width nameplate opens the profile. The biography reads as two short columns. */
+.profile-spread {
+  padding-block: clamp(25px,5vw,72px) clamp(48px,8vw,110px);
+  display: grid; grid-template-columns: minmax(0,1fr); align-items: center;
+}
+.profile-masthead {min-width: 0}
+.profile-byline {display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 1.5rem;
+  color: var(--muted); font-size: .94rem; line-height: 1.5}
+.profile-byline span:first-child {color: var(--accent); font-family: var(--mono)}
+.profile-masthead h1 {
+  margin-top: clamp(15px,2.7vw,35px); font: 600 clamp(2.8rem,7.8vw,6rem)/.99 var(--sans);
+  letter-spacing: -.04em; text-wrap: initial;
+}
+.profile-masthead h1 em {font-weight: 400; color: var(--ink)}
+.profile-narrative {
+  grid-column: 1/-1; display: grid; grid-template-columns: minmax(0,.9fr) minmax(0,1.05fr);
+  align-items: start; gap: clamp(30px,7vw,96px); border-top: 1px solid var(--edge);
+  margin-top: clamp(26px,4.3vw,62px); padding-top: clamp(21px,3.3vw,48px);
+}
+.profile-intro {max-width: 31ch; font: 500 clamp(1.25rem,2.1vw,1.88rem)/1.42 var(--sans); color: var(--ink); letter-spacing: -.03em}
+.profile-story {max-width: 64ch; font-size: 1.03rem; line-height: 1.73}
+.profile-story p+p {margin-top: 1em}
+.profile-story .profile-actions {margin-top: 1.5rem}
+.profile-spread:has(.profile-photo) {grid-template-columns: minmax(0,1.5fr) minmax(190px,.65fr); column-gap: clamp(28px,6vw,88px)}
+.profile-photo {max-width: 330px; width: 100%; justify-self: end}
+.profile-photo img {width: 100%; height: auto; display: block}
+@media(max-width:700px) {
+  .profile-spread:has(.profile-photo), .profile-narrative {grid-template-columns: minmax(0,1fr)}
+  .profile-narrative {gap: 22px}
+  .profile-photo {justify-self: start; width: min(85%,310px); margin-top: 1.75rem}
+  .profile-intro {max-width: 36ch}
+}

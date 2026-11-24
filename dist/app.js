@@ -3,18 +3,56 @@
   document.querySelectorAll('[data-year]').forEach(node => node.textContent = new Date().getFullYear());
   const menu = document.querySelector('.menu-toggle');
   const nav = document.querySelector('.mobile-nav');
-  let closeTimer;
+  const lines = menu.querySelectorAll('.menu-signal path');
+  let target = 0, position = 0, velocity = 0, frame = 0, previous = 0;
+
+  function drawMenu() {
+    const p = position;
+    const bend = Math.sin(Math.PI * Math.max(0, Math.min(p, 1))) * 5;
+    // Both strokes bow out, pass one another and settle into the close mark.
+    lines.forEach((path, index) => {
+      const side = index === 0 ? -1 : 1;
+      const leftY = 16 + side * (4 + 4 * p);
+      const rightY = 16 + side * (4 - 12 * p);
+      path.setAttribute('d', 'M' + (5 + 3*p) + ' ' + leftY +
+        ' Q' + (16 - side*bend) + ' ' + (16 + side*(4 - 4*p + bend)) +
+        ' ' + (27 - 3*p) + ' ' + rightY);
+    });
+    nav.style.setProperty('--unfold', p.toFixed(4));
+  }
+  function finishMenu() {
+    cancelAnimationFrame(frame);
+    position = target;
+    velocity = frame = previous = 0;
+    drawMenu();
+    nav.hidden = !target;
+  }
+  function stepMenu(time) {
+    const dt = Math.min((time - (previous || time - 16)) / 1000, .032);
+    previous = time;
+    // Two short integration steps keep the spring consistent on slower devices.
+    for (let i = 0; i < 2; i++) {
+      velocity += ((target - position) * 380 - velocity * 29) * dt / 2;
+      position += velocity * dt / 2;
+    }
+    if (Math.abs(target - position) < .001 && Math.abs(velocity) < .025) {
+      finishMenu();
+      return;
+    }
+    drawMenu();
+    frame = requestAnimationFrame(stepMenu);
+  }
   function setMenu(open, immediate = false) {
-    if (open === (menu.getAttribute('aria-expanded') === 'true') && !(immediate && !nav.hidden)) return;
-    clearTimeout(closeTimer);
+    if (target === Number(open) && !immediate) return;
+    target = Number(open);
     menu.setAttribute('aria-expanded', String(open));
     menu.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
     nav.inert = !open;
-    nav.classList.toggle('closing', !open);
-    if (open) nav.hidden = false;
-    else if (immediate || reduced.matches) nav.hidden = true;
-    else closeTimer = setTimeout(() => { nav.hidden = true; }, 185);
+    if (immediate || reduced.matches) { finishMenu(); return; }
+    nav.hidden = false;
+    if (!frame) frame = requestAnimationFrame(stepMenu);
   }
+  reduced.addEventListener('change', () => { if (reduced.matches) finishMenu(); });
   menu.addEventListener('click', () => setMenu(menu.getAttribute('aria-expanded') !== 'true'));
   nav.querySelectorAll('a').forEach(link => link.addEventListener('click', () => setMenu(false, true)));
   document.addEventListener('keydown', event => {
