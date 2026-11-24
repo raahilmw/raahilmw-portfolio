@@ -2,6 +2,18 @@
 
 Raahil Muhammad Wildan’s security research portfolio. Run `python scripts/build.py` to regenerate the eight static pages in `dist/`.
 
+## Hosting
+
+Upload the contents of `dist/` to the root of a static website. The host should serve each directory's `index.html`, so routes such as `/about/` and `/writeups/` work. No server runtime or package installation is required.
+
+Before moving to a new domain, rebuild with its full public origin. This updates canonical URLs and the article's copy-link action.
+
+```bash
+SITE_ORIGIN=https://your-domain.example python scripts/build.py
+```
+
+The default origin is the current Sites address. Run `python -m http.server 8000 --directory dist` for a local preview at `http://localhost:8000/`. All fonts, scripts, photos, and library assets used by the website are inside `dist/`.
+
 - Shared content and navigation live in `scripts/build.py`. The About spread layers the existing transparent portrait over a two-ink forest print and the Home map contours. The background follows MengTo’s Bayer dither treatment. The staggered name and print register once on entry, with a static composition for reduced motion. Instrument Serif is bundled under its OFL license.
 - The home scene restores the forest photograph and Three.js specimen from the first design. The particle interaction follows the MengTo hover-particle-dissolve skill.
 - The About field uses locally bundled Matter.js. Drag tiles by mouse or touch, or focus one and move it with the arrow keys. Scrolling down drops them. Pick up a label at a corner to swing it. Return to the top to re-float the labels. Reduced motion skips directly to the resting positions.

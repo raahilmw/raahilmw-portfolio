@@ -1,10 +1,11 @@
 from pathlib import Path
 from hashlib import sha256
 from html import escape
+import os
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'dist'
-ORIGIN = 'https://raahilmw-security-lab.team-8535.chatgpt.site'
+ORIGIN = os.environ.get('SITE_ORIGIN', 'https://raahilmw-security-lab.team-8535.chatgpt.site').rstrip('/')
 MEDIUM = 'https://medium.com/@raahil.mw'
 REPORT = MEDIUM + '/how-i-got-paid-for-turning-an-image-fetcher-into-an-arbitrary-file-read-0d15679bae00'
 ARTICLE = '/writeups/image-fetcher-local-file-read/'
