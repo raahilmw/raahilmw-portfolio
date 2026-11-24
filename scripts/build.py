@@ -1,5 +1,6 @@
 from pathlib import Path
 from html import escape
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'dist'
@@ -36,38 +37,37 @@ def header(active):
 <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation" hidden>{nav_links(active)}</nav>'''
 
 LINKEDIN = 'https://www.linkedin.com/in/raahilmw/'
+EMAIL = 'raahil.mw@gmail.com'
+RESUME = '/assets/raahil-muhammad-wildan-resume.pdf'
 SOCIAL = {
     'GitHub': 'https://github.com/raahilmw',
     'LinkedIn': LINKEDIN,
-    'Email': '',
-    'Instagram': '',
-    'Discord': '',
+    'Email': 'mailto:' + EMAIL,
+    'Instagram': 'https://www.instagram.com/raahilmw_/',
+    'Discord': 'https://discord.com/users/591142560802668563',
     'Hack The Box': '',
-    'TryHackMe': '',
+    'TryHackMe': 'https://tryhackme.com/p/raahil.mw',
     'X': '',
 }
 
 def social_link(name, compact=False):
     key = name.lower().replace(' ', '')
     target = SOCIAL[name]
-    attrs = f'class="{"platform-link" if compact else "social-card"} platform-{key}"'
+    attrs = f'class="{"platform-link" if compact else "social-orb"} platform-{key}"'
     graphic = f'<img src="/assets/social/{key}.svg" alt="" width="24" height="24">'
     if compact:
         content = f'{graphic}<span>{name}</span>'
     else:
-        content = f'<span class="card-art">{graphic}</span><span class="card-label">{name}</span>'
+        content = f'<span class="orb-disc">{graphic}</span><span class="orb-label">{name}</span>'
     if not target:
         return f'<span {attrs} data-unlisted title="Profile not linked">{content}<small class="card-status">Not linked</small></span>'
-    if target.startswith('copy:'):
-        value = escape(target.removeprefix('copy:'),quote=True)
-        return f'<button type="button" {attrs} data-copy="{value}" data-message="Discord username copied." aria-label="Copy Discord username {value}" title="{value}">{content}</button>'
     external = '' if target.startswith('mailto:') else ' target="_blank" rel="noreferrer"'
     return f'<a {attrs} href="{escape(target,quote=True)}"{external}>{content}</a>'
 
 def social_deck():
     cards = ''.join(social_link(name) for name in ('GitHub','LinkedIn','Email','Instagram','Discord'))
     platforms = ''.join(social_link(name, compact=True) for name in ('Hack The Box','TryHackMe','X'))
-    return f'<div class="social-set"><div class="social-cards">{cards}</div><div class="platform-row">{platforms}</div></div>'
+    return f'<div class="social-set"><div class="social-orbits">{cards}</div><div class="platform-row">{platforms}</div></div>'
 
 
 def footer():
@@ -79,7 +79,7 @@ def page(title,active,body,path='/',description=None):
     output.parent.mkdir(parents=True,exist_ok=True)
     extra = {'Home':'<script type="module" src="/artifact.js"></script>', 'About':'<script src="/assets/matter.min.js" defer></script><script src="/field.js" defer></script>'}.get(active,'')
     profile_css = '<link rel="stylesheet" href="/profile.css">' if active in ('Home','About') else ''
-    intro = '<dialog id="site-intro" aria-label="Portfolio introduction"><div class="intro-ground" aria-hidden="true"></div><div class="intro-center" aria-hidden="true"><span class="pixel-logo"></span></div><button class="intro-skip" type="button">Skip intro</button></dialog><script src="/intro.js"></script>'
+    intro = '<dialog id="site-intro" aria-label="Portfolio introduction"><div class="intro-ground" aria-hidden="true"></div><div class="intro-center" aria-hidden="true"><div class="boot-layout"><div class="boot-sigil"><span class="pixel-logo"></span></div><div class="boot-console"><div class="boot-host"><i></i>raahilmw@observatory <span>/ bash</span></div><div class="boot-prompt boot-first"><b>~ $</b><samp>whoami</samp></div><div class="boot-answer">raahilmw</div><div class="boot-prompt boot-command"><b>~ $</b><samp>sudo -u raahilmw ./open</samp></div><div class="boot-response">Field notes mounted.</div><div class="boot-ready">~/portfolio $ <i></i></div></div></div></div><button class="intro-skip" type="button">Skip intro</button></dialog><script src="/intro.js"></script>'
     output.write_text(f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>{escape(title)} — raahilmw</title><meta name="description" content="{escape(description,quote=True)}"><link rel="canonical" href="{ORIGIN}{path}"><script src="/theme.js"></script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/fonts.css"><link rel="stylesheet" href="/style.css">{profile_css}</head><body class="page-{active.lower()}">{header(active)}{intro}<main id="content">{body}</main>{footer()}<script src="/app.js" defer></script>{extra}</body></html>''')
 
@@ -132,14 +132,12 @@ def tile(entry):
 
 # Dates and roles are from the owner's public LinkedIn profile.
 roles = [
-    ('From Sep 2026','Offensive Security Intern','VINIX7'),
-    ('From Jul 2026','Penetration Testing Intern','JAH Training Center'),
     ('Dec 2023 – May 2024','Data Center Engineering Intern','PT Usaha Adi Sanggoro (ASNET)'),
-    ('Jul – Nov 2023','IT Service Management Intern','Lintasarta'),
-    ('Mar 2023','CCNA Trainer','SMK Negeri 36 Jakarta'),
-    ('Jun 2022','MTCRE Trainer','SMK Informatika Utama'),
-    ('Feb 2022','Fiber Optic Trainer','IDN Boarding School'),
+    ('From Jul 2026','Penetration Testing Intern','JAH Training Center'),
+    ('From Sep 2026','Offensive Security Intern','VINIX7'),
 ]
+expertise = ['Penetration Testing', 'Web Exploitation', 'Security Automation']
+tool_names = ['Burp Suite', 'Nuclei', 'Nmap', 'Wireshark', 'Python', 'Bash']
 education = [
     ('From 2024','Bachelor of Technology in Information Technology','Asia e University'),
     ('From 2024','Diploma in Informatics and Information Technology','CEP-CCIT FTUI · Cyber Security'),
@@ -148,25 +146,22 @@ education = [
 def timeline(entries):
     return '<ul class="timeline">' + ''.join(f'<li><span class="year">{date}</span><div><h3>{role}</h3><p>{org}</p></div></li>' for date,role,org in entries) + '</ul>'
 
-about_parts = [('about-me','About me'),('expertise','Expertise'),('tools','Tools & standards'),('experience','Experience'),('education','Education'),('connect','Connect')]
+about_parts = [('about-me','About me'),('expertise','Expertise'),('tools','Tools'),('experience','Experience'),('education','Education'),('connect','Connect')]
 index_links = ''.join(f'<a href="#{anchor}">{escape(name)}</a>' for anchor,name in about_parts)
 about = f'''
 <section class="field-scroll" aria-label="Interactive research interests"><div class="field-sticky"><div class="field-card"><div class="field-board">
-{''.join(map(tile,tiles))}</div><div class="field-caption"><p>Drag a tile. Scroll to let them fall.</p><span class="sr-only" id="field-keys">Use the arrow keys to move a focused tile. Use Home to reset the tiles.</span><button type="button" class="reset-board">{icon('reset')}Reset tiles</button></div>
+{''.join(map(tile,tiles))}</div><div class="field-caption"><p>Grab and toss a tile. Scroll to let it fall.</p><span class="sr-only" id="field-keys">Use the arrow keys to move a focused tile.</span></div>
 </div></div></section>
 <section id="about-me" class="shell about-profile">{portrait()}<div class="bio">{label('About me')}<h1>Raahil Muhammad<br>Wildan<span class="red">.</span></h1>
 <p class="bio-lead">I’m a cybersecurity student in Tangerang Selatan, Indonesia. I test web applications and APIs, hunt bugs, and write tools for the checks I run more than once.</p>
 <p>I started in network engineering. Teaching routing and working in a data center taught me to follow a request from one system to the next. I use that same habit now to work out where an application puts its trust.</p>
 <p>One investigation started with an image URL. The server could read a local file through a feature built to fetch pictures. I wrote up what I could verify and how the team could prevent it.</p>
-<div class="hero-actions"><a class="button" href="{LINKEDIN}" target="_blank" rel="noreferrer">View LinkedIn</a><a class="underlined" href="{ARTICLE}">Read the image-fetcher writeup</a></div></div></section>
+<div class="profile-actions"><button type="button" class="contact-action copy-action" data-copy="{EMAIL}" data-message="Email copied." aria-label="Copy email address {EMAIL}"><span class="copy-emblem">{icon('copy')}</span><span>Copy email</span></button><a class="contact-action resume-action" href="{RESUME}" target="_blank" rel="noreferrer" aria-label="Open résumé (PDF)">Resume <span aria-hidden="true">↗</span></a></div></div></section>
 <div class="shell about-index-layout"><nav class="about-index" aria-label="On this page">{label('On this page')}{index_links}</nav>
 <div class="about-chapters">
-<section id="expertise" class="about-chapter"><h2>Expertise</h2><dl class="expertise-lines">
-<div><dt>Web &amp; API testing</dt><dd>I trace requests across trust boundaries, review access decisions, and record the impact of unexpected behavior.</dd></div>
-<div><dt>Bug hunting</dt><dd>I follow small inconsistencies in application behavior and collect the evidence behind a finding.</dd></div>
-<div><dt>Security automation</dt><dd>I use scripts to organize observations and make repeated checks easier to review.</dd></div></dl></section>
-<section id="tools" class="about-chapter"><h2>Tools &amp; standards</h2><div class="tool-list"><span>Python</span><span>HTTP</span><span>OWASP</span><span>Cisco networking</span><span>MikroTik routing</span></div></section>
-<section id="experience" class="about-chapter"><h2>Experience</h2>{timeline(roles)}</section>
+<section id="expertise" class="about-chapter"><h2>Expertise</h2><ul class="expertise-list">{''.join(f'<li>{name}</li>' for name in expertise)}</ul></section>
+<section id="tools" class="about-chapter"><h2>Tools</h2><ul class="tool-list">{''.join(f'<li>{name}</li>' for name in tool_names)}</ul></section>
+<section id="experience" class="about-chapter"><h2>Experience</h2><ol class="career-track">{''.join(f'<li><span class="year">{date}</span><div><h3>{org}</h3><p>{role}</p></div></li>' for date,role,org in roles)}</ol></section>
 <section id="education" class="about-chapter"><h2>Education</h2>{timeline(education)}<a class="underlined record-source" href="{LINKEDIN}" target="_blank" rel="noreferrer">Career and education on LinkedIn</a></section>
 <section id="connect" class="about-chapter"><h2>Let’s connect.</h2>{social_deck()}<a class="underlined" href="{MEDIUM}" target="_blank" rel="noreferrer">Read my research on Medium</a></section></div></div>'''
 page('About','About',about,'/about/')
@@ -193,6 +188,9 @@ page('Recon workflow','Projects',workflow,'/projects/recon-workflow/')
 certs=f'''<section class="page-intro shell">{label('LEARNING / ON THE RECORD')}<h1>Certifications<span class="red">.</span></h1><p>A place for qualifications,<br>with a way to verify them.</p><div class="intro-rule"><span class="mono">CREDENTIAL RECORD</span><span class="mono">ISSUER / QUALIFICATION / VERIFICATION</span></div></section><section class="shell certifications-index"><div class="empty-record"><span class="empty-record-mark" aria-hidden="true">+</span><h2>No certifications listed yet.</h2><p>Published credentials and their verification links will appear here.</p><a class="underlined" href="/about/">Explore my research practice</a></div></section>'''
 page('Certifications','Certifications',certs,'/certifications/')
 
-contact=f'''<section class="contact-page shell">{label('OPEN A CONVERSATION')}<h1>Let’s compare<br>notes<span class="red">.</span></h1><p class="contact-intro">Security research, interesting systems,<br>and questions worth following.</p><div class="contact-records"><div class="contact-record"><span class="mono">THE HANDLE</span><div><strong>@raahilmw</strong><span>The handle I use for security research.</span></div><button class="button" type="button" data-copy="raahilmw">{icon('copy')}Copy handle</button></div><div class="contact-record"><span class="mono">THE WRITING</span><div><strong>Medium</strong><span>Published research and the full field notes.</span></div><a class="button" href="{MEDIUM}" target="_blank" rel="noreferrer">Visit my Medium</a></div></div></section>'''
+contact=f'''<section class="contact-page shell">{label('OPEN A CONVERSATION')}<h1>Let’s compare<br>notes<span class="red">.</span></h1><p class="contact-intro">Security research, interesting systems,<br>and questions worth following.</p><div class="contact-records"><div class="contact-record"><span class="mono">EMAIL</span><div><strong><a href="mailto:{EMAIL}">{EMAIL}</a></strong></div><button class="button" type="button" data-copy="{EMAIL}" data-message="Email copied.">{icon('copy')}Copy email</button></div><div class="contact-record"><span class="mono">THE HANDLE</span><div><strong>@raahilmw</strong><span>The handle I use for security research.</span></div><button class="button" type="button" data-copy="raahilmw">{icon('copy')}Copy handle</button></div><div class="contact-record"><span class="mono">THE WRITING</span><div><strong>Medium</strong><span>Published research and the full field notes.</span></div><a class="button" href="{MEDIUM}" target="_blank" rel="noreferrer">Visit my Medium</a></div></div></section>'''
 page('Contact','Contact',contact,'/contact/')
+if __name__ == '__main__' and '--resume' in sys.argv:
+    from make_resume import write_resume
+    write_resume(OUT / RESUME.lstrip('/'), EMAIL, LINKEDIN, roles, education, expertise, tool_names, REPORT)
 print('Built 8 Saltmere-inspired pages. Profile photo: ' + ('included' if profile_file else 'awaiting original file; monogram used.'))

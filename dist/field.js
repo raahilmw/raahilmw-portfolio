@@ -2,15 +2,15 @@
 (() => {
   const board = document.querySelector('.field-board');
   if (!board || !window.Matter) return;
-  const { Engine, Bodies, Body, Composite, Sleeping } = window.Matter;
+  const { Engine, Bodies, Body, Composite, Constraint, Sleeping } = window.Matter;
   const engine = Engine.create({ enableSleeping: true, positionIterations: 8 });
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  const tiles = Array.from(board.querySelectorAll('.field-tile'), el => ({ el, body: null, hold: null }));
+  const tiles = Array.from(board.querySelectorAll('.field-tile'), (el, index) => ({ el, body: null, hold: null, anchor: null, phase: index * 2.39996 }));
   const step = 1000 / 60;
   const gutter = 6;
   let width = 0, height = 0, frame = 0, previousTime = 0, remainder = 0;
   let dropped = false, visible = true, topLayer = 1;
-  let lastScroll = window.scrollY, armedAt = lastScroll;
+  engine.gravity.y = 0;
 
   function draw(tile) {
     const { position, angle } = tile.body;
@@ -35,6 +35,25 @@
     const y = Number(narrow ? el.dataset.my : el.dataset.y);
     Body.setAngle(body, Number(el.dataset.angle) * Math.PI / 180);
     move(tile, tile.w / 2 + x * (width - tile.w), tile.h / 2 + y * (height - tile.h));
+    tile.anchor = { ...body.position, angle: body.angle };
+    if (!reduced.matches) {
+      move(tile, body.position.x + Math.cos(tile.phase) * 12, body.position.y - 14);
+      Body.setVelocity(body, { x: Math.cos(tile.phase) * 1.3, y: .8 });
+    }
+  }
+  function drift(tile, seconds) {
+    if (tile.hold) return;
+    const { body, anchor, phase } = tile;
+    const x = anchor.x + Math.sin(seconds * .8 + phase) * Math.min(16, width * .022);
+    const y = anchor.y + Math.cos(seconds * .67 + phase) * 10;
+    Sleeping.set(body, false);
+    Body.applyForce(body, body.position, {
+      x: body.mass * ((x - body.position.x) * .000018 - body.velocity.x * .00017),
+      y: body.mass * ((y - body.position.y) * .000018 - body.velocity.y * .00017)
+    });
+    const tilt = anchor.angle + Math.sin(seconds * .64 + phase) * .07;
+    const delta = Math.atan2(Math.sin(tilt - body.angle), Math.cos(tilt - body.angle));
+    body.torque += body.inertia * (delta * .000020 - body.angularVelocity * .00019);
   }
   function stop() {
     cancelAnimationFrame(frame);
@@ -45,19 +64,21 @@
     remainder += Math.min(previousTime ? now - previousTime : step, 50);
     previousTime = now;
     while (remainder >= step) {
+      if (!dropped) tiles.forEach(tile => drift(tile, engine.timing.timestamp / 1000));
       Engine.update(engine, step);
       remainder -= step;
     }
     tiles.forEach(draw);
-    if (tiles.some(({ body }) => !body.isStatic && !body.isSleeping)) {
+    if (!dropped || tiles.some(({ body, hold }) => hold || (!body.isStatic && !body.isSleeping))) {
       frame = requestAnimationFrame(advance);
     } else {
       previousTime = remainder = 0;
     }
   }
   function run() {
-    if (!dropped || !visible || document.hidden || frame) return;
+    if (!width || !visible || document.hidden || frame) return;
     if (reduced.matches) {
+      if (!dropped) return;
       // Compute the resting layout without showing intermediate motion.
       for (let i = 0; i < 240; i++) Engine.update(engine, step);
       tiles.forEach(draw);
@@ -65,38 +86,37 @@
       frame = requestAnimationFrame(advance);
     }
   }
-  function release(tile, fling = true) {
+  function release(tile) {
     const held = tile.hold;
     if (!held) return;
     tile.hold = null;
+    if (held.spring) Composite.remove(engine.world, held.spring);
     tile.el.classList.remove('is-held');
     if (tile.el.hasPointerCapture(held.id)) tile.el.releasePointerCapture(held.id);
-    Body.setStatic(tile.body, !dropped);
-    if (dropped) {
-      Sleeping.set(tile.body, false);
-      if (fling && !reduced.matches && performance.now() - held.time < 100) {
-        Body.setVelocity(tile.body, { x: held.vx, y: held.vy });
-      }
-      run();
-    }
+    if (tile.body.isStatic) Body.setStatic(tile.body, false);
+    tile.anchor = { ...tile.body.position, angle: tile.body.angle };
+    Sleeping.set(tile.body, false);
+    run();
   }
   function reset() {
     if (!width) return;
     dropped = false;
-    armedAt = lastScroll = window.scrollY;
+    engine.gravity.y = 0;
     stop();
     tiles.forEach(tile => {
-      release(tile, false);
-      Body.setStatic(tile.body, true);
+      if (tile.hold) return;
+      Sleeping.set(tile.body, false);
       Body.setVelocity(tile.body, { x: 0, y: 0 });
       Body.setAngularVelocity(tile.body, 0);
       home(tile);
     });
     board.dataset.state = 'floating';
+    run();
   }
   function drop() {
     if (dropped || !width) return;
     dropped = true;
+    engine.gravity.y = 1;
     board.dataset.state = 'falling';
     tiles.forEach(tile => {
       if (tile.hold) return;
@@ -112,8 +132,8 @@
     if (!w || !h) return;
     if (w === width && h === height && tiles.every(t => t.w === t.el.offsetWidth && t.h === t.el.offsetHeight)) return;
     stop();
-    const before = tiles.map(tile => tile.body && ({ x: tile.body.position.x / width, y: tile.body.position.y / height, angle: tile.body.angle }));
-    tiles.forEach(tile => release(tile, false));
+    const before = tiles.map(tile => tile.body && ({ x: tile.body.position.x / width, y: tile.body.position.y / height, angle: tile.body.angle, ax: tile.anchor.x / width, ay: tile.anchor.y / height, tilt: tile.anchor.angle }));
+    tiles.forEach(release);
     stop();
     width = w; height = h;
     Composite.clear(engine.world, false);
@@ -130,9 +150,9 @@
       tile.body = Bodies.rectangle(w / 2, h / 2, tile.w, tile.h, {
         friction: .55, frictionAir: .014, restitution: .20, chamfer: { radius: 5 }
       });
-      Body.setStatic(tile.body, !dropped);
       Composite.add(engine.world, tile.body);
       if (before[index]) {
+        tile.anchor = { x: before[index].ax*w, y: before[index].ay*h, angle: before[index].tilt };
         Body.setAngle(tile.body, before[index].angle);
         move(tile, before[index].x * w, before[index].y * h);
       } else home(tile);
@@ -147,9 +167,19 @@
       if (!tile.body || tile.hold || event.button !== 0) return;
       const bounds = board.getBoundingClientRect();
       const { position } = tile.body;
-      tile.hold = { id: event.pointerId, dx: event.clientX - bounds.left - position.x,
-        dy: event.clientY - bounds.top - position.y, vx: 0, vy: 0, time: performance.now() };
-      Body.setStatic(tile.body, true);
+      const target = { x: event.clientX - bounds.left, y: event.clientY - bounds.top };
+      const offset = { x: target.x - position.x, y: target.y - position.y };
+      Sleeping.set(tile.body, false);
+      tile.hold = { id: event.pointerId, offset, spring: null };
+      if (reduced.matches) Body.setStatic(tile.body, true);
+      else {
+        // Grip the actual pickup point so the label can swing around the pointer.
+        tile.hold.spring = Constraint.create({
+          pointA: target, bodyB: tile.body, pointB: offset, length: 0, stiffness: .20, damping: .13
+        });
+        Composite.add(engine.world, tile.hold.spring);
+      }
+      run();
       el.setPointerCapture(event.pointerId);
       el.classList.add('is-held');
       el.style.zIndex = ++topLayer;
@@ -158,42 +188,37 @@
       const held = tile.hold;
       if (held?.id !== event.pointerId) return;
       const bounds = board.getBoundingClientRect();
-      const prev = { ...tile.body.position };
-      move(tile, event.clientX - bounds.left - held.dx, event.clientY - bounds.top - held.dy);
-      const now = performance.now(), duration = Math.max(8, now - held.time);
-      held.vx = clamp((tile.body.position.x - prev.x) * step / duration, -9, 9);
-      held.vy = clamp((tile.body.position.y - prev.y) * step / duration, -9, 9);
-      held.time = now;
+      const target = { x: clamp(event.clientX - bounds.left, 0, width), y: clamp(event.clientY - bounds.top, 0, height) };
+      if (held.spring) {
+        held.spring.pointA = target;
+        Sleeping.set(tile.body, false);
+      } else move(tile, target.x - held.offset.x, target.y - held.offset.y);
     });
     ['pointerup','pointercancel','lostpointercapture'].forEach(name =>
       el.addEventListener(name, event => {
-        if (tile.hold?.id === event.pointerId) release(tile, name === 'pointerup');
+        if (tile.hold?.id === event.pointerId) release(tile);
       }));
     el.addEventListener('keydown', event => {
-      if (event.key === 'Home') { event.preventDefault(); reset(); return; }
       const dir = { ArrowLeft: [-1,0], ArrowRight: [1,0], ArrowUp: [0,-1], ArrowDown: [0,1] }[event.key];
       if (!dir || !tile.body || tile.hold) return;
       event.preventDefault();
       el.style.zIndex = ++topLayer;
       const delta = event.shiftKey ? 28 : 12;
       move(tile, tile.body.position.x + delta * dir[0], tile.body.position.y + delta * dir[1]);
+      tile.anchor = { ...tile.body.position, angle: tile.body.angle };
+      Body.setVelocity(tile.body, { x: 0, y: 0 });
       Sleeping.set(tile.body, false);
       run();
     });
   });
   function onScroll() {
     const y = Math.max(0, window.scrollY);
-    if (y <= 2 && dropped && y < lastScroll) reset();
-    if (!dropped) {
-      armedAt = Math.min(armedAt, y);
-      if (y > lastScroll && y - armedAt >= 22) drop();
-    }
-    lastScroll = y;
+    if (y <= 2 && dropped) reset();
+    else if (y >= 22 && !dropped) drop();
   }
-  document.querySelector('.reset-board').addEventListener('click', reset);
   window.addEventListener('scroll', onScroll, { passive: true });
   document.addEventListener('visibilitychange', () => document.hidden ? stop() : run());
-  reduced.addEventListener('change', () => { stop(); run(); });
+  reduced.addEventListener('change', () => { tiles.forEach(release); stop(); run(); });
   layout();
   new ResizeObserver(layout).observe(board);
   if (document.fonts) document.fonts.ready.then(layout);

@@ -25,3 +25,15 @@
     run.addEventListener('click',()=>{clearTimeout(timer);run.disabled=true;run.textContent='Workflow running…';steps.forEach(el=>el.classList.remove('active','done'));tracks.forEach(el=>el.classList.remove('active','done'));let i=0;function tick(){if(i>0){steps[i-1].classList.replace('active','done');tracks[i-1].classList.replace('active','done');}if(i===steps.length){output.textContent='Simulation complete. A clear queue, ready for human review.';run.disabled=false;run.textContent='Run it again';return;}steps[i].classList.add('active');tracks[i].classList.add('active');output.textContent=messages[i];i++;timer=setTimeout(tick,reduced.matches?100:850);}tick();});
   }
 })();
+
+(() => {
+  const career = document.querySelector('.career-track');
+  if (!career || !('IntersectionObserver' in window)) return;
+  const observer = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) {
+      career.classList.add('is-visible');
+      observer.disconnect();
+    }
+  }, { threshold: .12 });
+  observer.observe(career);
+})();

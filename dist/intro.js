@@ -1,6 +1,6 @@
 // Show the brand reveal once per visitor. Native dialog keeps the skip control reachable.
 (() => {
-  const key = 'raahilmw-visited-v1';
+  const key = 'raahilmw-observatory-intro-v2';
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   if (reduced.matches || location.hash) return;
   const stores = [];
@@ -57,5 +57,5 @@
   dialog.addEventListener('animationend', event => { if (event.animationName === 'curtain-clear') finish(); });
   reduced.addEventListener('change', finish);
   window.addEventListener('pagehide', finish);
-  timer = setTimeout(finish, 2050);
+  timer = setTimeout(finish, 7650);
 })();
