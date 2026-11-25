@@ -122,7 +122,7 @@ def portrait():
 
 def article_card():
     return f'''<article class="research-card"><a class="research-cover" href="{ARTICLE}" aria-label="Read the image fetcher case study"><span class="mono">WEB SECURITY</span>
-<div class="boundary-art" aria-hidden="true"><i></i><i></i><i></i><b></b><em></em></div><span class="cover-sub mono">Image fetcher / trust boundary</span></a><div class="research-copy"><div class="entry-meta"><time datetime="2026-10-07">07 Oct 2026</time><span>Case study</span></div><h3><a href="{ARTICLE}">The image fetcher that read local files.</a></h3><p>Where a backend’s idea of an image URL crossed into the server’s filesystem.</p><div class="tag-list"><span>SSRF</span><span>File read</span></div><a class="underlined" href="{ARTICLE}">Read the writeup</a></div></article>'''
+<div class="boundary-art" aria-hidden="true"><i></i><i></i><i></i><b></b><em></em></div><span class="cover-sub mono">Image fetcher / trust boundary</span></a><div class="research-copy"><div class="entry-meta"><time datetime="2026-10-07">07 Oct 2026</time><span>Case study</span></div><h3><a href="{ARTICLE}">The image fetcher that read local files.</a></h3><p>An image URL parameter accepted file URLs and returned local server files as Base64.</p><div class="tag-list"><span>SSRF</span><span>File read</span></div><a class="underlined" href="{ARTICLE}">Read the writeup</a></div></article>'''
 
 def research_map():
     trail = 'M-16 216 C30 218 30 168 75 168 S136 166 146 128 S157 68 208 68 S260 101 255 131 S260 188 312 188 S395 172 436 141 S487 125 520 132'
@@ -230,11 +230,11 @@ about = f'''
 </div></div>'''
 page('About','About',about,'/about/')
 
-writeups=f'''<section class="page-intro shell">{label('THE RESEARCH NOTEBOOK')}<h1>Writeups<span class="red">.</span></h1><p>Findings, the questions behind them,<br>and what the evidence actually says.</p><div class="intro-rule"><span class="mono">PUBLISHED NOTES</span><span class="mono">WEB SECURITY / INVESTIGATION / DISCLOSURE</span></div></section><section class="shell writeups-index">{article_card()}</section>'''
+writeups=f'''<section class="page-intro shell"><h1>Writeups<span class="red">.</span></h1><p>Security findings, from the first request<br>to the fix.</p></section><section class="shell writeups-index">{article_card()}</section>'''
 page('Writeups','Writeups',writeups,'/writeups/')
 
 article_body = (ROOT / 'content/writeups/image-fetcher.html').read_text().replace('{{REPORT_URL}}', REPORT).replace('{{ARTICLE_URL}}', ORIGIN + ARTICLE)
-page('Image fetcher to arbitrary file read','Writeups',article_body,ARTICLE,'An anonymized writeup of full-read SSRF and arbitrary local file read in an image-to-Base64 endpoint, with an interactive attack-chain illustration and evidence boundaries.')
+page('Image fetcher to arbitrary file read','Writeups',article_body,ARTICLE,'A bug bounty writeup about an image-to-Base64 endpoint that exposed local files, with a reward response, privacy-edited screenshots, and clear reproduction notes.')
 
 projects=f'''<section class="page-intro shell">{label('THE WORKBENCH')}<h1>Projects<span class="red">.</span></h1><p>Small experiments, useful tools,<br>and ideas put into practice.</p><div class="intro-rule"><span class="mono">TOOLS &amp; EXPERIMENTS</span><span class="mono">BUILD / OBSERVE / REFINE</span></div></section><section class="shell projects-index"><article class="project-feature"><div class="project-art" aria-hidden="true"><span class="mono">WORKFLOW / A SMALL EXPERIMENT</span><div class="project-flow"><span>MAP</span><i></i><span>PROBE</span><i></i><span>CONNECT</span><i></i><span>REPORT</span></div><span class="handwritten">make room for human judgment.</span></div><div class="project-copy"><span class="eyebrow">PORTFOLIO EXPERIMENT</span><h2>A workflow,<br>made visible.</h2><p>An interactive browser-only demonstration of a recon pipeline. Sample data shows how a sequence of steps becomes a readable investigation queue.</p><div class="tag-list"><span>Interactive demo</span><span>Automation</span></div><a class="button" href="/projects/recon-workflow/">Open the experiment</a></div></article></section>'''
 page('Projects','Projects',projects,'/projects/')

@@ -110,5 +110,5 @@
     else{started+=performance.now()-pausedAt;frame=requestAnimationFrame(render);fallback=setTimeout(finish,Math.max(200,duration-elapsed+1000));}
   });
   let visited=false;try{visited=!!sessionStorage.getItem(key);}catch{}
-  if(!visited&&!location.hash)start();
+  if(!visited&&!location.hash&&!location.pathname?.startsWith('/writeups/'))start();
 })();
