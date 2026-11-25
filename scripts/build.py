@@ -87,6 +87,9 @@ def page(title,active,body,path='/',description=None):
         extra += f'<script defer src="{asset_url("assets/scrollcraft.js")}"></script><script defer src="{asset_url("research-map.js")}"></script>'
     if active == 'Contact':
         extra += f'<script defer src="{asset_url("contact.js")}"></script>'
+    if active == 'Certifications':
+        extra += f'<script defer src="{asset_url("certifications.js")}"></script>'
+    certificate_css = f'<link rel="stylesheet" href="{asset_url("certifications.css")}">' if active == 'Certifications' else ''
     contact_css = f'<link rel="stylesheet" href="{asset_url("contact.css")}">' if active == 'Contact' else ''
     profile_css = f'<link rel="stylesheet" href="{asset_url("profile.css")}">' if active in ('Home','About','Contact') else ''
     intro = f'''<dialog id="site-intro" aria-label="Portfolio introduction">
@@ -98,7 +101,7 @@ def page(title,active,body,path='/',description=None):
 <div class="arrival-footer"><button class="intro-skip" type="button">Skip intro <kbd>Esc</kbd></button><div class="arrival-progress" aria-hidden="true"><i></i></div><span class="arrival-count" aria-hidden="true">000 / 100</span></div>
 </dialog><script src="{asset_url('intro.js')}"></script>'''
     output.write_text(f'''<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>{escape(title)} — raahilmw</title><meta name="description" content="{escape(description,quote=True)}"><link rel="canonical" href="{ORIGIN}{path}"><script src="{asset_url('theme.js')}"></script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/fonts.css"><link rel="stylesheet" href="{asset_url('style.css')}">{profile_css}<link rel="stylesheet" href="{asset_url('motion.css')}">{contact_css}</head><body class="page-{active.lower()}">{header(active)}{intro}<main id="content">{body}</main>{footer()}<script src="{asset_url('app.js')}" defer></script><script src="{asset_url('motion.js')}" defer></script>{extra}</body></html>''')
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>{escape(title)} — raahilmw</title><meta name="description" content="{escape(description,quote=True)}"><link rel="canonical" href="{ORIGIN}{path}"><script src="{asset_url('theme.js')}"></script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/fonts.css"><link rel="stylesheet" href="{asset_url('style.css')}">{profile_css}<link rel="stylesheet" href="{asset_url('motion.css')}">{contact_css}{certificate_css}</head><body class="page-{active.lower()}">{header(active)}{intro}<main id="content">{body}</main>{footer()}<script src="{asset_url('app.js')}" defer></script><script src="{asset_url('motion.js')}" defer></script>{extra}</body></html>''')
 
 def portrait():
     photo = 'assets/raahil-portrait.webp'
@@ -199,7 +202,7 @@ def timeline(entries):
     items = ''.join(f'<li><span class="year">{date}</span><div><h3>{title}</h3><p>{detail}</p></div></li>' for date, title, detail in entries)
     return f'<ol class="career-track">{items}</ol>'
 
-about_parts = [('about-me','About me'),('expertise','Expertise'),('tools','Tools'),('experience','Experience'),('education','Education'),('connect','Connect')]
+about_parts = [('about-me','About me'),('expertise','Expertise'),('tools','Tools'),('experience','Experience'),('education','Education')]
 index_links = ''.join(f'<a href="#{anchor}">{escape(name)}</a>' for anchor,name in about_parts)
 about = f'''
 <section class="field-scroll" aria-label="Interactive research interests"><div class="field-sticky"><div class="field-card"><div class="field-board">
@@ -221,7 +224,7 @@ about = f'''
 <section id="tools" class="about-chapter"><h2>Tools</h2><ul class="tool-list">{''.join(f'<li>{name}</li>' for name in tool_names)}</ul></section>
 <section id="experience" class="about-chapter"><h2>Experience</h2>{timeline((date, org, role) for date, role, org in roles)}</section>
 <section id="education" class="about-chapter"><h2>Education</h2>{timeline(education)}</section>
-<section id="connect" class="about-chapter"><h2>Let’s connect.</h2>{social_deck()}</section></div></div>'''
+</div></div>'''
 page('About','About',about,'/about/')
 
 writeups=f'''<section class="page-intro shell">{label('THE RESEARCH NOTEBOOK')}<h1>Writeups<span class="red">.</span></h1><p>Findings, the questions behind them,<br>and what the evidence actually says.</p><div class="intro-rule"><span class="mono">PUBLISHED NOTES</span><span class="mono">WEB SECURITY / INVESTIGATION / DISCLOSURE</span></div></section><section class="shell writeups-index">{article_card()}</section>'''
@@ -243,7 +246,43 @@ recon = Workflow(scope)
 <span data-step="3">recon.export_findings()</span></code></pre><div id="workflow-output" role="status" aria-live="polite">Ready when curiosity calls.</div><ol class="workflow-track" aria-label="Workflow stages"><li data-track="0">Map</li><li data-track="1">Probe</li><li data-track="2">Connect</li><li data-track="3">Report</li></ol></div></section>'''
 page('Recon workflow','Projects',workflow,'/projects/recon-workflow/')
 
-certs=f'''<section class="page-intro shell">{label('LEARNING / ON THE RECORD')}<h1>Certifications<span class="red">.</span></h1><p>A place for qualifications,<br>with a way to verify them.</p><div class="intro-rule"><span class="mono">CREDENTIAL RECORD</span><span class="mono">ISSUER / QUALIFICATION / VERIFICATION</span></div></section><section class="shell certifications-index"><div class="empty-record"><span class="empty-record-mark" aria-hidden="true">+</span><h2>No certifications listed yet.</h2><p>Published credentials and their verification links will appear here.</p><a class="underlined" href="/about/">Explore my research practice</a></div></section>'''
+certificate_id = 'd508375a-3807-48d3-b0c9-8c8a8980d722'
+certificate_png = '/assets/certificates/cyberops-associate.png'
+certificate_pdf = '/assets/certificates/cyberops-associate.pdf'
+course_skills = [
+    'Data and Event Analysis', 'Security Concepts', 'Attack Methods', 'Incident Response',
+    'Cryptography', 'Malware Analysis', 'Security Policy', 'Computer Forensics',
+    'Security Monitoring', 'Network Attacks', 'Host-based Analysis', 'SOC Metrics',
+    'Network Intrusion Analysis', 'SecOps', 'Cybersecurity', 'Endpoint Threat Analysis',
+    'Security Procedures', 'Threat Detection',
+]
+certs=f'''<section class="page-intro shell credential-intro"><h1>Certifications<span class="red">.</span></h1><p>What I’ve learned.<br>The record behind it.</p></section>
+<section class="shell certifications-index" aria-labelledby="cyberops-title">
+<article class="credential-feature">
+<div class="credential-visual">
+<div class="credential-orbit" aria-hidden="true"><i></i><i></i><i></i></div>
+<a class="certificate-preview" href="{certificate_png}" target="_blank" rel="noreferrer" data-certificate-open aria-label="Enlarge the CyberOps Associate certificate">
+<img src="{asset_url('assets/certificates/cyberops-associate-preview.webp')}" width="1600" height="1084" alt="CyberOps Associate course completion certificate awarded to Raahil Muhammad Wildan on 30 October 2026." decoding="async">
+<span class="certificate-loupe" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5M7 10h6m-3-3v6"/></svg>View certificate</span>
+</a>
+<p class="credential-document"><span>Original course record</span><time datetime="2026-10-30">30 Oct 2026</time></p>
+</div>
+<div class="credential-copy">
+<h2 id="cyberops-title">CyberOps<br> Associate<span class="red">.</span></h2>
+<p class="credential-kind">Cisco Networking Academy <span>Course completion</span></p>
+<p class="credential-summary">Monitoring, detecting, and responding to cyber threats. A defender’s perspective on the network and endpoint activity an attack leaves behind.</p>
+<dl class="credential-facts"><div><dt>Offered by</dt><dd>Faculty of Engineering,<br>University of Indonesia</dd></div><div><dt>Instructor</dt><dd>Elvian Syafrurizal</dd></div><div><dt>Completed</dt><dd><time datetime="2026-10-30">30 October 2026</time></dd></div></dl>
+<div class="credential-actions"><a class="button primary" href="{certificate_pdf}" target="_blank" rel="noreferrer">{icon('book')}View PDF</a><a class="underlined" href="{certificate_png}" download="raahilmw-cyberops-associate.png">Download PNG</a></div>
+</div>
+</article>
+<section class="course-notes" aria-labelledby="course-notes-title">
+<div class="course-overview"><h2 id="course-notes-title">About the course.</h2><p>From recognizing an attack to making sense of the evidence: security monitoring, event analysis, and incident response across hosts and networks.</p><p class="course-preparation">The course supports preparation for the Cisco Certified Cybersecurity Associate certification.</p></div>
+<div class="course-focus" aria-label="Course focus"><span>Monitor<svg viewBox="0 0 44 26" aria-hidden="true"><path d="M2 15h9l4-9 8 18 6-13 4 4h9"/></svg></span><span>Detect<svg viewBox="0 0 44 26" aria-hidden="true"><circle cx="22" cy="13" r="10"/><circle cx="22" cy="13" r="4"/><path d="M22 0v6m0 14v6M9 13h6m14 0h6"/></svg></span><span>Respond<svg viewBox="0 0 44 26" aria-hidden="true"><path d="m12 4 10-3 10 3v9c0 7-10 12-10 12S12 20 12 13zM18 13l3 3 6-7"/></svg></span></div>
+</section>
+<details class="course-skills" open><summary>Course skills <span class="skills-chevron" aria-hidden="true"></span></summary><ul>{''.join(f'<li>{escape(skill)}</li>' for skill in course_skills)}</ul></details>
+<div class="credential-record"><div><span>Certificate ID</span><code>{certificate_id}</code></div><button class="text-link" type="button" data-copy="{certificate_id}" data-message="Certificate ID copied.">{icon('copy')}Copy ID</button></div>
+</section>
+<dialog class="certificate-viewer" id="certificate-viewer" aria-labelledby="certificate-viewer-title"><div class="certificate-viewer-head"><h2 id="certificate-viewer-title">CyberOps Associate</h2><button class="icon-button" type="button" data-certificate-close aria-label="Close certificate preview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><div class="certificate-viewer-image"><img src="{certificate_png}" width="2325" height="1575" alt="Original CyberOps Associate course certificate awarded to Raahil Muhammad Wildan." loading="lazy"></div><div class="certificate-viewer-foot"><a class="underlined" href="{certificate_pdf}" target="_blank" rel="noreferrer">View original PDF</a><a class="underlined" href="{certificate_png}" download="raahilmw-cyberops-associate.png">Download PNG</a></div></dialog>'''
 page('Certifications','Certifications',certs,'/certifications/')
 
 ARROW = '<svg class="cta-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M9 6h9v9"/></svg>'
