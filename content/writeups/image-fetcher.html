@@ -8,9 +8,8 @@
 <p class="reading-lead">The security team accepted the finding and confirmed that they had fixed it. Their reply also explained the reward process and asked me to retest.</p>
 <figure class="reading-figure reading-reward">
 <a href="/assets/writeups/image-fetcher/reward-email.png" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/reward-email.png" width="1277" height="666" alt="The security team's email confirms a fix, asks for a retest, and explains the reward process and planned Hall of Fame recognition." decoding="async" fetchpriority="high"><span class="image-expand" aria-hidden="true">View larger</span></a>
-<figcaption>The team's response: a fix to retest, reward processing, and planned Hall of Fame recognition.</figcaption>
+<figcaption>The team's response confirming a fix and outlining the reward process.</figcaption>
 </figure>
-<p class="reading-privacy">The email is my original capture. The Burp images are privacy-edited renditions with authentication and identifying details covered.</p>
 <section id="overview" class="reading-section">
 <h2>What I was testing</h2>
 <p>I was testing an image-to-Base64 endpoint in the program's UAT environment, a server used for testing. I accessed it with the Basic Auth credentials supplied by the program.</p>
@@ -32,41 +31,44 @@
 <div class="trace-node trace-source"><span class="trace-node-art"><svg class="trace-web" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="22"/><ellipse cx="32" cy="32" rx="10" ry="22"/><path d="M10 32h44M15 19h34M15 45h34"/></svg><svg class="trace-files" viewBox="0 0 64 64" aria-hidden="true"><g class="trace-file-back"><path d="M18 11h22l10 10v31H18Z"/><path d="M40 11v10h10"/></g><g class="trace-file-front"><path d="M12 7h22l10 10v35H12Z"/><path d="M34 7v10h10M21 28h14M21 35h14M21 42h8"/></g></svg></span><strong data-trace-source>External URL</strong><small data-trace-source-note>The HTTP check</small></div>
 <span class="trace-return-label" aria-hidden="true">Base64 response</span>
 </div>
-<div class="trace-readout"><span class="trace-readout-label">Input</span><code data-trace-code>image=http://httpbin.org/ip</code><span class="trace-receipt" aria-hidden="true">HTTP</span></div>
+<div class="trace-controls">
 <ol class="trace-steps" aria-label="Explore the attack chain">
 <li><button type="button" data-trace-step="0" aria-pressed="true" disabled>HTTP fetch</button></li>
 <li><button type="button" data-trace-step="1" aria-pressed="false" disabled>Local file</button></li>
 <li><button type="button" data-trace-step="2" aria-pressed="false" disabled>Filter gap</button></li>
 <li><button type="button" data-trace-step="3" aria-pressed="false" disabled>Read response</button></li>
 </ol>
-<p class="trace-description" data-trace-description aria-live="polite">An HTTP URL confirmed that the backend fetched the resource and returned its contents.</p>
-<p class="trace-footnote">Illustration of the observed requests. The server's internal decoding order was not verified.</p>
+</div>
+<div class="trace-detail">
+<div class="trace-readout"><span class="trace-readout-label">Input</span><code data-trace-code>image=http://httpbin.org/ip</code><span class="trace-receipt sr-only" aria-hidden="true">HTTP</span></div>
+<p class="trace-description" data-trace-description aria-live="polite">An HTTP URL made the backend fetch a resource and return its contents.</p>
+</div>
 <noscript><p>The chain: an HTTP fetch confirmed SSRF; a file URL read a local file; alternate paths passed the filter; Base64 decoding recovered the returned contents.</p></noscript>
 </section>
 <section id="ssrf" class="reading-section">
 <h2>Confirming a server-side request</h2>
 <p>I first supplied an HTTP URL for a service that reports where a request came from. The endpoint returned a Base64 response. After decoding it, I could see an origin address for the server-side request.</p>
 <p>This confirmed <a class="reading-link" href="https://portswigger.net/web-security/ssrf" target="_blank" rel="noreferrer">server-side request forgery (SSRF)</a>: I could make the backend fetch a URL I chose. I could also read the fetched response through the API.</p>
-<figure class="reading-figure"><a href="/assets/writeups/image-fetcher/http-ssrf-redacted.png" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/http-ssrf-redacted.png" width="1851" height="849" alt="Redacted Burp capture showing an HTTP URL in the image parameter and a returned JSON response. The origin IP and encoded value are covered." loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">View larger</span></a><figcaption>The external HTTP response came back through the image endpoint. The origin address and headers are redacted.</figcaption></figure>
+<figure class="reading-figure"><a href="/assets/writeups/image-fetcher/http-ssrf.png" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/http-ssrf.png" width="1688" height="774" alt="Burp Suite capture of the HTTP SSRF check and the API response." loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">View larger</span></a><figcaption>The external response returned through the image endpoint.</figcaption></figure>
 </section>
 <section id="local-read" class="reading-section">
 <h2>Changing the URL to a local file</h2>
 <p>Next, I replaced the HTTP URL with <code>file:///etc/hostname</code>. The <code>file://</code> scheme refers to a file on the machine handling the request.</p>
 <p>The endpoint accepted it. Decoding the returned data gave me the UAT server's hostname. I also read <code>/etc/os-release</code> to confirm the behavior with another system-identification file.</p>
-<figure class="reading-figure"><a href="/assets/writeups/image-fetcher/local-file-read-redacted.png" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/local-file-read-redacted.png" width="1909" height="824" alt="Redacted Burp capture showing image=file:///etc/hostname and a successful response containing Base64 data. The host identifier and sensitive headers are hidden." loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">View larger</span></a><figcaption>The same feature accepted a local file URL. The hostname and its encoded value are hidden.</figcaption></figure>
+<figure class="reading-figure"><a href="/assets/writeups/image-fetcher/local-file-read.png" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/local-file-read.png" width="1803" height="778" alt="Burp Suite capture of image=file:///etc/hostname and the Base64 response." loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">View larger</span></a><figcaption>The same endpoint returned a local file through a file URL.</figcaption></figure>
 <p>The response still used a <code>data:image/png;base64</code> prefix. That label did not mean the bytes were a PNG. Base64 is an encoding, so decoding it recovered the file contents.</p>
 </section>
 <section id="filter-gap" class="reading-section">
 <h2>Working around the path filter</h2>
 <p>A direct request for <code>/etc/passwd</code> returned <code>403 Forbidden</code>. I then tried different spellings of the path, including a dot segment, a repeated slash, and an encoded character.</p>
 <p>Those variants returned <code>200 OK</code>. During testing, I decoded account-file entries from the response. The encoded request below was one of the successful variants.</p>
-<figure class="reading-figure"><a href="/assets/writeups/image-fetcher/encoded-path-redacted.png" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/encoded-path-redacted.png" width="1764" height="892" alt="Redacted Burp capture showing image=file:///etc/pass%2577d and HTTP/2 200 OK. Identifying headers, timestamps and status metadata are hidden." loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">View larger</span></a><figcaption>An encoded path returned HTTP 200. This capture shows the status; the file-read result was checked during testing.</figcaption></figure>
+<figure class="reading-figure"><a href="/assets/writeups/image-fetcher/encoded-path.png" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/encoded-path.png" width="1541" height="779" alt="Burp Suite capture of an encoded file path returning HTTP/2 200 OK." loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">View larger</span></a><figcaption>An encoded path returned HTTP 200.</figcaption></figure>
 <p>I also tested <code>file:///proc/./version</code>. The screenshot shows another successful request using a dot segment.</p>
-<figure class="reading-figure"><a href="/assets/writeups/image-fetcher/normalized-path-redacted.png" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/normalized-path-redacted.png" width="1670" height="942" alt="Redacted Burp capture showing image=file:///proc/./version and HTTP/2 200 OK. The response body is not visible in this capture." loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">View larger</span></a><figcaption>The dot-segment test for <code>/proc/./version</code>. The response body is outside this capture.</figcaption></figure>
+<figure class="reading-figure"><a href="/assets/writeups/image-fetcher/normalized-path.png" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/normalized-path.png" width="1561" height="880" alt="Burp Suite capture of file:///proc/./version returning HTTP/2 200 OK. The response body is outside the capture." loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">View larger</span></a><figcaption>A dot-segment path returned HTTP 200. The response body is outside the capture.</figcaption></figure>
 <p>The results showed that the filter did not consistently block paths that the file loader could resolve. I did not have server-side instrumentation, so I could not determine the exact decoding order.</p>
 <details class="reading-details"><summary>The path variants in the report</summary><pre><code>file:///etc/./passwd
 file:///etc//passwd
-file:///etc/pass%2577d</code></pre><p>These are the recorded inputs. The target and authentication values are omitted.</p></details>
+file:///etc/pass%2577d</code></pre><p>These are the path variants recorded in my report.</p></details>
 </section>
 <section id="impact" class="reading-section">
 <h2>How far I went</h2>
@@ -80,6 +82,6 @@ file:///etc/pass%2577d</code></pre><p>These are the recorded inputs. The target 
 <ul class="reading-list"><li>Accept only HTTP(S) URLs from approved image sources and reject other schemes.</li><li>Validate the parsed destination and resolved IP address, including each redirect. Block private, loopback, link-local, and cloud metadata destinations.</li><li>Check the returned bytes as an image, with limits on response size and fetch time.</li><li>Restrict the network destinations and local files available to the application process.</li></ul>
 <p>The WAF blocked some direct requests, but alternate path forms still reached the file loader. Application-level validation had to enforce the restriction consistently.</p>
 </section>
-<footer class="reading-end"><p>The security team's email above records their confirmation of a fix and request for retesting.</p><a class="underlined" href="{{REPORT_URL}}" target="_blank" rel="noreferrer">Read my published Medium writeup</a><div class="reading-end-actions"><a class="underlined" href="/writeups/">All writeups</a><button class="text-link" type="button" data-copy="{{ARTICLE_URL}}" data-message="Writeup link copied.">Copy link</button></div></footer>
+<footer class="reading-end"><a class="reading-return" href="/writeups/"><span class="reading-end-label">Research archive</span><span class="reading-return-title">Back to writeups</span></a><div class="reading-end-actions"><a href="{{REPORT_URL}}" target="_blank" rel="noreferrer">On Medium</a><button type="button" data-copy="{{ARTICLE_URL}}" data-message="Writeup link copied."><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V4H3v12h5"/></svg>Copy link</button></div></footer>
 </article>
 <dialog class="evidence-viewer" id="evidence-viewer" aria-labelledby="evidence-viewer-title"><div class="evidence-viewer-head"><h2 id="evidence-viewer-title">Screenshot</h2><button type="button" class="icon-button" data-evidence-close aria-label="Close image"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><div class="evidence-viewer-body"><img alt=""></div><p class="evidence-viewer-caption"></p><a class="underlined evidence-file-link" href="#" target="_blank" rel="noreferrer" data-evidence-file>Open image file</a></dialog>

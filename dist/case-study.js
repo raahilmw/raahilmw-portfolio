@@ -19,10 +19,10 @@
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
   const narrow=window.matchMedia('(max-width: 780px)');
   const steps=[
-    {code:'image=http://httpbin.org/ip',caption:'An HTTP URL confirmed that the backend fetched the resource and returned its contents.',source:'External URL',note:'The HTTP check',receipt:'HTTP'},
-    {code:'image=file:///etc/hostname',caption:'Changing the scheme to file:// made the same endpoint return a local file from the UAT server.',source:'Local filesystem',note:'The file URL',receipt:'FILE'},
-    {code:'image=file:///etc/pass%2577d',caption:'The direct path was blocked. Alternate path forms still returned HTTP 200; I verified account-file entries during testing.',source:'Local filesystem',note:'Alternate path forms',receipt:'200 OK'},
-    {code:'data:image/png;base64,[redacted]',caption:'The API wrapped the bytes in Base64. Decoding the response recovered the file contents.',source:'Local filesystem',note:'Readable by the app',receipt:'BASE64'}
+    {code:'image=http://httpbin.org/ip',caption:'An HTTP URL made the backend fetch a resource and return its contents.',source:'External URL',note:'The HTTP check',receipt:'HTTP'},
+    {code:'image=file:///etc/hostname',caption:'Using file:// returned a local file through the same endpoint.',source:'Local filesystem',note:'The file URL',receipt:'FILE'},
+    {code:'image=file:///etc/pass%2577d',caption:'Alternate paths returned HTTP 200 where the direct path was blocked.',source:'Local filesystem',note:'Alternate path forms',receipt:'200 OK'},
+    {code:'data:image/png;base64,[redacted]',caption:'Decoding the Base64 response recovered the file contents.',source:'Local filesystem',note:'Readable by the app',receipt:'BASE64'}
   ];
   const routes={
     wide:[
