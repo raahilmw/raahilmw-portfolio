@@ -3,6 +3,7 @@
   const board = document.querySelector('.field-board');
   if (!board || !window.Matter) return;
   const profile = document.querySelector('.researcher-print');
+  const intro = document.querySelector('#site-intro');
   const { Engine, Bodies, Body, Composite, Constraint, Sleeping } = window.Matter;
   const engine = Engine.create({ enableSleeping: true, positionIterations: 8 });
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -99,6 +100,7 @@
   }
   function advance(now) {
     frame = 0;
+    if (intro?.open) return;
     remainder += Math.min(previousTime ? now - previousTime : step, 50);
     previousTime = now;
     while (remainder >= step) {
@@ -114,7 +116,7 @@
     }
   }
   function run() {
-    if (!width || !visible || document.hidden || frame) return;
+    if (!width || !visible || document.hidden || frame || intro?.open) return;
     if (reduced.matches) {
       if (!dropped) return;
       // Compute the resting layout without showing intermediate motion.
@@ -271,6 +273,8 @@
   window.addEventListener('scroll', onScroll, { passive: true });
   document.addEventListener('visibilitychange', () => document.hidden ? stop() : run());
   reduced.addEventListener('change', () => { tiles.forEach(release); stop(); run(); });
+  document.addEventListener('arrivalstart', stop);
+  document.addEventListener('arrivalcomplete', run);
   layout();
   new ResizeObserver(layout).observe(board);
   if (document.fonts) document.fonts.ready.then(layout);

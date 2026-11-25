@@ -71,7 +71,7 @@ def social_deck():
 
 
 def footer():
-    return f'''<footer class="site-footer shell">{wordmark()}<span>2026 raahilmw</span><a href="{MEDIUM}" target="_blank" rel="noreferrer">Medium</a><a href="/contact/">Contact</a></footer><div class="toast" role="status" aria-live="polite" id="toast"></div>'''
+    return f'''<footer class="site-footer shell">{wordmark()}<span>2026 raahilmw</span><a href="{MEDIUM}" target="_blank" rel="noreferrer">Medium</a><a href="/contact/">Contact</a><button type="button" class="replay-arrival" aria-label="Replay opening animation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6M4 10a8 8 0 1 1 1 7"/></svg><span>Replay arrival</span></button></footer><div class="toast" role="status" aria-live="polite" id="toast"></div>'''
 
 def asset_url(name):
     revision = sha256((OUT / name).read_bytes()).hexdigest()[:12]
@@ -82,13 +82,20 @@ def page(title,active,body,path='/',description=None):
     description = description or 'Raahil Muhammad Wildan — penetration testing, bug hunting, security automation, and published research.'
     output = OUT / path.lstrip('/') / 'index.html'
     output.parent.mkdir(parents=True,exist_ok=True)
-    extra = {'Home':'<script type="module" src="/artifact.js"></script>', 'About':f'<script src="/assets/matter.min.js" defer></script><script src="{asset_url("field.js")}" defer></script><script src="{asset_url("portrait-motion.js")}" defer></script>'}.get(active,'')
+    extra = {'Home':f'<script type="module" src="{asset_url("artifact.js")}"></script>', 'About':f'<script src="/assets/matter.min.js" defer></script><script src="{asset_url("field.js")}" defer></script><script src="{asset_url("portrait-motion.js")}" defer></script>'}.get(active,'')
     if active == 'Home':
         extra += f'<script defer src="{asset_url("assets/scrollcraft.js")}"></script><script defer src="{asset_url("research-map.js")}"></script>'
     profile_css = f'<link rel="stylesheet" href="{asset_url("profile.css")}">' if active in ('Home','About') else ''
-    intro = '<dialog id="site-intro" aria-label="Portfolio introduction"><div class="intro-ground" aria-hidden="true"></div><div class="intro-center" aria-hidden="true"><div class="boot-layout"><div class="boot-sigil"><span class="pixel-logo"></span></div><div class="boot-console"><div class="boot-host"><i></i>raahilmw@observatory <span>/ bash</span></div><div class="boot-prompt boot-first"><b>~ $</b><samp>whoami</samp></div><div class="boot-answer">raahilmw</div><div class="boot-prompt boot-command"><b>~ $</b><samp>sudo -u raahilmw ./open</samp></div><div class="boot-response">Field notes mounted.</div><div class="boot-ready">~/portfolio $ <i></i></div></div></div></div><button class="intro-skip" type="button">Skip intro</button></dialog><script src="/intro.js"></script>'
+    intro = f'''<dialog id="site-intro" aria-label="Portfolio introduction">
+<div class="arrival-backdrop" aria-hidden="true"><i></i><i></i></div>
+<canvas class="arrival-particles" aria-hidden="true"></canvas>
+<div class="arrival-frame" aria-hidden="true"><span>RAAHILMW / PERSONAL PORTFOLIO</span><span class="arrival-phase">Establishing a connection</span></div>
+<div class="arrival-console" aria-hidden="true"><p class="arrival-host">raahilmw@observatory <span>~ / bash</span></p><p class="arrival-line" style="--at:450ms"><b>$</b> <samp class="arrival-type" style="--duration:550ms">whoami</samp></p><p class="arrival-line arrival-answer" style="--at:1150ms">raahilmw</p><p class="arrival-line" style="--at:1550ms"><b>$</b> <samp class="arrival-type" style="--duration:1450ms">sudo -u raahilmw ./portfolio --open</samp></p><p class="arrival-line arrival-answer" style="--at:3200ms">Research. Curiosity. A different perspective.</p></div>
+<div class="arrival-identity" aria-hidden="true"><span>Look a little closer.</span><strong>raahilmw<span>.</span></strong></div>
+<div class="arrival-footer"><button class="intro-skip" type="button">Skip intro <kbd>Esc</kbd></button><div class="arrival-progress" aria-hidden="true"><i></i></div><span class="arrival-count" aria-hidden="true">000 / 100</span></div>
+</dialog><script src="{asset_url('intro.js')}"></script>'''
     output.write_text(f'''<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>{escape(title)} — raahilmw</title><meta name="description" content="{escape(description,quote=True)}"><link rel="canonical" href="{ORIGIN}{path}"><script src="{asset_url('theme.js')}"></script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/fonts.css"><link rel="stylesheet" href="{asset_url('style.css')}">{profile_css}</head><body class="page-{active.lower()}">{header(active)}{intro}<main id="content">{body}</main>{footer()}<script src="{asset_url('app.js')}" defer></script>{extra}</body></html>''')
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>{escape(title)} — raahilmw</title><meta name="description" content="{escape(description,quote=True)}"><link rel="canonical" href="{ORIGIN}{path}"><script src="{asset_url('theme.js')}"></script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/fonts.css"><link rel="stylesheet" href="{asset_url('style.css')}">{profile_css}<link rel="stylesheet" href="{asset_url('motion.css')}"></head><body class="page-{active.lower()}">{header(active)}{intro}<main id="content">{body}</main>{footer()}<script src="{asset_url('app.js')}" defer></script><script src="{asset_url('motion.js')}" defer></script>{extra}</body></html>''')
 
 def portrait():
     photo = 'assets/raahil-portrait.webp'
@@ -124,15 +131,15 @@ def research_map():
 
 home = f'''
 <section class="home-hero"><div class="hero-layout shell">
-<div class="hero-copy">{label('Security researcher')}<h1>Finding what<br>others <em>miss.</em></h1><p>I’m <strong>raahilmw</strong>, a penetration tester, bug hunter, and builder of security automation.</p>
+<div class="hero-copy"><h1><span class="hero-line">Finding what</span> <span class="hero-line">others <em>miss.</em></span></h1><p>I’m <strong>raahilmw</strong>, a penetration tester, bug hunter, and builder of security automation.</p>
 <div class="hero-actions"><a class="button primary" href="/writeups/">{icon('book')}Explore my writeups</a><a class="underlined" href="/about/">About me</a></div></div>
-<div class="artifact-stage" id="artifact-stage"><div class="artifact-fallback" aria-hidden="true"><i></i><i></i><i></i></div><canvas id="artifact" role="img" aria-label="A silver torus knot that dissolves into particles where you hover"></canvas>
+<div class="artifact-stage" id="artifact-stage"><div class="artifact-orbits" aria-hidden="true"><i></i><i></i><i></i><span>Hidden in plain sight</span></div><div class="artifact-fallback" aria-hidden="true"><i></i><i></i><i></i></div><canvas id="artifact" role="img" aria-label="A silver torus knot that dissolves into particles where you hover"></canvas>
 <a class="specimen-tag tag-top" href="{ARTICLE}"><span class="tag-glyph">{icon('book')}</span><span><small>Field note</small>Local file read</span></a>
 <button class="artifact-control" id="artifact-control" type="button" hidden><span aria-hidden="true">✧</span> Inspect surface</button></div>
-</div><div class="hero-baseline shell"><span>@raahilmw</span><a href="#selected">Scroll to explore <span aria-hidden="true">↓</span></a></div></section>
-<section class="shell home-connect" aria-labelledby="home-connect-title"><div>{label("Find me online")}<h2 id="home-connect-title">Connect.</h2></div>{social_deck()}</section>
-<section class="section shell" id="selected"><div class="section-heading"><div>{label('Fieldwork')}<h2>Selected research.</h2></div><a class="underlined" href="/writeups/">All writeups</a></div>{article_card()}</section>
-<section class="section shell practice"><div>{label('About the researcher')}<h2>Hi, I’m Raahil.</h2><p>I look at the assumptions people build into web applications and APIs. When a test starts to repeat itself, I turn it into a tool.</p><a class="underlined" href="/about/">More about me</a></div>{research_map()}</section>'''
+</div><div class="hero-baseline shell"><span>@raahilmw</span><a class="scroll-cue" href="#selected"><i aria-hidden="true"></i>Scroll to explore</a></div></section>
+<section class="shell home-connect" aria-labelledby="home-connect-title"><div><h2 id="home-connect-title">Connect.</h2></div>{social_deck()}</section>
+<section class="section shell" id="selected"><div class="section-heading"><div><h2>Selected research.</h2></div><a class="underlined" href="/writeups/">All writeups</a></div>{article_card()}</section>
+<section class="section shell practice"><div><h2>Hi, I’m Raahil.</h2><p>I look at the assumptions people build into web applications and APIs. When a test starts to repeat itself, I turn it into a tool.</p><a class="underlined" href="/about/">More about me</a></div>{research_map()}</section>'''
 page('Security research','Home',home)
 
 tiles = [

@@ -1,6 +1,7 @@
 import * as THREE from './assets/three.module.min.js';
 const canvas=document.querySelector('#artifact'), stage=document.querySelector('#artifact-stage'), control=document.querySelector('#artifact-control');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+const intro=document.querySelector('#site-intro');
 const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,powerPreference:'low-power'});
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));renderer.setClearColor(0x000000,0);renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.3;
 const scene=new THREE.Scene(), camera=new THREE.PerspectiveCamera(37,1,.1,50);camera.position.set(0,.1,7);
@@ -34,15 +35,23 @@ new ResizeObserver(resize).observe(stage);
 canvas.addEventListener('pointermove',event=>{if(event.pointerType==='touch'||reduced.matches)return;const rect=canvas.getBoundingClientRect();pointer.set((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1);inside=true;});
 const release=()=>{inside=false;exposureTarget=0;};canvas.addEventListener('pointerleave',release);canvas.addEventListener('pointercancel',release);window.addEventListener('blur',release);
 control.addEventListener('click',()=>{if(reduced.matches){pivot.rotation.y+=Math.PI/6;render(performance.now());return;}previewUntil=performance.now()+1800;uniform.uBrush.value.set(.7,.2,.7);brushTarget.copy(uniform.uBrush.value);});
-function render(now){const dt=Math.min((now-last)/1000||.016,.05);last=now;const time=now/1000;uniform.uTime.value=time;
+function render(now,once=false){frame=0;if((intro?.open&&!once)||document.hidden||!visible){stage.dataset.animationActive='false';return;}stage.dataset.animationActive=String(!reduced.matches&&!once);const dt=Math.min((now-last)/1000||.016,.05);last=now;const time=now/1000;uniform.uTime.value=time;
 if(!reduced.matches){pivot.rotation.y=rotationY+Math.sin(time*.16)*.23;pivot.rotation.x=rotationX+Math.sin(time*.21)*.08;pivot.position.y=Math.sin(time*.6)*.06;dustPoints.rotation.y=time*.015;}
 scene.updateMatrixWorld();if(inside&&!reduced.matches){raycaster.setFromCamera(pointer,camera);const hit=raycaster.intersectObject(pickMesh,false)[0];if(hit){brushTarget.copy(pivot.worldToLocal(hit.point));exposureTarget=1;}else exposureTarget=0;}else exposureTarget=now<previewUntil?1:0;
-if(reduced.matches)exposureTarget=0;uniform.uBrush.value.lerp(brushTarget,1-Math.exp(-16*dt));uniform.uExposure.value+=(exposureTarget-uniform.uExposure.value)*(1-Math.exp(-(exposureTarget>uniform.uExposure.value?7.5:3.5)*dt));wire.material.opacity=.065*(1-uniform.uExposure.value);renderer.render(scene,camera);stage.classList.add('loaded');control.hidden=false;if(!reduced.matches&&visible&&!document.hidden)frame=requestAnimationFrame(render);}
-const visibilityObserver=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(visible&&!frame&&!reduced.matches){last=performance.now();frame=requestAnimationFrame(loop);}else if(!visible){cancelAnimationFrame(frame);frame=0;}},{rootMargin:'80px'});visibilityObserver.observe(stage);
-// Clear the stored frame before rendering so visibility can resume a paused loop.
+if(reduced.matches)exposureTarget=0;uniform.uBrush.value.lerp(brushTarget,1-Math.exp(-16*dt));uniform.uExposure.value+=(exposureTarget-uniform.uExposure.value)*(1-Math.exp(-(exposureTarget>uniform.uExposure.value?7.5:3.5)*dt));wire.material.opacity=.065*(1-uniform.uExposure.value);renderer.render(scene,camera);stage.classList.add('loaded');control.hidden=false;if(!once&&!reduced.matches&&visible&&!document.hidden&&!intro?.open)frame=requestAnimationFrame(loop);}
 function loop(now){frame=0;render(now);}
-document.addEventListener('visibilitychange',()=>{cancelAnimationFrame(frame);frame=0;if(!document.hidden&&visible&&!reduced.matches){last=performance.now();frame=requestAnimationFrame(loop);}});
-reduced.addEventListener('change',()=>{cancelAnimationFrame(frame);frame=0;uniform.uExposure.value=0;if(!reduced.matches&&visible)frame=requestAnimationFrame(loop);else render(performance.now());});
+function resume(){
+ cancelAnimationFrame(frame);frame=0;stage.dataset.animationActive='false';
+ if(document.hidden||!visible||intro?.open)return;
+ last=performance.now();
+ if(reduced.matches)render(last,true);else frame=requestAnimationFrame(loop);
+}
+const visibilityObserver=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;resume();},{rootMargin:'80px'});visibilityObserver.observe(stage);
+document.addEventListener('visibilitychange',resume);
+reduced.addEventListener('change',()=>{uniform.uExposure.value=0;resume();});
+document.addEventListener('arrivalstart',()=>{cancelAnimationFrame(frame);frame=0;stage.dataset.animationActive='false';});
+document.addEventListener('arrivalreveal',()=>render(performance.now(),true));
+document.addEventListener('arrivalcomplete',resume);
 resize();
 
 function applyArtifactTheme(){
