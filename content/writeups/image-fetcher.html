@@ -1,0 +1,67 @@
+<header class="shell case-hero">
+<a class="underlined breadcrumb" href="/writeups/">All writeups</a>
+<div class="case-labels"><span>Web security</span><span>Original research</span><span>High · as reported</span></div>
+<h1>An image URL.<br>A file on the <em>other side.</em></h1>
+<p class="case-deck">How an image-to-Base64 feature became full-read SSRF, then arbitrary local file read—and why a keyword filter did not close the gap.</p>
+<div class="case-byline"><span>Raahil Muhammad Wildan</span><span>UAT / whitehat environment</span><span>Vendor-reported fix</span></div>
+</header>
+<div class="shell case-layout">
+<aside class="case-index" aria-label="Article sections"><p>Inside the investigation</p><a href="#overview">The feature</a><a href="#attack-chain">Attack chain</a><a href="#local-read">The file boundary</a><a href="#filter-gap">The filter gap</a><a href="#impact">Impact &amp; limits</a><a href="#disclosure">Disclosure</a><a href="#remediation">Remediation</a></aside>
+<article class="case-body">
+<section id="overview" class="case-section">
+<p class="case-lead">The feature was supposed to fetch a picture and return its Base64 representation. The useful question was what else its URL loader would accept.</p>
+<p>I tested <code>POST /api/v1/image-base-64</code> on an in-scope UAT target, using the test credentials supplied by the program. The <code>image</code> parameter controlled what the backend fetched. A request to an external HTTP service came back through the API. Changing the scheme to <code>file://</code> made that same feature read from the application server’s filesystem.</p>
+<dl class="case-facts"><div><dt>Entry point</dt><dd>Image-to-Base64 API</dd></div><div><dt>Access used</dt><dd>Program-provided Basic Auth</dd></div><div><dt>Confirmed result</dt><dd>Server-side file contents returned</dd></div><div><dt>Scope</dt><dd>UAT environment</dd></div></dl>
+<p class="case-editorial-note">The target is anonymized here. Credentials, cookies, network addresses, and host identifiers are omitted from this version.</p>
+</section>
+<section id="attack-chain" class="case-section chain-section" aria-labelledby="chain-title">
+<div class="case-section-head"><h2 id="chain-title">Follow the request.</h2><span>Interactive illustration</span></div>
+<div class="attack-chain" data-stage="0">
+<div class="chain-toolbar"><span class="chain-state">HTTP fetch</span><button class="chain-play" type="button" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 11 7-11 7z"/></svg><span>Play chain</span></button></div>
+<div class="chain-canvas"><svg class="chain-diagram" viewBox="0 0 660 300" role="img" aria-labelledby="chain-diagram-title chain-diagram-desc">
+<title id="chain-diagram-title">From a supplied image URL to a local file response</title><desc id="chain-diagram-desc">A test request reaches the image endpoint, passes a URL filter, and reaches a backend fetcher. The fetcher can reach an external HTTP source or a local file. Returned bytes are encoded as Base64 and sent back to the client.</desc>
+<defs><pattern id="chain-grid" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".65" fill="currentColor"/></pattern></defs>
+<rect class="chain-grid" x="0" y="0" width="660" height="300" fill="url(#chain-grid)"/>
+<path class="chain-route chain-in" d="M95 142H205"/><path class="chain-route chain-check" d="M265 142H375"/><path class="chain-route chain-http" d="M435 142C480 142 455 56 510 56H560"/><path class="chain-route chain-file" d="M435 142C480 142 455 227 510 227H560"/>
+<path class="chain-route chain-return" d="M560 252C560 280 65 280 65 172"/>
+<rect class="chain-node" x="35" y="112" width="60" height="60" rx="12"/><path class="chain-icon" d="m52 133 9 9-9 9m15 0h11"/><text x="65" y="96" text-anchor="middle">Request</text>
+<rect class="chain-node chain-filter" x="205" y="112" width="60" height="60" rx="12"/><path class="chain-icon" d="M220 129h30l-11 13v11l-8 5v-16z"/><text x="235" y="96" text-anchor="middle">URL filter</text>
+<rect class="chain-node chain-fetcher" x="375" y="112" width="60" height="60" rx="12"/><path class="chain-icon" d="M389 129h32v10h-32zm0 16h32v10h-32zm6-11h1m-1 16h1"/><text x="405" y="96" text-anchor="middle">Fetcher</text>
+<rect class="chain-node chain-source-http" x="560" y="30" width="60" height="52" rx="10"/><circle class="chain-icon" cx="590" cy="56" r="13"/><path class="chain-icon" d="M577 56h26m-13-13c-9 8-9 18 0 26m0-26c9 8 9 18 0 26"/><text x="590" y="17" text-anchor="middle">HTTP source</text>
+<rect class="chain-node chain-source-file" x="560" y="201" width="60" height="52" rx="10"/><path class="chain-icon" d="M580 212h14l7 7v23h-21zm14 0v8h7m-15 7h9m-9 6h9"/><text x="590" y="188" text-anchor="middle">Local file</text>
+<text class="chain-return-label" x="315" y="284" text-anchor="middle">bytes → Base64 → response</text><circle class="chain-packet" cx="95" cy="142" r="4" visibility="hidden"/>
+</svg></div>
+<div class="chain-mobile" role="img" aria-label="Request to URL filter to backend fetcher to Base64 response"><span>Request<code>image=URL</code></span><span>URL filter<code>check input</code></span><span>Fetcher<code class="chain-mobile-source">HTTP source</code></span><span>Response<code>Base64 bytes</code></span></div>
+<ol class="chain-steps"><li><button type="button" disabled data-chain-step="0" aria-pressed="true">HTTP fetch</button></li><li><button type="button" disabled data-chain-step="1" aria-pressed="false">File scheme</button></li><li><button type="button" disabled data-chain-step="2" aria-pressed="false">Normalization</button></li><li><button type="button" disabled data-chain-step="3" aria-pressed="false">Base64 response</button></li></ol>
+<div class="chain-explanation"><code class="chain-payload">image=http://external.example/resource</code><p class="chain-caption">The supplied URL reaches the backend fetcher. The API returns the remote response body, establishing full-read SSRF.</p></div>
+<p class="chain-footnote">Illustration based on the report. No live requests.</p>
+</div>
+</section>
+<section class="case-section" aria-labelledby="http-title"><h2 id="http-title">First, establish the server-side fetch.</h2><p>I sent an HTTP URL to a service that reports the origin of a request. After decoding <code>data.image</code>, the response contained an origin address for the server-side request. This established that I could receive the fetched response body, rather than only trigger an outbound connection.</p><p>The address is redacted in this writeup. It was evidence of the request path, not a reason to test unrelated hosts.</p></section>
+<section id="local-read" class="case-section"><h2>Then, cross the file boundary.</h2><p>The same parameter accepted <code>file:///etc/hostname</code>. The returned Base64 decoded to a hostname associated with the UAT environment. Reading <code>/etc/os-release</code> provided another system-identification check.</p><p>The trust boundary had changed: input intended to identify a remote picture could select a file available to the backend process. Those bytes were then delivered through the normal image response.</p>
+<figure class="request-extract"><figcaption>Sanitized request structure <span>From the original report</span></figcaption><pre><code>POST /api/v1/image-base-64
+Host: [REDACTED]
+Authorization: [REDACTED]
+Content-Type: application/x-www-form-urlencoded
+
+image=file:///etc/hostname</code></pre></figure>
+<figure class="response-extract"><figcaption>Response shape <span>Content withheld</span></figcaption><pre><code>{
+  "data": {
+    "image": "data:image/png;base64,[REDACTED]"
+  }
+}</code></pre></figure>
+<p>The <code>data:image/png</code> prefix did not establish that the content was an image. It was a wrapper around bytes the server had fetched. Base64 encoding preserved those bytes.</p>
+</section>
+<section id="filter-gap" class="case-section"><h2>Why the filter did not close the gap.</h2><p>A direct request for a blocked path returned <code>403</code>. Variants of that path returned <code>200</code>, and the original report records that the decoded content contained the expected account-file entries.</p><div class="normalization-note"><div><span>Filter’s view</span><code>/etc/./passwd</code></div><svg viewBox="0 0 40 28" aria-hidden="true"><path d="M2 14h33m-9-8 9 8-9 8"/></svg><div><span>Resolved path</span><code>/etc/passwd</code></div></div>
+<p>The report also records a repeated-slash variant and a double-encoded character variant. These results are consistent with the filter and the fetcher interpreting different forms of the same input. Without server-side instrumentation, the exact decoding order remains an inference.</p><p>A keyword rule could reject one spelling while leaving the URL loader’s file access available. The application needed to constrain what the loader was allowed to fetch.</p></section>
+<section id="impact" class="case-section"><h2>What the evidence establishes.</h2>
+<div class="evidence-table-wrap"><table class="evidence-table"><thead><tr><th scope="col">Observation</th><th scope="col">Conclusion</th></tr></thead><tbody><tr><th scope="row">External HTTP body returned</th><td>Full-read SSRF on the image endpoint.</td></tr><tr><th scope="row">System files decoded</th><td>Local files readable by the backend could be returned through the API.</td></tr><tr><th scope="row">Blocked-path variants succeeded</th><td>The filtering did not consistently prevent the file read.</td></tr><tr><th scope="row">Configuration path returned a non-empty response</th><td>The report records a response for that path. Its contents and any credentials inside were not verified.</td></tr></tbody></table></div>
+<p>I stopped at response behavior and size for the application’s database-configuration path. I did not decode its contents or test database access. Exposure of usable credentials and any further compromise remain unproven.</p><p>The demonstrated impact is limited to the UAT/whitehat environment covered by the report. The reproduction used program-provided Basic authentication. The report submitted the issue as High severity.</p>
+</section>
+<section id="disclosure" class="case-section"><h2>Disclosure and response.</h2><p>The original report describes manual testing against the in-scope environment. It states that no customer data was accessed and no destructive actions were performed.</p><p>In the supplied response, the security team said the issue had been resolved and asked me to retest. The message also described reward processing after confirmation and a planned Hall of Fame acknowledgment.</p><p>That response documents the vendor’s stated fix. It does not establish a completed retest, a paid reward, or a published Hall of Fame entry. Those outcomes are not claimed here.</p>
+</section>
+<section id="remediation" class="case-section"><h2>Close the boundary at the fetcher.</h2><ul class="remediation-list"><li><strong>Allow only intended sources.</strong> Parse the URL on the server, require HTTP(S), and allow only approved image hosts. Reject unsupported schemes before any fetch.</li><li><strong>Validate the destination that will be used.</strong> Canonicalize once with a trusted parser. Check resolved addresses and prevent access to loopback, private, link-local, and metadata destinations.</li><li><strong>Recheck every redirect.</strong> Apply the same scheme, host, and resolved-address rules to each destination, or disable redirects.</li><li><strong>Constrain the fetch and response.</strong> Use timeouts and size limits. Check that the returned bytes are a supported image before processing or returning them.</li><li><strong>Reduce the consequences of a missed check.</strong> Restrict network egress and the files available to the application process. Keep sensitive configuration outside its readable paths where possible.</li></ul>
+<p>WAF rules can support these controls. The decisive fix is ensuring that a feature built for images can access only the resources it needs.</p></section>
+<div class="case-source"><span>From my research notebook</span><p>This expanded writeup is based on my original report and the supplied vendor response. The earlier published version is also available on Medium.</p><a class="underlined" href="{{REPORT_URL}}" target="_blank" rel="noreferrer">Read the published Medium writeup</a></div>
+<div class="article-actions"><a class="underlined" href="/writeups/">Back to writeups</a><button class="text-link" type="button" data-copy="{{ARTICLE_URL}}">Copy article link</button></div>
+</article></div>
