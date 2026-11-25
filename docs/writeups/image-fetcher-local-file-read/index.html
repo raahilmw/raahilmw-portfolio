@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>Image fetcher to arbitrary file read — raahilmw</title><meta name="description" content="A bug bounty writeup about an image-to-Base64 endpoint that exposed local files, with a reward response, privacy-edited screenshots, and clear reproduction notes."><link rel="canonical" href="https://raahilmw.com/writeups/image-fetcher-local-file-read/"><script src="/theme.js?v=93a597a6e635"></script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/fonts.css?v=7efc749776d1"><link rel="stylesheet" href="/style.css?v=196d68d9f3b6"><link rel="stylesheet" href="/motion.css?v=18bb7d3a0db4"><link rel="stylesheet" href="/case-study.css?v=216c05d9d79f"></head><body class="page-writeups"><a class="skip-link" href="#content">Skip to content</a><svg class="icon-library" aria-hidden="true"><defs>
+<symbol id="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></symbol>
+<symbol id="moon" viewBox="0 0 24 24"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></symbol>
+<symbol id="copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="13" rx="1"/><path d="M16 8V4H3v12h5"/></symbol>
+<symbol id="book" viewBox="0 0 24 24"><path d="M4 3h16v18H4zM8 3v18M11 8h6m-6 4h6M2 7h4m-4 5h4m-4 5h4"/></symbol>
+<symbol id="code" viewBox="0 0 24 24"><path d="m7 7-5 5 5 5m10-10 5 5-5 5M14 4l-4 16"/></symbol>
+<symbol id="reset" viewBox="0 0 24 24"><path d="M4 4v6h6M4 10a8 8 0 1 1 1 7"/></symbol>
+</defs></svg>
+<header class="site-header shell"><a class="wordmark" href="/" aria-label="raahilmw home"><span class="brand-star" aria-hidden="true">✦</span>raahilmw<span class="brand-dot">.</span></a>
+<nav class="desktop-nav" aria-label="Main navigation"><a href="/">Home</a><a href="/about/">About</a><a href="/writeups/" aria-current="page">Writeups</a><a href="/projects/">Projects</a><a href="/certifications/">Certifications</a><a href="/contact/">Contact</a></nav>
+<div class="header-controls"><button class="theme-toggle icon-button" type="button" aria-label="Change appearance"><span class="theme-sun"><svg aria-hidden="true"><use href="#sun"/></svg></span><span class="theme-moon"><svg aria-hidden="true"><use href="#moon"/></svg></span></button><button class="menu-toggle icon-button" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Open navigation"><svg class="menu-signal" viewBox="0 0 32 32" aria-hidden="true"><path d="M5 12 Q16 12 27 12"/><path d="M5 20 Q16 20 27 20"/></svg></button></div></header>
+<nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation" hidden><a href="/">Home</a><a href="/about/">About</a><a href="/writeups/" aria-current="page">Writeups</a><a href="/projects/">Projects</a><a href="/certifications/">Certifications</a><a href="/contact/">Contact</a></nav><dialog id="site-intro" aria-label="Portfolio introduction">
+<div class="identity-frame" aria-hidden="true"><span>raahilmw<span class="identity-period">.</span></span><span class="identity-state">Reading signature</span></div>
+<div class="identity-stage" aria-hidden="true">
+  <div class="identity-reader"><div class="identity-glass"><i class="identity-ghost"></i><i class="identity-print"></i><i class="identity-beam"></i></div><i class="reader-corner"></i><i class="reader-corner"></i></div>
+  <div class="intro-terminal">
+    <div class="terminal-title"><b>raahilmw@observatory</b><span>/ bash</span></div>
+    <div class="terminal-session">
+      <div class="terminal-command command-one"><i>~ $</i> whoami</div>
+      <div class="terminal-output output-one">raahilmw</div>
+      <div class="terminal-command command-two"><i>~ $</i> sudo -u raahilmw ./open</div>
+      <div class="terminal-output output-two">Field notes mounted.</div>
+      <div class="terminal-ready">~/portfolio $ <i></i></div>
+    </div>
+  </div>
+</div>
+<div class="identity-footer"><button class="intro-skip" type="button" autofocus>Skip intro <kbd>Esc</kbd></button><div class="identity-meter" aria-hidden="true"><i></i></div></div>
+</dialog><script defer src="/intro.js?v=3622fd4bd387"></script><main id="content"><header class="reading-header">
+<a class="underlined reading-back" href="/writeups/">All writeups</a>
+<h1>How an image fetcher let me read <em>server files.</em></h1>
+<p class="reading-subtitle">I started with an image URL and found a way to read files from the application's UAT server.</p>
+<div class="reading-byline"><span>Raahil Muhammad Wildan</span><span>SSRF / file read</span></div>
+</header>
+<article class="reading-article">
+<p class="reading-lead">The security team accepted the finding and confirmed that they had fixed it. Their reply also explained the reward process and asked me to retest.</p>
+<figure class="reading-figure reading-reward">
+<a href="/assets/writeups/image-fetcher/reward-email.png?v=959636ff3961" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/reward-email.png?v=959636ff3961" width="1277" height="666" alt="The security team's email confirms a fix, asks for a retest, and explains the reward process and planned Hall of Fame recognition." decoding="async" fetchpriority="high"><span class="image-expand" aria-hidden="true">View larger</span></a>
+<figcaption>The team's response confirming a fix and outlining the reward process.</figcaption>
+</figure>
+<section id="overview" class="reading-section">
+<h2>What I was testing</h2>
+<p>I was testing an image-to-Base64 endpoint in the program's UAT environment, a server used for testing. I accessed it with the Basic Auth credentials supplied by the program.</p>
+<p>The endpoint, <code>POST /api/v1/image-base-64</code>, accepted an <code>image</code> parameter containing a URL. It fetched that resource and returned its contents in <code>data.image</code>.</p>
+<p>That made the URL an interesting place to test. Could I control what the server fetched, and would it send the result back to me?</p>
+</section>
+<section class="request-trace" id="attack-chain" aria-labelledby="trace-heading" data-request-trace>
+<div class="trace-heading"><div><p class="trace-eyebrow">Attack chain</p><h2 id="trace-heading">Follow the <em>request.</em></h2></div><button class="trace-play" type="button" data-trace-play hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path class="trace-play-symbol" d="m9 5 10 7-10 7Z"/><path class="trace-pause-symbol" d="M8 5v14M16 5v14"/></svg><span data-trace-play-label>Play chain</span></button></div>
+<p class="trace-intro">The same endpoint fetched a URL, opened a local file, and sent the bytes back.</p>
+<div class="trace-art" role="img" aria-label="An illustrated request travels from the researcher through the UAT image fetcher to an external URL or local filesystem. The result returns through the API as Base64.">
+<svg class="trace-wires" viewBox="0 0 900 360" preserveAspectRatio="none" aria-hidden="true">
+<path class="trace-wire" data-trace-wire="forward" d="M90 130C210 130 310 130 450 130S670 130 810 130"/>
+<path class="trace-wire trace-return-wire" data-trace-wire="return" d="M810 130C900 130 900 300 450 300S0 130 90 130"/>
+<path class="trace-signal-path" data-trace-path d="M90 130C210 130 310 130 450 130S670 130 810 130"/>
+<g class="trace-packet" data-trace-packet><circle r="15" class="trace-packet-halo"/><circle r="4"/></g>
+</svg>
+<div class="trace-node trace-client"><span class="trace-node-art"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="10" y="12" width="44" height="32" rx="5"/><path d="M5 51h54M25 44v7M39 44v7m-20-29 7 6-7 6m13 0h11"/></svg></span><strong>Researcher</strong><small>The image parameter</small></div>
+<div class="trace-node trace-engine"><span class="trace-node-art"><svg class="trace-lens" viewBox="0 0 80 80" aria-hidden="true"><circle class="trace-lens-ring" cx="40" cy="40" r="32"/><circle cx="40" cy="40" r="23"/><path class="trace-star" d="M40 18c0 16 6 22 22 22-16 0-22 6-22 22 0-16-6-22-22-22 16 0 22-6 22-22Z"/><path d="M40 1v6M40 73v6M1 40h6M73 40h6"/></svg></span><strong>Image fetcher</strong><small>The UAT application</small></div>
+<div class="trace-node trace-source"><span class="trace-node-art"><svg class="trace-web" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="22"/><ellipse cx="32" cy="32" rx="10" ry="22"/><path d="M10 32h44M15 19h34M15 45h34"/></svg><svg class="trace-files" viewBox="0 0 64 64" aria-hidden="true"><g class="trace-file-back"><path d="M18 11h22l10 10v31H18Z"/><path d="M40 11v10h10"/></g><g class="trace-file-front"><path d="M12 7h22l10 10v35H12Z"/><path d="M34 7v10h10M21 28h14M21 35h14M21 42h8"/></g></svg></span><strong data-trace-source>External URL</strong><small data-trace-source-note>The HTTP check</small></div>
+<span class="trace-return-label" aria-hidden="true">Base64 response</span>
+</div>
+<div class="trace-controls">
+<ol class="trace-steps" aria-label="Explore the attack chain">
+<li><button type="button" data-trace-step="0" aria-pressed="true" disabled>HTTP fetch</button></li>
+<li><button type="button" data-trace-step="1" aria-pressed="false" disabled>Local file</button></li>
+<li><button type="button" data-trace-step="2" aria-pressed="false" disabled>Filter gap</button></li>
+<li><button type="button" data-trace-step="3" aria-pressed="false" disabled>Read response</button></li>
+</ol>
+</div>
+<div class="trace-detail">
+<div class="trace-readout"><span class="trace-readout-label">Input</span><code data-trace-code>image=http://httpbin.org/ip</code><span class="trace-receipt sr-only" aria-hidden="true">HTTP</span></div>
+<p class="trace-description" data-trace-description aria-live="polite">An HTTP URL made the backend fetch a resource and return its contents.</p>
+</div>
+<noscript><p>The chain: an HTTP fetch confirmed SSRF; a file URL read a local file; alternate paths passed the filter; Base64 decoding recovered the returned contents.</p></noscript>
+</section>
+<section id="ssrf" class="reading-section">
+<h2>Confirming a server-side request</h2>
+<p>I first supplied an HTTP URL for a service that reports where a request came from. The endpoint returned a Base64 response. After decoding it, I could see an origin address for the server-side request.</p>
+<p>This confirmed <a class="reading-link" href="https://portswigger.net/web-security/ssrf" target="_blank" rel="noreferrer">server-side request forgery (SSRF)</a>: I could make the backend fetch a URL I chose. I could also read the fetched response through the API.</p>
+<figure class="reading-figure"><a href="/assets/writeups/image-fetcher/http-ssrf.png?v=0fd119162d6b" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/http-ssrf.png?v=0fd119162d6b" width="1688" height="774" alt="Burp Suite capture of the HTTP SSRF check and the API response." loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">View larger</span></a><figcaption>The external response returned through the image endpoint.</figcaption></figure>
+</section>
+<section id="local-read" class="reading-section">
+<h2>Changing the URL to a local file</h2>
+<p>Next, I replaced the HTTP URL with <code>file:///etc/hostname</code>. The <code>file://</code> scheme refers to a file on the machine handling the request.</p>
+<p>The endpoint accepted it. Decoding the returned data gave me the UAT server's hostname. I also read <code>/etc/os-release</code> to confirm the behavior with another system-identification file.</p>
+<figure class="reading-figure"><a href="/assets/writeups/image-fetcher/local-file-read.png?v=5805da29fe7e" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/local-file-read.png?v=5805da29fe7e" width="1803" height="778" alt="Burp Suite capture of image=file:///etc/hostname and the Base64 response." loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">View larger</span></a><figcaption>The same endpoint returned a local file through a file URL.</figcaption></figure>
+<p>The response still used a <code>data:image/png;base64</code> prefix. That label did not mean the bytes were a PNG. Base64 is an encoding, so decoding it recovered the file contents.</p>
+</section>
+<section id="filter-gap" class="reading-section">
+<h2>Working around the path filter</h2>
+<p>A direct request for <code>/etc/passwd</code> returned <code>403 Forbidden</code>. I then tried different spellings of the path, including a dot segment, a repeated slash, and an encoded character.</p>
+<p>Those variants returned <code>200 OK</code>. During testing, I decoded account-file entries from the response. The encoded request below was one of the successful variants.</p>
+<figure class="reading-figure"><a href="/assets/writeups/image-fetcher/encoded-path.png?v=d1c516baaeed" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/encoded-path.png?v=d1c516baaeed" width="1541" height="779" alt="Burp Suite capture of an encoded file path returning HTTP/2 200 OK." loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">View larger</span></a><figcaption>An encoded path returned HTTP 200.</figcaption></figure>
+<p>I also tested <code>file:///proc/./version</code>. The screenshot shows another successful request using a dot segment.</p>
+<figure class="reading-figure"><a href="/assets/writeups/image-fetcher/normalized-path.png?v=7390d87fa944" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/normalized-path.png?v=7390d87fa944" width="1561" height="880" alt="Burp Suite capture of file:///proc/./version returning HTTP/2 200 OK. The response body is outside the capture." loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">View larger</span></a><figcaption>A dot-segment path returned HTTP 200. The response body is outside the capture.</figcaption></figure>
+<p>The results showed that the filter did not consistently block paths that the file loader could resolve. I did not have server-side instrumentation, so I could not determine the exact decoding order.</p>
+<details class="reading-details"><summary>The path variants in the report</summary><pre><code>file:///etc/./passwd
+file:///etc//passwd
+file:///etc/pass%2577d</code></pre><p>These are the path variants recorded in my report.</p></details>
+</section>
+<section id="impact" class="reading-section">
+<h2>How far I went</h2>
+<p>The confirmed impact was arbitrary local file read through the image endpoint, limited to files the application process could access.</p>
+<p>A database-configuration path also returned a non-empty response. I stopped before decoding it because it could contain credentials. I did not verify usable database credentials or test database access.</p>
+<p>The report covered the UAT environment. I did not access customer data or perform destructive actions. I submitted the issue as High severity, with the program-provided authentication described in the report.</p>
+</section>
+<section id="remediation" class="reading-section">
+<h2>What needed to change</h2>
+<p>The application needed to restrict the resources its image fetcher could access. The recommendations in my report were to:</p>
+<ul class="reading-list"><li>Accept only HTTP(S) URLs from approved image sources and reject other schemes.</li><li>Validate the parsed destination and resolved IP address, including each redirect. Block private, loopback, link-local, and cloud metadata destinations.</li><li>Check the returned bytes as an image, with limits on response size and fetch time.</li><li>Restrict the network destinations and local files available to the application process.</li></ul>
+<p>The WAF blocked some direct requests, but alternate path forms still reached the file loader. Application-level validation had to enforce the restriction consistently.</p>
+</section>
+<footer class="reading-end"><nav class="reading-end-actions" aria-label="Writeup actions"><a class="reading-return" href="/writeups/"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>Back to writeups</a><a href="https://medium.com/@raahil.mw/how-i-got-paid-for-turning-an-image-fetcher-into-an-arbitrary-file-read-0d15679bae00" target="_blank" rel="noreferrer">On Medium</a><button type="button" data-copy="https://raahilmw.com/writeups/image-fetcher-local-file-read/" data-message="Writeup link copied."><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V4H3v12h5"/></svg>Copy link</button></nav></footer>
+</article>
+<dialog class="evidence-viewer" id="evidence-viewer" aria-labelledby="evidence-viewer-title"><div class="evidence-viewer-head"><h2 id="evidence-viewer-title">Screenshot</h2><button type="button" class="icon-button" data-evidence-close aria-label="Close image"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><div class="evidence-viewer-body"><img alt=""></div><p class="evidence-viewer-caption"></p><a class="underlined evidence-file-link" href="#" target="_blank" rel="noreferrer" data-evidence-file>Open image file</a></dialog>
+</main><footer class="site-footer shell"><a class="wordmark" href="/" aria-label="raahilmw home"><span class="brand-star" aria-hidden="true">✦</span>raahilmw<span class="brand-dot">.</span></a><span>2026 raahilmw</span><a href="https://medium.com/@raahil.mw" target="_blank" rel="noreferrer">Medium</a><a href="/contact/">Contact</a><button type="button" class="replay-arrival" aria-label="Replay opening animation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6M4 10a8 8 0 1 1 1 7"/></svg><span>Replay arrival</span></button></footer><div class="toast" role="status" aria-live="polite" id="toast"></div><script src="/app.js?v=7739d39203a4" defer></script><script src="/motion.js?v=f6c497fcb15f" defer></script><script defer src="/case-study.js?v=914b65c20e3d"></script></body></html>

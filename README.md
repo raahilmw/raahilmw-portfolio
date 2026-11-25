@@ -12,6 +12,8 @@ Before moving to a new domain, rebuild with its full public origin. This updates
 SITE_ORIGIN=https://your-domain.example python scripts/build.py
 ```
 
+For the connected GitHub Pages site, `docs/` contains the same built pages with canonical URLs set to `https://raahilmw.com`. GitHub Pages serves `docs/` from `main`, and `docs/CNAME` preserves the custom domain. Regenerate `docs/` after changing the source or assets.
+
 The default origin is the current Sites address. Run `python -m http.server 8000 --directory dist` for a local preview at `http://localhost:8000/`. All fonts, scripts, photos, and library assets used by the website are inside `dist/`.
 
 - Shared content and navigation live in `scripts/build.py`. The About spread layers the existing transparent portrait over a two-ink forest print and the Home map contours. The background follows MengTo’s Bayer dither treatment. The staggered name and print register once on entry, with a static composition for reduced motion. Instrument Serif is bundled under its OFL license.
