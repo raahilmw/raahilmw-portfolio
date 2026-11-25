@@ -30,6 +30,8 @@
     if (viewer.open) { event.preventDefault(); return; }
     try { viewer.showModal(); } catch { return; }
     event.preventDefault();
+    const original = viewer.querySelector('[data-full-image]');
+    if (original && !original.src) original.src = trigger.href;
     root.classList.add('certificate-open');
     viewer.querySelector('[data-certificate-close]')?.focus({ preventScroll: true });
   });

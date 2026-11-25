@@ -79,8 +79,44 @@
   if(run){
     const steps=[...document.querySelectorAll('[data-step]')],tracks=[...document.querySelectorAll('[data-track]')],output=document.querySelector('#workflow-output');
     const messages=['Map: loading the example.test sample inventory.','Probe: reviewing sample service metadata.','Connect: grouping assets and removing duplicates.','Report: preparing an investigation queue.'];
-    let timer;
-    run.addEventListener('click',()=>{clearTimeout(timer);run.disabled=true;run.textContent='Workflow running…';steps.forEach(el=>el.classList.remove('active','done'));tracks.forEach(el=>el.classList.remove('active','done'));let i=0;function tick(){if(i>0){steps[i-1].classList.replace('active','done');tracks[i-1].classList.replace('active','done');}if(i===steps.length){output.textContent='Simulation complete. A clear queue, ready for human review.';run.disabled=false;run.textContent='Run it again';return;}steps[i].classList.add('active');tracks[i].classList.add('active');output.textContent=messages[i];i++;timer=setTimeout(tick,reduced.matches?100:850);}tick();});
+    let timer, index = 0;
+    function showStep() {
+      clearTimeout(timer);
+      if (reduced.matches) {
+        [...steps, ...tracks].forEach(item => {
+          item.classList.remove('active');
+          item.classList.add('done');
+        });
+        index = steps.length;
+      } else if (index > 0) {
+        steps[index-1].classList.replace('active', 'done');
+        tracks[index-1].classList.replace('active', 'done');
+      }
+      if (index === steps.length) {
+        output.textContent = 'Simulation complete. A clear queue, ready for human review.';
+        run.disabled = false;
+        run.textContent = 'Run it again';
+        return;
+      }
+      steps[index].classList.add('active');
+      tracks[index].classList.add('active');
+      output.textContent = messages[index++];
+      timer = setTimeout(showStep, 850);
+    }
+    run.addEventListener('click', () => {
+      run.disabled = true;
+      run.textContent = 'Workflow running…';
+      [...steps, ...tracks].forEach(item => item.classList.remove('active', 'done'));
+      index = 0;
+      showStep();
+    });
+    document.addEventListener('visibilitychange', () => {
+      clearTimeout(timer);
+      if (!document.hidden && run.disabled) showStep();
+    });
+    reduced.addEventListener('change', () => {
+      if (reduced.matches && run.disabled) showStep();
+    });
   }
 })();
 

@@ -37,6 +37,7 @@
   function close() { if (picker.open) picker.close(); }
   openers.forEach(opener => opener.addEventListener('click', event => {
     // Keep the mailto href as a fallback if opening the dialog fails.
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     if (picker.open) { event.preventDefault(); return; }
     try { picker.showModal(); } catch { return; }
     event.preventDefault();

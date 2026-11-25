@@ -6,8 +6,12 @@
   const intro=document.querySelector('#site-intro');
   const hero=document.querySelector('.home-hero');
   function entrance(){
-    if(!hero || reduced.matches || hero.classList.contains('hero-arrived')) return;
-    requestAnimationFrame(()=>hero.classList.add('hero-arrived'));
+    if(reduced.matches) return;
+    if(hero) {
+      if (!hero.classList.contains('hero-arrived')) requestAnimationFrame(() => hero.classList.add('hero-arrived'));
+    } else {
+      document.body.classList.add('page-arrived');
+    }
   }
   if(!intro?.open) entrance();
   document.addEventListener('arrivalreveal',entrance);
@@ -24,25 +28,41 @@
     observed.forEach(el=>observer.observe(el));
   }
   document.addEventListener('visibilitychange',()=>root.classList.toggle('motion-paused',document.hidden));
-  // A section's surface catches the pointer; its hit target stays in place.
-  document.querySelectorAll('.research-cover,.project-art,.expertise-list li,.orb-disc').forEach(surface=>{
-    let frame=0,tx=0,ty=0,cx=0,cy=0;
-    function tick(){
-      frame=0;cx+=(tx-cx)*.14;cy+=(ty-cy)*.14;
-      surface.style.setProperty('--pointer-x',(50+cx*35).toFixed(2)+'%');
-      surface.style.setProperty('--pointer-y',(50+cy*35).toFixed(2)+'%');
-      surface.style.setProperty('--tilt-x',(-cy*3).toFixed(2)+'deg');
-      surface.style.setProperty('--tilt-y',(cx*4).toFixed(2)+'deg');
-      if(Math.abs(tx-cx)+Math.abs(ty-cy)>.004)frame=requestAnimationFrame(tick);
-    }
-    surface.addEventListener('pointermove',event=>{
-      if(!fine.matches||reduced.matches)return;
-      const b=surface.getBoundingClientRect();tx=(event.clientX-b.left)/b.width*2-1;ty=(event.clientY-b.top)/b.height*2-1;
-      if(!frame)frame=requestAnimationFrame(tick);
-    },{passive:true});
-    surface.addEventListener('pointerleave',()=>{tx=ty=0;if(!frame&&!reduced.matches)frame=requestAnimationFrame(tick);});
-    reduced.addEventListener('change',()=>{cancelAnimationFrame(frame);frame=0;tx=ty=cx=cy=0;surface.style.removeProperty('--tilt-x');surface.style.removeProperty('--tilt-y');});
+  // Coalesce pointer input across surfaces, keeping measurement on a stable hit target.
+  const surfaces = '.research-cover,.project-art,.expertise-list li,.social-orb';
+  let active = null, point, pointerFrame = 0;
+  function resetSurface() {
+    cancelAnimationFrame(pointerFrame);
+    pointerFrame = 0;
+    if (!active) return;
+    for (const prop of ['--tilt-x','--tilt-y','--pointer-x','--pointer-y']) active.style.removeProperty(prop);
+    active = null;
+  }
+  function paintSurface() {
+    pointerFrame = 0;
+    if (!active) return;
+    const box = active.getBoundingClientRect();
+    if (!box.width || !box.height) return;
+    const x = Math.max(0, Math.min(1, (point.x - box.left) / box.width));
+    const y = Math.max(0, Math.min(1, (point.y - box.top) / box.height));
+    active.style.setProperty('--pointer-x', (100*x).toFixed(1)+'%');
+    active.style.setProperty('--pointer-y', (100*y).toFixed(1)+'%');
+    active.style.setProperty('--tilt-x', (3-6*y).toFixed(2)+'deg');
+    active.style.setProperty('--tilt-y', (8*x-4).toFixed(2)+'deg');
+  }
+  document.querySelectorAll(surfaces).forEach(surface => {
+    surface.addEventListener('pointermove', event => {
+      if (!fine.matches || reduced.matches || document.hidden || event.pointerType === 'touch') return;
+      if (surface !== active) { resetSurface(); active = surface; }
+      point = {x:event.clientX,y:event.clientY};
+      if (!pointerFrame) pointerFrame = requestAnimationFrame(paintSurface);
+    }, {passive:true});
+    surface.addEventListener('pointerleave', resetSurface);
+    surface.addEventListener('pointercancel', resetSurface);
   });
+  window.addEventListener('blur', resetSurface);
+  fine.addEventListener('change', resetSurface);
+  reduced.addEventListener('change', resetSurface);
   // Hover navigation follows the link rather than moving the link itself.
   const nav=document.querySelector('.desktop-nav');
   if(nav){

@@ -8,11 +8,11 @@ Manrope is the primary face; Instrument Serif italic gives the Home emphasis and
 
 ## Motion
 
-The focal sequence is a first-session, eight-second arrival: a personal terminal, a surface made of particles, the four-point star, then the header and hero. The hero resolves before the curtain exposes it. Skip and Escape always close the dialog; a footer control allows replay. Hash navigation, writeup pages, and reduced motion bypass automatic playback. Reading pages open directly into the article; the footer replay remains available. The image-fetcher article contains one finite request trace that explains the observed chain with a travelling signal, a file-stack reveal, and a return path. It supports pause, replay and individual steps; narrow screens use diagonal geometry. No article text is hidden for an entrance animation.
+An illustrated fingerprint connects the three-second introductory scan to the silver lid of the Home secure element. The handle resolves alongside the scan. Pointer tilt and the Inspect layers control reveal the chip package, silicon die and printed circuit board. Skip and Escape close the dialog. The footer allows replay. Deep links with a hash, writeup pages and reduced motion bypass automatic playback. The image-fetcher article contains one finite request trace that explains the observed chain with a travelling signal, a file-stack reveal, and a return path. It supports pause, replay and individual steps; narrow screens use diagonal geometry. No article text is hidden for an entrance animation.
 
 Use the shared exponential settle curve for supporting motion. Navigation tracks a fixed link; hover surfaces respond within stable hit targets. The writeup artwork opens its layers. About retains its draggable Matter.js field and scroll-triggered gravity. The real portrait stays photographic.
 
-Canvas work is bounded and pauses when hidden or outside the viewport. The Three.js scene pauses behind the intro and renders a static frame before the curtain opens. Reduced motion provides static geometry and immediate state changes. Scroll is native. No audio or custom cursor.
+The chip uses composited CSS planes and schedules pointer updates only on input. Map updates run while the map is visible. Reduced motion provides static geometry and immediate state changes. Scroll is native. No audio or custom cursor.
 
 ## Implementation
 

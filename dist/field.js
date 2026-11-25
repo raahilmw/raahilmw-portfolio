@@ -12,6 +12,8 @@
   const gutter = 6;
   let width = 0, height = 0, frame = 0, previousTime = 0, remainder = 0;
   let dropped = false, visible = true, topLayer = 1;
+  let fadeDistance = Math.min(window.innerHeight * .72, 620);
+  let scrollFrame = 0;
   let floor = null, lastScrollY = window.scrollY;
   engine.gravity.y = 0;
 
@@ -19,7 +21,6 @@
     const { position, angle } = tile.body;
     tile.el.style.transform = 'translate(' + (position.x - tile.w / 2) + 'px,' +
       (position.y - tile.h / 2) + 'px) rotate(' + angle + 'rad)';
-    const fadeDistance = Math.min(window.innerHeight * .72, 620);
     tile.el.style.opacity = dropped ? clamp((height + fadeDistance - position.y) / fadeDistance, 0, 1) : 1;
   }
   function clamp(value, low, high) {
@@ -109,7 +110,7 @@
       remainder -= step;
     }
     tiles.forEach(draw);
-    if (!dropped || tiles.some(({ body, hold }) => hold || body.position.y < height + Math.min(window.innerHeight * .72, 620))) {
+    if (!dropped || tiles.some(({ body, hold }) => hold || body.position.y < height + fadeDistance)) {
       frame = requestAnimationFrame(advance);
     } else {
       previousTime = remainder = 0;
@@ -119,9 +120,12 @@
     if (!width || !visible || document.hidden || frame || intro?.open) return;
     if (reduced.matches) {
       if (!dropped) return;
-      // Compute the resting layout without showing intermediate motion.
-      for (let i = 0; i < 240; i++) Engine.update(engine, step);
-      tiles.forEach(draw);
+      // Match the final, offstage state directly without hundreds of physics ticks.
+      tiles.forEach(tile => {
+        if (tile.hold) return;
+        Body.setPosition(tile.body, {x:tile.body.position.x, y:height + fadeDistance + tile.h});
+        draw(tile);
+      });
     } else {
       frame = requestAnimationFrame(advance);
     }
@@ -171,6 +175,7 @@
     run();
   }
   function layout() {
+    fadeDistance = Math.min(window.innerHeight * .72, 620);
     const w = board.clientWidth;
     if (!w || !board.clientHeight) return;
     if (w === width && board.clientHeight === height && tiles.every(t => t.w === t.el.offsetWidth && t.h === t.el.offsetHeight)) return;
@@ -257,6 +262,7 @@
     });
   });
   function onScroll() {
+    scrollFrame = 0;
     const y = Math.max(0, window.scrollY);
     const delta = y - lastScrollY;
     lastScrollY = y;
@@ -265,12 +271,14 @@
       drop();
       if (delta > 0 && !reduced.matches) tiles.forEach(tile => Body.translate(tile.body, { x: 0, y: delta }));
     }
-    else if (dropped && delta > 0 && !reduced.matches) {
+    else if (dropped && visible && delta > 0 && !reduced.matches && tiles.some(tile => tile.body.position.y < height + fadeDistance)) {
       tiles.forEach(tile => Body.translate(tile.body, { x: 0, y: delta }));
       run();
     }
   }
-  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('scroll', () => {
+    if (!scrollFrame) scrollFrame = requestAnimationFrame(onScroll);
+  }, { passive: true });
   document.addEventListener('visibilitychange', () => document.hidden ? stop() : run());
   reduced.addEventListener('change', () => { tiles.forEach(release); stop(); run(); });
   document.addEventListener('arrivalstart', stop);

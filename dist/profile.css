@@ -162,7 +162,7 @@
 .trail-guide {stroke: var(--air); stroke-width: 1; stroke-dasharray: 1 4}
 .trail-ink {stroke: var(--trail); stroke-width: 1.7; stroke-dasharray: 1 1; stroke-dashoffset: 0}
 @media (prefers-reduced-motion:no-preference) {
-  .sc-ready .trail-ink {stroke-dashoffset: clamp(0,calc(1.12 - var(--sc-p,.65) * var(--trace-speed,2)),1)}
+  .trail-ink {stroke-dashoffset: var(--trail-reveal,0)}
 }
 .map-point {
   position: absolute; left: var(--x); top: var(--y); transform: translate(-12px,-22px);
