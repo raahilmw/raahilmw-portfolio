@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>Security research — raahilmw</title><meta name="description" content="Raahil Muhammad Wildan — penetration testing, bug hunting, security automation, and published research."><link rel="canonical" href="https://raahilmw-security-lab.team-8535.chatgpt.site/"><script src="/theme.js?v=93a597a6e635"></script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/fonts.css?v=7efc749776d1"><link rel="stylesheet" href="/style.css?v=196d68d9f3b6"><link rel="stylesheet" href="/profile.css?v=3ec7765519af"><link rel="stylesheet" href="/motion.css?v=ce993a959f6f"><link rel="stylesheet" href="/chip.css?v=be304098f2de"></head><body class="page-home"><a class="skip-link" href="#content">Skip to content</a><svg class="icon-library" aria-hidden="true"><defs>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>Security research — raahilmw</title><meta name="description" content="Raahil Muhammad Wildan — penetration testing, bug hunting, security automation, and published research."><link rel="canonical" href="https://raahilmw-security-lab.team-8535.chatgpt.site/"><script src="/theme.js?v=93a597a6e635"></script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/fonts.css?v=7efc749776d1"><link rel="stylesheet" href="/style.css?v=196d68d9f3b6"><link rel="stylesheet" href="/profile.css?v=3ec7765519af"><link rel="stylesheet" href="/motion.css?v=fb11765607b4"><link rel="stylesheet" href="/flipper.css?v=5bfa585b6b89"></head><body class="page-home"><a class="skip-link" href="#content">Skip to content</a><svg class="icon-library" aria-hidden="true"><defs>
 <symbol id="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></symbol>
 <symbol id="moon" viewBox="0 0 24 24"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></symbol>
 <symbol id="copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="13" rx="1"/><path d="M16 8V4H3v12h5"/></symbol>
@@ -10,25 +10,59 @@
 <header class="site-header shell"><a class="wordmark" href="/" aria-label="raahilmw home"><span class="brand-star" aria-hidden="true">✦</span>raahilmw<span class="brand-dot">.</span></a>
 <nav class="desktop-nav" aria-label="Main navigation"><a href="/" aria-current="page">Home</a><a href="/about/">About</a><a href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/certifications/">Certifications</a><a href="/contact/">Contact</a></nav>
 <div class="header-controls"><button class="theme-toggle icon-button" type="button" aria-label="Change appearance"><span class="theme-sun"><svg aria-hidden="true"><use href="#sun"/></svg></span><span class="theme-moon"><svg aria-hidden="true"><use href="#moon"/></svg></span></button><button class="menu-toggle icon-button" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Open navigation"><svg class="menu-signal" viewBox="0 0 32 32" aria-hidden="true"><path d="M5 12 Q16 12 27 12"/><path d="M5 20 Q16 20 27 20"/></svg></button></div></header>
-<nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation" hidden><a href="/" aria-current="page">Home</a><a href="/about/">About</a><a href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/certifications/">Certifications</a><a href="/contact/">Contact</a></nav><dialog id="site-intro" aria-label="Portfolio introduction">
-<div class="identity-frame" aria-hidden="true"><span>raahilmw<span class="identity-period">.</span></span><span class="identity-state">Reading signature</span></div>
-<div class="identity-stage" aria-hidden="true">
-  <div class="identity-reader"><div class="identity-glass"><i class="identity-ghost"></i><i class="identity-print"></i><i class="identity-beam"></i></div><i class="reader-corner"></i><i class="reader-corner"></i></div>
-  <div class="identity-copy"><span class="identity-prompt">~ / whoami</span><strong class="identity-handle">raahilmw</strong></div>
-</div>
-<div class="identity-footer"><button class="intro-skip" type="button" autofocus>Skip intro <kbd>Esc</kbd></button><div class="identity-meter" aria-hidden="true"><i></i></div></div>
-</dialog><script defer src="/intro.js?v=d3c913ce2303"></script><main id="content">
+<nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation" hidden><a href="/" aria-current="page">Home</a><a href="/about/">About</a><a href="/writeups/">Writeups</a><a href="/projects/">Projects</a><a href="/certifications/">Certifications</a><a href="/contact/">Contact</a></nav><main id="content">
 <section class="home-hero"><div class="hero-layout shell">
 <div class="hero-copy"><h1><span class="hero-line">Finding what</span> <span class="hero-line">others <em>miss.</em></span></h1><p>I’m <strong>raahilmw</strong>, a penetration tester, bug hunter, and builder of security automation.</p>
 <div class="hero-actions"><a class="button primary" href="/writeups/"><svg aria-hidden="true"><use href="#book"/></svg>Explore my writeups</a><a class="underlined" href="/about/">About me</a></div></div>
-<div class="artifact-stage" id="artifact-stage">
-<div class="chip-viewport" role="img" aria-label="A layered hardware security chip with a silver fingerprint engraved in its lid.">
-  <div class="chip-projection"><div class="chip-ground"></div><div class="chip-stack">
-    <div class="chip-board"></div><div class="chip-pins"></div><div class="chip-package"></div><div class="chip-die"></div>
-    <div class="chip-lid"><i class="chip-mark"></i><i class="chip-fingerprint"></i><span class="chip-engraving">RMW<span>Secure element</span></span></div>
-  </div></div>
-</div>
-<button class="artifact-control" id="artifact-control" type="button" aria-pressed="false" hidden><i aria-hidden="true"></i>Inspect layers</button></div>
+<figure class="flipper-specimen" id="flipper">
+      <div class="flipper-stage"><div class="flipper-pedestal" aria-hidden="true"></div><div class="device-plane">
+        <img class="device-product" src="/assets/flipper/assembled.webp?v=0e9786d20754" width="960" height="540" alt="White Flipper Zero with orange controls and a pixel dolphin on its screen." fetchpriority="high" decoding="async">
+        <img class="device-overlay device-lcd" src="/assets/flipper/screen-off.webp?v=a141bcdf0cd5" width="960" height="540" alt="" aria-hidden="true" decoding="async">
+        <img class="device-overlay device-blink" src="/assets/flipper/blink.webp?v=e61d8446481c" width="960" height="540" alt="" aria-hidden="true" decoding="async">
+      </div></div>
+      <figcaption class="specimen-caption"><span>Flipper Zero</span><i aria-hidden="true"></i>
+        <button type="button" class="flipper-inspect" hidden aria-haspopup="dialog" aria-controls="flipper-inspector">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-5 9 5-9 5-9-5Zm1 5 8 4.5 8-4.5m-16 4 8 4 8-4"/></svg>Inspect</button>
+      </figcaption>
+      <noscript><details class="plain-flipper"><summary>Inspect parts</summary><dl><dt>Top shell &amp; buttons</dt><dd>The shell holds the buttons you use to navigate menus.</dd><dt>LCD screen</dt><dd>Shows menus, device status and the pixel dolphin.</dd><dt>Main board</dt><dd>Runs the software and connects the controls to the screen.</dd><dt>Bottom shell</dt><dd>Supports the board and protects the electronics inside.</dd></dl></details></noscript>
+    </figure>
+    <dialog class="flipper-inspector" id="flipper-inspector" aria-labelledby="flipper-title">
+      <div class="inspection-panel">
+        <header class="inspection-head"><h2 id="flipper-title">Inside the Flipper Zero</h2>
+          <button type="button" class="flipper-reassemble" autofocus><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 14 9 5 9-5M3 10l9 5 9-5M9 4l3 3 3-3m-3-2v5"/></svg>Reassemble</button>
+        </header>
+        <p class="inspection-status" role="status"></p>
+        <div class="cutaway-scene">
+          <div class="cutaway-rest" aria-hidden="true"><div class="part-sprite"><img src="/assets/flipper/assembled.webp?v=0e9786d20754" width="960" height="540" alt="" decoding="async"></div></div>
+          <ol class="parts-list"><li class="part-row part-shell" style="--fold:150%;--order:0;--depth:4">
+          <div class="part-space" aria-hidden="true">
+            <div class="part-travel"><div class="part-sprite"><img data-part-src="/assets/flipper/shell.webp?v=78652f25dbc3" alt="" width="960" height="540" decoding="async"></div></div>
+            <div class="part-registration"><i class="part-pin"></i></div>
+          </div>
+          <div class="part-note"><h3>Top shell &amp; buttons</h3><p>The shell holds the buttons you use to navigate menus.</p></div>
+        </li><li class="part-row part-display" style="--fold:50%;--order:1;--depth:3">
+          <div class="part-space" aria-hidden="true">
+            <div class="part-travel"><div class="part-sprite"><img data-part-src="/assets/flipper/display.webp?v=afd913e2c2e9" alt="" width="960" height="540" decoding="async"></div></div>
+            <div class="part-registration"><i class="part-pin"></i></div>
+          </div>
+          <div class="part-note"><h3>LCD screen</h3><p>Shows menus, device status and the pixel dolphin.</p></div>
+        </li><li class="part-row part-board" style="--fold:-50%;--order:2;--depth:2">
+          <div class="part-space" aria-hidden="true">
+            <div class="part-travel"><div class="part-sprite"><img data-part-src="/assets/flipper/board.webp?v=2d1472352a5a" alt="" width="960" height="540" decoding="async"></div></div>
+            <div class="part-registration"><i class="part-pin"></i></div>
+          </div>
+          <div class="part-note"><h3>Main board</h3><p>Runs the software and connects the controls to the screen.</p></div>
+        </li><li class="part-row part-base" style="--fold:-150%;--order:3;--depth:1">
+          <div class="part-space" aria-hidden="true">
+            <div class="part-travel"><div class="part-sprite"><img data-part-src="/assets/flipper/base.webp?v=2c0cd076675b" alt="" width="960" height="540" decoding="async"></div></div>
+            <div class="part-registration"><i class="part-pin"></i></div>
+          </div>
+          <div class="part-note"><h3>Bottom shell</h3><p>Supports the board and protects the electronics inside.</p></div>
+        </li></ol>
+          <svg class="part-arrows" aria-hidden="true"><defs><marker id="part-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="m1 1.3 5.6 2.7L1 6.7" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"/></marker></defs><path class="part-leader" pathLength="1" marker-end="url(#part-arrow)"/><path class="part-leader" pathLength="1" marker-end="url(#part-arrow)"/><path class="part-leader" pathLength="1" marker-end="url(#part-arrow)"/><path class="part-leader" pathLength="1" marker-end="url(#part-arrow)"/></svg>
+        </div>
+      </div>
+    </dialog>
 </div><div class="hero-baseline shell"><span>@raahilmw</span><a class="scroll-cue" href="#selected"><i aria-hidden="true"></i>Scroll to explore</a></div></section>
 <section class="shell home-connect" aria-labelledby="home-connect-title"><div><h2 id="home-connect-title">Connect.</h2></div><div class="social-set"><div class="social-orbits"><a class="social-orb platform-github" href="https://github.com/raahilmw" target="_blank" rel="noreferrer"><span class="orb-disc"><img src="/assets/social/github.svg" alt="" width="24" height="24"></span><span class="orb-label">GitHub</span></a><a class="social-orb platform-linkedin" href="https://www.linkedin.com/in/raahilmw/" target="_blank" rel="noreferrer"><span class="orb-disc"><img src="/assets/social/linkedin.svg" alt="" width="24" height="24"></span><span class="orb-label">LinkedIn</span></a><a class="social-orb platform-email" href="mailto:raahil.mw@gmail.com"><span class="orb-disc"><img src="/assets/social/email.svg" alt="" width="24" height="24"></span><span class="orb-label">Email</span></a><a class="social-orb platform-instagram" href="https://www.instagram.com/raahilmw_/" target="_blank" rel="noreferrer"><span class="orb-disc"><img src="/assets/social/instagram.svg" alt="" width="24" height="24"></span><span class="orb-label">Instagram</span></a><a class="social-orb platform-discord" href="https://discord.com/users/591142560802668563" target="_blank" rel="noreferrer"><span class="orb-disc"><img src="/assets/social/discord.svg" alt="" width="24" height="24"></span><span class="orb-label">Discord</span></a></div><div class="platform-row"><span class="platform-link platform-hackthebox" data-unlisted title="Profile not linked"><img src="/assets/social/hackthebox.svg" alt="" width="24" height="24"><span>Hack The Box</span><small class="card-status">Not linked</small></span><a class="platform-link platform-tryhackme" href="https://tryhackme.com/p/raahil.mw" target="_blank" rel="noreferrer"><img src="/assets/social/tryhackme.svg" alt="" width="24" height="24"><span>TryHackMe</span></a><span class="platform-link platform-x" data-unlisted title="Profile not linked"><img src="/assets/social/x.svg" alt="" width="24" height="24"><span>X</span><small class="card-status">Not linked</small></span></div></div></section>
 <section class="section shell" id="selected"><div class="section-heading"><div><h2>Selected research.</h2></div><a class="underlined" href="/writeups/">All writeups</a></div><article class="research-card"><a class="research-cover" href="/writeups/image-fetcher-local-file-read/" aria-label="Read the image fetcher case study"><span class="mono">WEB SECURITY</span>
@@ -37,4 +71,4 @@
     <div class="map-contours" aria-hidden="true"></div>
     <svg class="map-trail" viewBox="0 0 500 262" preserveAspectRatio="none" aria-hidden="true">
       <path class="trail-guide" d="M-16 216 C30 218 30 168 75 168 S136 166 146 128 S157 68 208 68 S260 101 255 131 S260 188 312 188 S395 172 436 141 S487 125 520 132"/><path class="trail-ink" pathLength="1" d="M-16 216 C30 218 30 168 75 168 S136 166 146 128 S157 68 208 68 S260 101 255 131 S260 188 312 188 S395 172 436 141 S487 125 520 132"/>
-    </svg><a class="map-point map-testing" href="/writeups/"><i aria-hidden="true"></i><span>Penetration testing</span></a><a class="map-point map-hunting" href="/writeups/image-fetcher-local-file-read/"><i aria-hidden="true"></i><span>Bug hunting</span></a><a class="map-point map-automation" href="/projects/"><i aria-hidden="true"></i><span>Security automation</span></a></nav></section></main><footer class="site-footer shell"><a class="wordmark" href="/" aria-label="raahilmw home"><span class="brand-star" aria-hidden="true">✦</span>raahilmw<span class="brand-dot">.</span></a><span>2026 raahilmw</span><a href="https://medium.com/@raahil.mw" target="_blank" rel="noreferrer">Medium</a><a href="/contact/">Contact</a><button type="button" class="replay-arrival" aria-label="Replay opening animation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6M4 10a8 8 0 1 1 1 7"/></svg><span>Replay arrival</span></button></footer><div class="toast" role="status" aria-live="polite" id="toast"></div><script src="/app.js?v=7739d39203a4" defer></script><script src="/motion.js?v=050893056332" defer></script><script defer src="/artifact.js?v=55b3e63f29fa"></script><script defer src="/research-map.js?v=a7e92b971d97"></script></body></html>
+    </svg><a class="map-point map-testing" href="/writeups/"><i aria-hidden="true"></i><span>Penetration testing</span></a><a class="map-point map-hunting" href="/writeups/image-fetcher-local-file-read/"><i aria-hidden="true"></i><span>Bug hunting</span></a><a class="map-point map-automation" href="/projects/"><i aria-hidden="true"></i><span>Security automation</span></a></nav></section></main><footer class="site-footer shell"><a class="wordmark" href="/" aria-label="raahilmw home"><span class="brand-star" aria-hidden="true">✦</span>raahilmw<span class="brand-dot">.</span></a><span>2026 raahilmw</span><a href="https://medium.com/@raahil.mw" target="_blank" rel="noreferrer">Medium</a><a href="/contact/">Contact</a><button type="button" class="replay-arrival" aria-label="Replay opening animation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6M4 10a8 8 0 1 1 1 7"/></svg><span>Replay arrival</span></button></footer><div class="toast" role="status" aria-live="polite" id="toast"></div><script src="/app.js?v=7739d39203a4" defer></script><script src="/motion.js?v=6a2bd5e66cc9" defer></script><script defer src="/flipper.js?v=bbe54386aaf9"></script><script defer src="/research-map.js?v=a7e92b971d97"></script></body></html>

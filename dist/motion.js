@@ -17,7 +17,7 @@
   document.addEventListener('arrivalreveal',entrance);
   document.addEventListener('arrivalcomplete',entrance);
   document.addEventListener('arrivalstart',()=>hero?.classList.remove('hero-arrived'));
-  const observed=document.querySelectorAll('.home-connect,.research-card,.project-feature,.expertise-list,.research-map,.contact-record,.artifact-stage,.social-orbits');
+  const observed=document.querySelectorAll('.home-connect,.research-card,.project-feature,.expertise-list,.research-map,.contact-record,.flipper-specimen,.social-orbits');
   if('IntersectionObserver'in window){
     const observer=new IntersectionObserver(entries=>{
       entries.forEach(({target,isIntersecting})=>{
@@ -85,18 +85,48 @@
     if(reduced.matches)return;button.getAnimations().forEach(a=>a.cancel());
     button.animate([{boxShadow:'0 0 0 0 var(--edge)'},{boxShadow:'0 0 0 8px transparent'},{boxShadow:'0 0 0 0 transparent'}],{duration:550,easing:'ease-out'});
   }));
-  // A quiet chapter marker keeps your position in the long About page.
-  const chapters=[...document.querySelectorAll('.about-chapter,#about-me')];
-  if(chapters.length&&'IntersectionObserver'in window){
-    const active=new Set();
-    const observer=new IntersectionObserver(entries=>{
-      entries.forEach(e=>e.isIntersecting?active.add(e.target):active.delete(e.target));
-      const current=[...active].sort((a,b)=>a.getBoundingClientRect().top-b.getBoundingClientRect().top)[0];
-      if(!current)return;
-      document.querySelectorAll('.about-index a').forEach(a=>{
-        if(a.hash==='#'+current.id)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current');
+  // The last heading can reach the end of the page before it reaches the reading line.
+  const index = document.querySelector('.about-index');
+  if (index) {
+    const links = [...index.querySelectorAll('a[href^="#"]')];
+    const chapters = links.map(link => document.getElementById(link.hash.slice(1)));
+    let selected, scheduled = 0;
+    function highlight(link) {
+      if (!link || link === selected) return;
+      selected?.removeAttribute('aria-current');
+      link.setAttribute('aria-current', 'location');
+      selected = link;
+    }
+    function updateChapter() {
+      scheduled = 0;
+      const page = document.scrollingElement || document.documentElement;
+      const height = document.documentElement.clientHeight;
+      const bottom = page.scrollHeight - height;
+      if (bottom > 0 && page.scrollTop >= bottom - 2) {
+        highlight(links[links.length - 1]);
+        return;
+      }
+      const line = Math.min(150, height * .30);
+      let current = 0;
+      chapters.forEach((section, position) => {
+        if (section && section.getBoundingClientRect().top <= line) current = position;
       });
-    },{rootMargin:'-10% 0px -55% 0px'});
-    chapters.forEach(c=>observer.observe(c));
+      highlight(links[current]);
+    }
+    function scheduleChapter() {
+      if (!scheduled) scheduled = requestAnimationFrame(updateChapter);
+    }
+    function syncAnchor() {
+      const link = links.find(item => item.hash === location.hash);
+      if (link) highlight(link);
+      scheduleChapter();
+    }
+    window.addEventListener('scroll', scheduleChapter, {passive:true});
+    window.addEventListener('resize', scheduleChapter);
+    window.addEventListener('hashchange', syncAnchor);
+    window.addEventListener('pageshow', syncAnchor);
+    document.fonts?.ready.then(scheduleChapter);
+    if ('ResizeObserver' in window) new ResizeObserver(scheduleChapter).observe(document.body);
+    syncAnchor();
   }
 })();

@@ -82,7 +82,7 @@ def page(title,active,body,path='/',description=None):
     description = description or 'Raahil Muhammad Wildan — penetration testing, bug hunting, security automation, and published research.'
     output = OUT / path.lstrip('/') / 'index.html'
     output.parent.mkdir(parents=True,exist_ok=True)
-    extra = {'Home':f'<script defer src="{asset_url("artifact.js")}"></script>', 'About':f'<script src="/assets/matter.min.js" defer></script><script src="{asset_url("field.js")}" defer></script><script src="{asset_url("portrait-motion.js")}" defer></script>'}.get(active,'')
+    extra = {'Home':f'<script defer src="{asset_url("flipper.js")}"></script>', 'About':f'<script src="/assets/matter.min.js" defer></script><script src="{asset_url("field.js")}" defer></script><script src="{asset_url("portrait-motion.js")}" defer></script>'}.get(active,'')
     if active == 'Home':
         extra += f'<script defer src="{asset_url("research-map.js")}"></script>'
     if active == 'Contact':
@@ -95,7 +95,7 @@ def page(title,active,body,path='/',description=None):
     certificate_css = f'<link rel="stylesheet" href="{asset_url("certifications.css")}">' if active == 'Certifications' else ''
     contact_css = f'<link rel="stylesheet" href="{asset_url("contact.css")}">' if active == 'Contact' else ''
     profile_css = f'<link rel="stylesheet" href="{asset_url("profile.css")}">' if active in ('Home','About','Contact') else ''
-    home_css = f'<link rel="stylesheet" href="{asset_url("chip.css")}">' if active == 'Home' else ''
+    home_css = f'<link rel="stylesheet" href="{asset_url("flipper.css")}">' if active == 'Home' else ''
     intro = f'''<dialog id="site-intro" aria-label="Portfolio introduction">
 <div class="identity-frame" aria-hidden="true"><span>raahilmw<span class="identity-period">.</span></span><span class="identity-state">Reading signature</span></div>
 <div class="identity-stage" aria-hidden="true">
@@ -104,6 +104,8 @@ def page(title,active,body,path='/',description=None):
 </div>
 <div class="identity-footer"><button class="intro-skip" type="button" autofocus>Skip intro <kbd>Esc</kbd></button><div class="identity-meter" aria-hidden="true"><i></i></div></div>
 </dialog><script defer src="{asset_url('intro.js')}"></script>'''
+    if active == 'Home':
+        intro = ''  # On Home the device boots in place.
     output.write_text(f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>{escape(title)} — raahilmw</title><meta name="description" content="{escape(description,quote=True)}"><link rel="canonical" href="{ORIGIN}{path}"><script src="{asset_url('theme.js')}"></script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="{asset_url('assets/fonts.css')}"><link rel="stylesheet" href="{asset_url('style.css')}">{profile_css}<link rel="stylesheet" href="{asset_url('motion.css')}">{contact_css}{certificate_css}{case_css}{home_css}</head><body class="page-{active.lower()}">{header(active)}{intro}<main id="content">{body}</main>{footer()}<script src="{asset_url('app.js')}" defer></script><script src="{asset_url('motion.js')}" defer></script>{extra}</body></html>''')
 
@@ -139,18 +141,60 @@ def research_map():
       <path class="trail-guide" d="{trail}"/><path class="trail-ink" pathLength="1" d="{trail}"/>
     </svg>{points}</nav>'''
 
+FLIPPER_PARTS = [
+    ('shell', 'Top shell & buttons', 'The shell holds the buttons you use to navigate menus.'),
+    ('display', 'LCD screen', 'Shows menus, device status and the pixel dolphin.'),
+    ('board', 'Main board', 'Runs the software and connects the controls to the screen.'),
+    ('base', 'Bottom shell', 'Supports the board and protects the electronics inside.'),
+]
+
+
+def flipper_specimen():
+    assembled = asset_url('assets/flipper/assembled.webp')
+    rows = []
+    for index, (part, title, description) in enumerate(FLIPPER_PARTS):
+        image = asset_url(f'assets/flipper/{part}.webp')
+        rows.append(f'''<li class="part-row part-{part}" style="--fold:{150-100*index}%;--order:{index};--depth:{4-index}">
+          <div class="part-space" aria-hidden="true">
+            <div class="part-travel"><div class="part-sprite"><img data-part-src="{image}" alt="" width="960" height="540" decoding="async"></div></div>
+            <div class="part-registration"><i class="part-pin"></i></div>
+          </div>
+          <div class="part-note"><h3>{escape(title)}</h3><p>{escape(description)}</p></div>
+        </li>''')
+    leaders = ''.join('<path class="part-leader" pathLength="1" marker-end="url(#part-arrow)"/>' for part in FLIPPER_PARTS)
+    plain_notes = ''.join(f'<dt>{escape(title)}</dt><dd>{escape(desc)}</dd>' for _, title, desc in FLIPPER_PARTS)
+    return f'''<figure class="flipper-specimen" id="flipper">
+      <div class="flipper-stage"><div class="flipper-pedestal" aria-hidden="true"></div><div class="device-plane">
+        <img class="device-product" src="{assembled}" width="960" height="540" alt="White Flipper Zero with orange controls and a pixel dolphin on its screen." fetchpriority="high" decoding="async">
+        <img class="device-overlay device-lcd" src="{asset_url('assets/flipper/screen-off.webp')}" width="960" height="540" alt="" aria-hidden="true" decoding="async">
+        <img class="device-overlay device-blink" src="{asset_url('assets/flipper/blink.webp')}" width="960" height="540" alt="" aria-hidden="true" decoding="async">
+      </div></div>
+      <figcaption class="specimen-caption"><span>Flipper Zero</span><i aria-hidden="true"></i>
+        <button type="button" class="flipper-inspect" hidden aria-haspopup="dialog" aria-controls="flipper-inspector">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-5 9 5-9 5-9-5Zm1 5 8 4.5 8-4.5m-16 4 8 4 8-4"/></svg>Inspect</button>
+      </figcaption>
+      <noscript><details class="plain-flipper"><summary>Inspect parts</summary><dl>{plain_notes}</dl></details></noscript>
+    </figure>
+    <dialog class="flipper-inspector" id="flipper-inspector" aria-labelledby="flipper-title">
+      <div class="inspection-panel">
+        <header class="inspection-head"><h2 id="flipper-title">Inside the Flipper Zero</h2>
+          <button type="button" class="flipper-reassemble" autofocus><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 14 9 5 9-5M3 10l9 5 9-5M9 4l3 3 3-3m-3-2v5"/></svg>Reassemble</button>
+        </header>
+        <p class="inspection-status" role="status"></p>
+        <div class="cutaway-scene">
+          <div class="cutaway-rest" aria-hidden="true"><div class="part-sprite"><img src="{assembled}" width="960" height="540" alt="" decoding="async"></div></div>
+          <ol class="parts-list">{''.join(rows)}</ol>
+          <svg class="part-arrows" aria-hidden="true"><defs><marker id="part-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="m1 1.3 5.6 2.7L1 6.7" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"/></marker></defs>{leaders}</svg>
+        </div>
+      </div>
+    </dialog>'''
+
+
 home = f'''
 <section class="home-hero"><div class="hero-layout shell">
 <div class="hero-copy"><h1><span class="hero-line">Finding what</span> <span class="hero-line">others <em>miss.</em></span></h1><p>I’m <strong>raahilmw</strong>, a penetration tester, bug hunter, and builder of security automation.</p>
 <div class="hero-actions"><a class="button primary" href="/writeups/">{icon('book')}Explore my writeups</a><a class="underlined" href="/about/">About me</a></div></div>
-<div class="artifact-stage" id="artifact-stage">
-<div class="chip-viewport" role="img" aria-label="A layered hardware security chip with a silver fingerprint engraved in its lid.">
-  <div class="chip-projection"><div class="chip-ground"></div><div class="chip-stack">
-    <div class="chip-board"></div><div class="chip-pins"></div><div class="chip-package"></div><div class="chip-die"></div>
-    <div class="chip-lid"><i class="chip-mark"></i><i class="chip-fingerprint"></i><span class="chip-engraving">RMW<span>Secure element</span></span></div>
-  </div></div>
-</div>
-<button class="artifact-control" id="artifact-control" type="button" aria-pressed="false" hidden><i aria-hidden="true"></i>Inspect layers</button></div>
+{flipper_specimen()}
 </div><div class="hero-baseline shell"><span>@raahilmw</span><a class="scroll-cue" href="#selected"><i aria-hidden="true"></i>Scroll to explore</a></div></section>
 <section class="shell home-connect" aria-labelledby="home-connect-title"><div><h2 id="home-connect-title">Connect.</h2></div>{social_deck()}</section>
 <section class="section shell" id="selected"><div class="section-heading"><div><h2>Selected research.</h2></div><a class="underlined" href="/writeups/">All writeups</a></div>{article_card()}</section>
