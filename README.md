@@ -33,3 +33,5 @@ The Home research map mounts [Scroll Craft](https://github.com/nateherkai/scroll
 `dist/motion.css` and `dist/motion.js` provide the shared observatory finish: fine grain, orbital lines, an elastic navigation marker, layered writeup artwork, reactive social discs, and About chapter tracking. The original photo, research, social destinations, and tile physics remain intact. Three.js pauses behind the introduction, outside the viewport, and while the document is hidden. Decorative CSS loops pause offscreen. No scroll hijacking or sound is used.
 
 The new interactions are original implementations informed by [HorizonX](https://horizonx.so), [Grainient](https://grainient.supply), [Arc UI](https://uiarc.dev), [uberdesigner](https://uberdesigner.ai), and [Bencho](https://bencho.dev). No paid assets or component source from those services is bundled.
+
+The Contact page follows the supplied intro → social links → conversation band order. `dist/contact.css` and `dist/contact.js` style and operate the Gmail/Outlook/Yahoo/default-mail picker. Its action retains a mailto fallback, and the existing copy action can copy the email address.

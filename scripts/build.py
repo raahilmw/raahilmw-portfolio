@@ -85,7 +85,10 @@ def page(title,active,body,path='/',description=None):
     extra = {'Home':f'<script type="module" src="{asset_url("artifact.js")}"></script>', 'About':f'<script src="/assets/matter.min.js" defer></script><script src="{asset_url("field.js")}" defer></script><script src="{asset_url("portrait-motion.js")}" defer></script>'}.get(active,'')
     if active == 'Home':
         extra += f'<script defer src="{asset_url("assets/scrollcraft.js")}"></script><script defer src="{asset_url("research-map.js")}"></script>'
-    profile_css = f'<link rel="stylesheet" href="{asset_url("profile.css")}">' if active in ('Home','About') else ''
+    if active == 'Contact':
+        extra += f'<script defer src="{asset_url("contact.js")}"></script>'
+    contact_css = f'<link rel="stylesheet" href="{asset_url("contact.css")}">' if active == 'Contact' else ''
+    profile_css = f'<link rel="stylesheet" href="{asset_url("profile.css")}">' if active in ('Home','About','Contact') else ''
     intro = f'''<dialog id="site-intro" aria-label="Portfolio introduction">
 <div class="arrival-backdrop" aria-hidden="true"><i></i><i></i></div>
 <canvas class="arrival-particles" aria-hidden="true"></canvas>
@@ -95,7 +98,7 @@ def page(title,active,body,path='/',description=None):
 <div class="arrival-footer"><button class="intro-skip" type="button">Skip intro <kbd>Esc</kbd></button><div class="arrival-progress" aria-hidden="true"><i></i></div><span class="arrival-count" aria-hidden="true">000 / 100</span></div>
 </dialog><script src="{asset_url('intro.js')}"></script>'''
     output.write_text(f'''<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>{escape(title)} — raahilmw</title><meta name="description" content="{escape(description,quote=True)}"><link rel="canonical" href="{ORIGIN}{path}"><script src="{asset_url('theme.js')}"></script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/fonts.css"><link rel="stylesheet" href="{asset_url('style.css')}">{profile_css}<link rel="stylesheet" href="{asset_url('motion.css')}"></head><body class="page-{active.lower()}">{header(active)}{intro}<main id="content">{body}</main>{footer()}<script src="{asset_url('app.js')}" defer></script><script src="{asset_url('motion.js')}" defer></script>{extra}</body></html>''')
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>{escape(title)} — raahilmw</title><meta name="description" content="{escape(description,quote=True)}"><link rel="canonical" href="{ORIGIN}{path}"><script src="{asset_url('theme.js')}"></script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/fonts.css"><link rel="stylesheet" href="{asset_url('style.css')}">{profile_css}<link rel="stylesheet" href="{asset_url('motion.css')}">{contact_css}</head><body class="page-{active.lower()}">{header(active)}{intro}<main id="content">{body}</main>{footer()}<script src="{asset_url('app.js')}" defer></script><script src="{asset_url('motion.js')}" defer></script>{extra}</body></html>''')
 
 def portrait():
     photo = 'assets/raahil-portrait.webp'
@@ -243,6 +246,46 @@ page('Recon workflow','Projects',workflow,'/projects/recon-workflow/')
 certs=f'''<section class="page-intro shell">{label('LEARNING / ON THE RECORD')}<h1>Certifications<span class="red">.</span></h1><p>A place for qualifications,<br>with a way to verify them.</p><div class="intro-rule"><span class="mono">CREDENTIAL RECORD</span><span class="mono">ISSUER / QUALIFICATION / VERIFICATION</span></div></section><section class="shell certifications-index"><div class="empty-record"><span class="empty-record-mark" aria-hidden="true">+</span><h2>No certifications listed yet.</h2><p>Published credentials and their verification links will appear here.</p><a class="underlined" href="/about/">Explore my research practice</a></div></section>'''
 page('Certifications','Certifications',certs,'/certifications/')
 
-contact=f'''<section class="contact-page shell">{label('OPEN A CONVERSATION')}<h1>Let’s compare<br>notes<span class="red">.</span></h1><p class="contact-intro">Security research, interesting systems,<br>and questions worth following.</p><div class="contact-records"><div class="contact-record"><span class="mono">EMAIL</span><div><strong><a href="mailto:{EMAIL}">{EMAIL}</a></strong></div><button class="button" type="button" data-copy="{EMAIL}" data-message="Email copied.">{icon('copy')}Copy email</button></div><div class="contact-record"><span class="mono">THE HANDLE</span><div><strong>@raahilmw</strong><span>The handle I use for security research.</span></div><button class="button" type="button" data-copy="raahilmw">{icon('copy')}Copy handle</button></div><div class="contact-record"><span class="mono">THE WRITING</span><div><strong>Medium</strong><span>Published research and the full field notes.</span></div><a class="button" href="{MEDIUM}" target="_blank" rel="noreferrer">Visit my Medium</a></div></div></section>'''
+ARROW = '<svg class="cta-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M9 6h9v9"/></svg>'
+MAIL_TARGETS = [
+    ('Gmail', 'https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=' + EMAIL, 'Opens a draft in your browser'),
+    ('Outlook', 'https://outlook.live.com/mail/0/deeplink/compose?to=' + EMAIL, 'Opens a draft in your browser'),
+    ('Yahoo Mail', 'https://compose.mail.yahoo.com/?to=' + EMAIL, 'Opens a draft in your browser'),
+    ('Mail app', 'mailto:' + EMAIL, 'Opens your default mail app'),
+]
+mail_options = ''.join(
+    f'<li><a class="mail-option" href="{href}" target="_blank" rel="noreferrer">'
+    f'<span class="mail-option-name">{name}</span>'
+    f'<span class="mail-option-note">{note}</span>{ARROW}</a></li>'
+    for name, href, note in MAIL_TARGETS)
+
+contact=f'''<section class="contact-page shell">
+{label('OPEN A CONVERSATION')}
+<h1>Let’s compare<br>notes<span class="red">.</span></h1>
+<p class="contact-intro">Bug bounty, security research,<br>and systems worth taking apart.</p>
+<div class="intro-rule"><span class="mono">DIRECT LINES</span><span class="mono">EMAIL / HANDLE / WRITING</span></div>
+</section>
+
+<section class="shell contact-connect" data-rise>
+<div class="contact-connect-head">{label('Find me online')}<h2>Let’s connect<span class="red">.</span></h2></div>
+{social_deck()}
+</section>
+
+<section class="cta-band" data-rise aria-labelledby="cta-title">
+<div class="shell cta-inner">
+<div class="cta-copy" data-wipe>
+<span class="cta-eyebrow">Start a conversation</span>
+<h2 id="cta-title"><span class="cta-line">Got a project in mind?</span><span class="cta-line">Let’s talk<span class="cta-dot">.</span></span></h2>
+</div>
+<a class="cta-link" href="mailto:{EMAIL}" data-mail-open aria-haspopup="dialog" aria-controls="mail-picker"><span>Get in touch</span>{ARROW}</a>
+</div>
+</section>
+
+<dialog id="mail-picker" class="mail-picker" aria-labelledby="mail-picker-title">
+<div class="mail-picker-head"><span class="mono">SEND TO {EMAIL}</span><h2 id="mail-picker-title">Pick where to write<span class="red">.</span></h2></div>
+<ul class="mail-options">{mail_options}</ul>
+<div class="mail-picker-foot"><button class="text-link" type="button" data-copy="{EMAIL}" data-message="Email copied." data-close>{icon('copy')}Or just copy the address</button><button class="text-link" type="button" data-close>Cancel</button></div>
+</dialog>'''
+
 page('Contact','Contact',contact,'/contact/')
 print('Built 8 portfolio pages.')
