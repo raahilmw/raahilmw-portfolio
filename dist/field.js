@@ -2,6 +2,7 @@
 (() => {
   const board = document.querySelector('.field-board');
   if (!board || !window.Matter) return;
+  const profile = document.querySelector('.researcher-print');
   const { Engine, Bodies, Body, Composite, Constraint, Sleeping } = window.Matter;
   const engine = Engine.create({ enableSleeping: true, positionIterations: 8 });
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -10,12 +11,15 @@
   const gutter = 6;
   let width = 0, height = 0, frame = 0, previousTime = 0, remainder = 0;
   let dropped = false, visible = true, topLayer = 1;
+  let floor = null, lastScrollY = window.scrollY;
   engine.gravity.y = 0;
 
   function draw(tile) {
     const { position, angle } = tile.body;
     tile.el.style.transform = 'translate(' + (position.x - tile.w / 2) + 'px,' +
       (position.y - tile.h / 2) + 'px) rotate(' + angle + 'rad)';
+    const fadeDistance = Math.min(window.innerHeight * .72, 620);
+    tile.el.style.opacity = dropped ? clamp((height + fadeDistance - position.y) / fadeDistance, 0, 1) : 1;
   }
   function clamp(value, low, high) {
     return Math.max(low, Math.min(value, high));
@@ -103,7 +107,7 @@
       remainder -= step;
     }
     tiles.forEach(draw);
-    if (!dropped || tiles.some(({ body, hold }) => hold || (!body.isStatic && !body.isSleeping))) {
+    if (!dropped || tiles.some(({ body, hold }) => hold || body.position.y < height + Math.min(window.innerHeight * .72, 620))) {
       frame = requestAnimationFrame(advance);
     } else {
       previousTime = remainder = 0;
@@ -136,6 +140,7 @@
     if (!width) return;
     dropped = false;
     engine.gravity.y = 0;
+    if (floor) Composite.add(engine.world, floor);
     stop();
     tiles.forEach(tile => {
       if (tile.hold) return;
@@ -150,14 +155,16 @@
   function drop() {
     if (dropped || !width) return;
     dropped = true;
-    engine.gravity.y = 1;
+    engine.gravity.y = .45;
+    if (floor) Composite.remove(engine.world, floor);
     board.dataset.state = 'falling';
     tiles.forEach(tile => {
       if (tile.hold) return;
       Body.setStatic(tile.body, false);
       Sleeping.set(tile.body, false);
       // The starting tilt determines the direction each tile tumbles.
-      Body.setAngularVelocity(tile.body, Math.sign(tile.body.angle) * .009);
+      Body.setVelocity(tile.body, { x: Math.sin(tile.phase) * 1.1, y: .5 + (tile.phase % 2) });
+      Body.setAngularVelocity(tile.body, Math.sin(tile.phase) * .02);
     });
     run();
   }
@@ -175,12 +182,13 @@
     Composite.clear(engine.world, false);
     Engine.clear(engine);
     const wall = { isStatic: true, friction: .65, restitution: .12 };
+    floor = Bodies.rectangle(w / 2, h + 40, w + 160, 80, wall);
     Composite.add(engine.world, [
-      Bodies.rectangle(w / 2, h + 40, w + 160, 80, wall),
       Bodies.rectangle(w / 2, -40, w + 160, 80, wall),
       Bodies.rectangle(-40, h / 2, 80, h + 160, wall),
       Bodies.rectangle(w + 40, h / 2, 80, h + 160, wall)
     ]);
+    if (!dropped) Composite.add(engine.world, floor);
     tiles.forEach((tile, index) => {
       tile.body = Bodies.rectangle(w / 2, h / 2, tile.w, tile.h, {
         friction: .55, frictionAir: .014, restitution: .20, chamfer: { radius: 5 }
@@ -189,7 +197,7 @@
       if (dropped && before[index]) {
         tile.anchor = { x: before[index].ax*w, y: before[index].ay*h, angle: before[index].tilt };
         Body.setAngle(tile.body, before[index].angle);
-        move(tile, before[index].x * w, before[index].y * h);
+        Body.setPosition(tile.body, { x: before[index].x * w, y: before[index].y * h });
       } else home(tile);
     });
     board.dataset.ready = '';
@@ -248,8 +256,17 @@
   });
   function onScroll() {
     const y = Math.max(0, window.scrollY);
+    const delta = y - lastScrollY;
+    lastScrollY = y;
     if (y <= 2 && dropped) reset();
-    else if (y >= 22 && !dropped) drop();
+    else if (!dropped && y > 40 && profile && profile.getBoundingClientRect().top < window.innerHeight * .55) {
+      drop();
+      if (delta > 0 && !reduced.matches) tiles.forEach(tile => Body.translate(tile.body, { x: 0, y: delta }));
+    }
+    else if (dropped && delta > 0 && !reduced.matches) {
+      tiles.forEach(tile => Body.translate(tile.body, { x: 0, y: delta }));
+      run();
+    }
   }
   window.addEventListener('scroll', onScroll, { passive: true });
   document.addEventListener('visibilitychange', () => document.hidden ? stop() : run());
@@ -260,7 +277,7 @@
   new IntersectionObserver(([entry]) => {
     visible = entry.isIntersecting;
     if (visible) run(); else stop();
-  }).observe(board);
+  }, { rootMargin: window.innerHeight + 'px 0px ' + window.innerHeight + 'px 0px' }).observe(board);
   // Restored scroll positions should agree with a visit that scrolled here.
-  if (window.scrollY >= 22) drop();
+  onScroll();
 })();
