@@ -8,7 +8,7 @@ Manrope is the primary face; Instrument Serif italic gives the Home emphasis and
 
 ## Motion
 
-The focal sequence is a first-session, eight-second arrival: a personal terminal, a surface made of particles, the four-point star, then the header and hero. The hero resolves before the curtain exposes it. Skip and Escape always close the dialog; a footer control allows replay. Hash navigation, writeup pages, and reduced motion bypass automatic playback. Reading pages open directly into the article; the footer replay remains available.
+The focal sequence is a first-session, eight-second arrival: a personal terminal, a surface made of particles, the four-point star, then the header and hero. The hero resolves before the curtain exposes it. Skip and Escape always close the dialog; a footer control allows replay. Hash navigation, writeup pages, and reduced motion bypass automatic playback. Reading pages open directly into the article; the footer replay remains available. The image-fetcher article contains one finite request trace that explains the observed chain with a travelling signal, a file-stack reveal, and a return path. It supports pause, replay and individual steps; narrow screens use diagonal geometry. No article text is hidden for an entrance animation.
 
 Use the shared exponential settle curve for supporting motion. Navigation tracks a fixed link; hover surfaces respond within stable hit targets. The writeup artwork opens its layers. About retains its draggable Matter.js field and scroll-triggered gravity. The real portrait stays photographic.
 

@@ -234,6 +234,9 @@ writeups=f'''<section class="page-intro shell"><h1>Writeups<span class="red">.</
 page('Writeups','Writeups',writeups,'/writeups/')
 
 article_body = (ROOT / 'content/writeups/image-fetcher.html').read_text().replace('{{REPORT_URL}}', REPORT).replace('{{ARTICLE_URL}}', ORIGIN + ARTICLE)
+for evidence in (OUT / 'assets/writeups/image-fetcher').glob('*.png'):
+    local_path = '/' + evidence.relative_to(OUT).as_posix()
+    article_body = article_body.replace('"' + local_path + '"', '"' + asset_url(local_path.lstrip('/')) + '"')
 page('Image fetcher to arbitrary file read','Writeups',article_body,ARTICLE,'A bug bounty writeup about an image-to-Base64 endpoint that exposed local files, with a reward response, privacy-edited screenshots, and clear reproduction notes.')
 
 projects=f'''<section class="page-intro shell">{label('THE WORKBENCH')}<h1>Projects<span class="red">.</span></h1><p>Small experiments, useful tools,<br>and ideas put into practice.</p><div class="intro-rule"><span class="mono">TOOLS &amp; EXPERIMENTS</span><span class="mono">BUILD / OBSERVE / REFINE</span></div></section><section class="shell projects-index"><article class="project-feature"><div class="project-art" aria-hidden="true"><span class="mono">WORKFLOW / A SMALL EXPERIMENT</span><div class="project-flow"><span>MAP</span><i></i><span>PROBE</span><i></i><span>CONNECT</span><i></i><span>REPORT</span></div><span class="handwritten">make room for human judgment.</span></div><div class="project-copy"><span class="eyebrow">PORTFOLIO EXPERIMENT</span><h2>A workflow,<br>made visible.</h2><p>An interactive browser-only demonstration of a recon pipeline. Sample data shows how a sequence of steps becomes a readable investigation queue.</p><div class="tag-list"><span>Interactive demo</span><span>Automation</span></div><a class="button" href="/projects/recon-workflow/">Open the experiment</a></div></article></section>'''
