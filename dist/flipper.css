@@ -1,33 +1,16 @@
-/* The Home specimen sits in a dim studio, picked out by the warm LCD. */
-.page-home {
-  --device-amber: #ffc08e;
-  --accent: var(--device-amber);
-}
-[data-theme="light"] .page-home {
-  --device-amber: #924715;
-}
-.home-hero {
-  --accent: var(--device-amber);
-  --button: #f8b784;
-  --button-ink: #2b1c13;
-}
-[data-theme="light"] .home-hero {--button:#8d471e; --button-ink:#fff9f4}
+/* Light from the same blue palette as the rest of the portfolio. */
 .home-hero.home-hero::before {
-  background-position: center 57%;
-  filter: saturate(.25);
+  background:radial-gradient(ellipse at 74% 48%,color-mix(in srgb,var(--accent) 10%,transparent),transparent 42%);
+  filter:none;
 }
 .home-hero.home-hero::after {
-  background: linear-gradient(0deg,var(--bg) 0%,transparent 31%),
-    radial-gradient(ellipse at 75% 45%,#1728394d,transparent 44%),
-    linear-gradient(100deg,#0b111bfa 5%,#0b1522eb 40%,#101c2acf 76%,#101b2aea);
-}
-[data-theme="light"] .home-hero.home-hero::after {
-  background: linear-gradient(0deg,var(--bg),transparent 40%),
-    linear-gradient(105deg,#eff3f7fa 15%,#edf2f6ed 50%,#d9e1e8e3);
+  background-image:radial-gradient(color-mix(in srgb,var(--accent) 22%,transparent) .72px,transparent 1px);
+  background-size:19px 19px;
+  mask-image:radial-gradient(ellipse 40% 68% at 75% 50%,#000 10%,transparent 88%);
 }
 .page-home .hero-layout {grid-template-columns:minmax(0,.96fr) minmax(0,1.04fr);gap:clamp(10px,2vw,36px)}
 .flipper-specimen {position:relative; margin:0; min-width:0; width:100%; align-self:center}
-.flipper-stage {position:relative; display:grid; place-items:center; isolation:isolate; perspective:1100px; touch-action:pan-y}
+.flipper-stage {position:relative; display:grid; place-items:center; isolation:isolate; width:min(82%,420px); margin-inline:auto; touch-action:pan-y}
 .flipper-stage::before {
   content:"";position:absolute;inset:-9% -1% -12%;z-index:-1;pointer-events:none;
   background:radial-gradient(ellipse at 57% 51%,#e3eaf221,transparent 63%);
@@ -37,30 +20,33 @@
   background:radial-gradient(ellipse at center,#030812a1 0%,#10182361 38%,transparent 70%);transform:rotate(-5deg)
 }
 [data-theme="light"] .flipper-pedestal {opacity:.55}
-.device-plane {position:relative;width:100%;transform:rotateX(var(--pitch,0deg)) rotateY(var(--yaw,0deg));transition:transform .25s ease-out}
-.device-product {display:block;width:100%;height:auto}
-.device-lcd,.device-blink {position:absolute;inset:0;pointer-events:none;opacity:0;width:100%;height:auto}
-.flipper-specimen.boot-pending .device-lcd {opacity:1}
-.specimen-caption {width:84%;margin:clamp(.55rem,1.4vw,1.15rem) auto 0;display:flex;align-items:center;gap:14px;color:var(--ink)}
+.device-plane {
+  display:grid;place-items:center;position:relative;width:100%;aspect-ratio:5/4;
+  padding:0;border:0;background:none;color:inherit;touch-action:pan-y;
+}
+.device-plane:disabled {cursor:default}.device-plane:enabled {cursor:crosshair}
+.device-product {display:block;width:100%;height:auto;pointer-events:none}
+.device-canvas {position:absolute;inset:0;width:100%;height:100%;visibility:hidden;pointer-events:none}
+.device-plane.has-frame .device-canvas {visibility:visible}
+.device-plane.has-frame .device-product {visibility:hidden}
+.specimen-caption {width:min(82%,420px);margin:.15rem auto 0;display:flex;align-items:center;gap:10px;color:var(--ink)}
+.rotation-toggle {display:grid;place-items:center;flex:none;width:44px;height:44px;padding:0;border:1px solid transparent;border-radius:50%;color:var(--muted);background:none}
+.rotation-toggle svg {width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}
+.rotation-toggle .play-mark,.rotation-toggle.is-paused .pause-mark {display:none}
+.rotation-toggle.is-paused .play-mark {display:block}
+.rotation-toggle:is(:hover,:focus-visible){color:var(--accent);border-color:var(--edge)}
+.specimen-caption [hidden]{display:none}
 .specimen-caption>span {font:500 clamp(1rem,1.7vw,1.4rem)/1.2 var(--sans);letter-spacing:-.035em;white-space:nowrap}
-.specimen-caption>i {height:1px;flex:1;background:var(--edge)}
+.specimen-caption>i {min-width:0;height:1px;flex:1;background:var(--edge)}
 .flipper-inspect,.flipper-reassemble {
   display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;
   padding:6px 15px;color:var(--ink);background:var(--panel);border:1px solid var(--edge);border-radius:24px;font:500 .84rem/1.3 var(--sans);
 }
-.flipper-inspect svg,.flipper-reassemble svg {width:17px;height:17px;color:var(--device-amber)}
-.flipper-inspect:is(:hover,:focus-visible),.flipper-reassemble:is(:hover,:focus-visible){border-color:var(--device-amber);background:var(--raised)}
+.flipper-inspect svg,.flipper-reassemble svg {width:17px;height:17px;color:var(--accent)}
+.flipper-inspect:is(:hover,:focus-visible),.flipper-reassemble:is(:hover,:focus-visible){border-color:var(--accent);background:var(--raised)}
 .plain-flipper{margin:1rem auto;max-width:36ch}.plain-flipper dt{font-weight:700;margin-top:.8rem}.plain-flipper dd{margin:0}
-@media(prefers-reduced-motion:no-preference){
-  .flipper-specimen.is-booting .device-product{animation:device-arrive 1.12s var(--settle) backwards}
-  .flipper-specimen.is-booting .device-lcd{animation:backlight-on .8s .05s both}
-  .flipper-specimen.is-booting .device-blink{animation:dolphin-blink .18s 1.1s steps(1,end) both}
-  @keyframes device-arrive{from{opacity:.5;filter:brightness(.8)}}
-  @keyframes backlight-on{0%,22%{opacity:1}70%{opacity:.08}100%{opacity:0}}
-  @keyframes dolphin-blink{0%,100%{opacity:0}15%,80%{opacity:1}}
-}
 .flipper-inspector {
-  --guide:#f6af74;
+  --guide:var(--accent);
   position:fixed;inset:0;width:min(900px,calc(100% - 32px));max-width:none;
   max-height:calc(100dvh - 32px);overflow:auto;overscroll-behavior:contain;margin:auto;
   padding:0;border:1px solid var(--edge);border-radius:16px;color:var(--ink);background:var(--panel);
@@ -69,7 +55,6 @@
 .flipper-inspector:not([open]) {display:none}
 .flipper-inspector::backdrop {background:#060c16bc}
 html:has(.flipper-inspector[open]) {overflow:hidden;scrollbar-gutter:stable}
-[data-theme="light"] .flipper-inspector {--guide:#a25724}
 .inspection-panel {padding:clamp(12px,2.7vw,30px);background:
   radial-gradient(ellipse at 32% 56%,color-mix(in srgb,var(--edge) 52%,transparent),transparent 61%),var(--panel)}
 .inspection-head {display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--edge);padding-bottom:clamp(10px,1.6vw,18px)}
@@ -118,7 +103,7 @@ html:has(.flipper-inspector[open]) {overflow:hidden;scrollbar-gutter:stable}
 @media(max-width:700px){
   .page-home .hero-layout{gap:1rem}
   .flipper-specimen{max-width:510px;margin:0 auto 1.6rem}
-  .flipper-stage{max-width:440px;margin:auto}
+  .flipper-stage,.specimen-caption{width:min(80%,320px);margin-inline:auto}
   .specimen-caption{margin-top:0}
   .cutaway-scene{--art-column:53%}
 }

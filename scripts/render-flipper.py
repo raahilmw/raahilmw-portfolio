@@ -1,4 +1,4 @@
-"""Render the illustrative device plates with Blender 4.x and Pillow.
+"""Render the product plates and the 72-view turntable with Blender 4.x and Pillow.
 
     blender -b -t 4 --python scripts/render-flipper.py
 """
@@ -31,26 +31,26 @@ def material(name, color, rough=.45, metal=0):
     return m
 
 
-cream = material('Pearl ABS', (.87, .825, .735), .32)
-inside = material('Interior ABS', (.64, .62, .555), .48)
-orange = material('Tangerine controls', (.82, .106, .004), .39)
-deep_orange = material('Button grooves', (.45, .056, .004), .38)
-ink = material('Printed orange', (.77, .115, .007), .43)
-plastic = material('Graphite gasket', (.025, .032, .034), .47)
-glass = material('LCD amber', (.78, .16, .008), .46)
-pixel_ink = material('LCD pixels', (.045, .019, .004), .63)
-green = material('Solder mask', (.055, .20, .135), .36)
-traces = material('Board tracks', (.11, .33, .226), .38)
+housing = material('Frost-blue ABS', (.34, .51, .83), .32)
+inside = material('Interior blue ABS', (.18, .30, .53), .48)
+control = material('Indigo controls', (.052, .105, .40), .35)
+groove = material('Button grooves', (.015, .036, .12), .38)
+ink = material('Midnight blueprint ink', (.017, .041, .147), .43)
+plastic = material('Blue-black gasket', (.015, .023, .051), .47)
+glass = material('Backlit blue LCD', (.17, .44, .84), .40)
+pixel_ink = material('LCD pixels', (.003, .011, .045), .63)
+board_mask = material('Slate-blue solder mask', (.034, .103, .190), .36)
+traces = material('Board tracks', (.121, .274, .385), .38)
 gold = material('Plated contacts', (.70, .42, .105), .28, .55)
 tin = material('Solder', (.54, .59, .59), .26, .65)
 silicon = material('Molded IC', (.039, .043, .05), .55)
-silk = material('Silkscreen', (.65, .70, .59), .52)
-satin = material('Shield', (.38, .44, .43), .31, .56)
+silk = material('Silkscreen', (.56, .68, .77), .52)
+satin = material('Shield', (.29, .36, .44), .31, .56)
 port = material('Port interior', (.014, .017, .02), .50)
-for m in (glass,pixel_ink,orange):
+for m in (glass,pixel_ink,control):
     m.node_tree.nodes['Principled BSDF'].inputs['Specular IOR Level'].default_value=.14
 flex = material('Polyimide', (.67, .26, .025), .42)
-rubber = material('Switch surround', (.38, .10, .016), .51)
+rubber = material('Switch surround', (.018, .037, .105), .51)
 
 
 def mesh(name, vertices, faces, mat):
@@ -99,7 +99,7 @@ def cut(obj, cutter):
 
 
 def bevel(obj, width, segments=3):
-    if obj.name.startswith(('Lower enclosure','Upper enclosure','Orange directional','OK button','Back button')):
+    if obj.name.startswith(('Lower enclosure','Upper enclosure','Directional','OK button','Back button')):
         for poly in obj.data.polygons:
             poly.use_smooth=True
     if width:
@@ -163,7 +163,7 @@ def lettering(value, loc, size, mat, front=False, regular=False):
 
 # Bottom tray has a visible interior, wall thickness, screw bosses and moulding ribs.
 outer=loft('Lower enclosure', [(-.51,5.48,2.30,.35),(-.46,5.64,2.46,.37),
-    (-.33,5.85,2.60,.38),(-.18,5.97,2.68,.40),(.185,5.97,2.68,.40)],cream)
+    (-.33,5.85,2.60,.38),(-.18,5.97,2.68,.40),(.185,5.97,2.68,.40)],housing)
 cut(outer,loft('Inside opening',[(-.342,5.59,2.31,.29),(.5,5.68,2.40,.31)],inside))
 bevel(outer,.027)
 rect('Tray floor',0,0,-.337,5.52,2.24,.017,.28,inside,.006)
@@ -183,7 +183,7 @@ rect('Side indicator',1.50,-1.35,-.039,.105,.016,.064,.006,inside,.003)
 
 # Flat illustrative PCB with an intentionally simplified component layout.
 part='board'
-pcb=rect('Main board',0,0,.233,5.54,2.24,.105,.30,green,.024)
+pcb=rect('Main board',0,0,.233,5.54,2.24,.105,.30,board_mask,.024)
 random.seed(43)
 for side in (-1,1):
     for i in range(15):
@@ -218,9 +218,9 @@ lettering('FZ',(-2.21,.57,.293),.18,silk,regular=True)
 # The LCD and the controls on the upper shell are separate visual layers.
 part='display'
 sx,sy=-.84,.11
-rect('LCD carrier',sx,sy,.375,2.49,1.60,.105,.105,green,.025)
+rect('LCD carrier',sx,sy,.375,2.49,1.60,.105,.105,board_mask,.025)
 rect('Black LCD surround',sx,sy,.500,2.34,1.49,.230,.115,plastic,.030)
-rect('Amber glass',sx,sy,.617,2.191,1.344,.023,.064,glass,.010)
+rect('Backlit display',sx,sy,.617,2.191,1.344,.023,.064,glass,.010)
 rect('Flex ribbon',-.45,-.80,.353,.62,.36,.025,.018,flex,.005)
 for i in range(11):
     rect('Flex contact',-.68+i*.045,-.88,.369,.016,.16,.005,.004,gold,.001)
@@ -263,27 +263,27 @@ mesh('Dolphin pixels',verts,faces,pixel_ink)
 
 part='shell'
 lid=loft('Upper enclosure',[(.188,5.97,2.68,.40),(.23,5.975,2.69,.40),
-     (.43,5.89,2.65,.41),(.54,5.74,2.54,.41),(.608,5.57,2.38,.39),(.631,5.44,2.26,.375)],cream)
+     (.43,5.89,2.65,.41),(.54,5.74,2.54,.41),(.608,5.57,2.38,.39),(.631,5.44,2.26,.375)],housing)
 cut(lid,loft('LCD aperture',[(.05,2.29,1.44,.120),(.58,2.29,1.44,.12),
-     (.65,2.36,1.51,.14),(.9,2.36,1.51,.14)],cream,(sx,sy)))
+     (.65,2.36,1.51,.14),(.9,2.36,1.51,.14)],housing,(sx,sy)))
 bevel(lid,.020)
 cx,cy=1.28,.20
 cyl('D-pad recess',cx,cy,.637,.683,.045,inside,.024,96)
 cyl('D-pad gasket',cx,cy,.652,.639,.047,rubber,.022,96)
-cyl('Orange directional rocker',cx,cy,.699,.617,.115,orange,.040,96)
-cyl('OK groove',cx,cy,.755,.236,.022,deep_orange,.010)
-cyl('OK button',cx,cy,.772,.214,.052,orange,.025)
+cyl('Directional rocker',cx,cy,.699,.617,.115,control,.040,96)
+cyl('OK groove',cx,cy,.755,.236,.022,groove,.010)
+cyl('OK button',cx,cy,.772,.214,.052,control,.025)
 for a in range(4):
     theta=a*pi/2; xx,yy=cos(theta),sin(theta)
     # Low profile chevrons rather than printed legends.
     p=[(cx+xx*.40-yy*.082,cy+yy*.40+xx*.082,.760),
        (cx+xx*.51,cy+yy*.51,.760),
        (cx+xx*.40+yy*.082,cy+yy*.40-xx*.082,.760)]
-    line('Directional chevron',p,.014,deep_orange)
+    line('Directional chevron',p,.014,groove)
 cyl('Back recess',2.15,-.55,.641,.221,.043,inside,.021)
-cyl('Back button',2.15,-.55,.680,.192,.076,orange,.031)
+cyl('Back button',2.15,-.55,.680,.192,.076,control,.031)
 line('Back icon',[(2.22,-.59,.721),(2.19,-.51,.721),(2.10,-.51,.721),
-     (2.133,-.481,.721),(2.10,-.51,.721),(2.133,-.545,.721)],.011,deep_orange)
+     (2.133,-.481,.721),(2.10,-.51,.721),(2.133,-.545,.721)],.011,groove)
 cyl('Indicator lens',.517,-.64,.638,.037,.02,plastic,.008)
 
 # Neutral product lighting remains registered across all exported states.
@@ -352,16 +352,42 @@ with TemporaryDirectory() as temp:
     patch=Image.new('RGBA',(960,540))
     pd=ImageDraw.Draw(patch)
     pd.polygon(points,fill=sample)
-    pd.line([camera_pixel(lcd_point(74,25.8)),camera_pixel(lcd_point(76.9,25.8))],fill=(94,64,28,255),width=2)
+    pd.line([camera_pixel(lcd_point(74,25.8)),camera_pixel(lcd_point(76.9,25.8))],fill=(29,46,84,255),width=2)
     patch.save(OUT/'blink.webp',lossless=True,method=6)
     # A registered, antialiased glass overlay for the first display power-up.
     off=Image.new('RGBA',(1920,1080))
     od=ImageDraw.Draw(off)
     rim=[camera_pixel((sx+x,sy+y,.632)) for x,y in rounded(2.17,1.32,.068)]
-    od.polygon([(2*x,2*y) for x,y in rim],fill=(54,51,46,255))
+    od.polygon([(2*x,2*y) for x,y in rim],fill=(32,42,65,255))
     off.resize((960,540),Image.Resampling.LANCZOS).save(OUT/'screen-off.webp',lossless=True,method=6)
     for name,p in {'button':(cx,cy,.78),'screen':(sx,sy,.629),'board':(-1.9,-.52,.32),
                    'base':(2.45,-.70,-.1),'eye':lcd_point(75,25)}.items():
         print('ANCHOR',name,camera_pixel(p),flush=True)
     print('LCD corners',[camera_pixel((sx+x,sy+y,.63)) for x,y in [
         (-1.10,.672),(1.1,.672),(1.1,-.672),(-1.1,-.672)]], flush=True)
+
+    # Turn the complete device under the same stationary lights and camera.
+    # The 5:4 cell keeps profile angles inside the frame. The poster is the
+    # central 480×270 region of frame zero, with 57 px headroom on either side.
+    cell_w, cell_h, columns, rows = 480, 384, 9, 8
+    atlas = Image.new('RGBA', (cell_w*columns, cell_h*rows))
+    tabletop = bpy.data.objects.new('Turntable', None)
+    scene.collection.objects.link(tabletop)
+    for objects in parts.values():
+        for component in objects:
+            component.hide_render = False
+            component.parent = tabletop
+    scene.cycles.samples = 18
+    scene.render.resolution_x = cell_w
+    scene.render.resolution_y = cell_h
+    scene.render.filepath = str(Path(temp)/'turntable-frame.png')
+    for frame in range(columns*rows):
+        tabletop.rotation_euler.z = 2*pi*frame/(columns*rows)
+        bpy.ops.render.render(write_still=True)
+        with Image.open(scene.render.filepath) as raw:
+            tile = raw.convert('RGBA')
+        bounds = tile.getchannel('A').getbbox()
+        if not bounds or min(bounds[:2]) < 2 or bounds[2] > cell_w-2 or bounds[3] > cell_h-2:
+            raise RuntimeError(f'Clipped turntable frame {frame}: {bounds}')
+        atlas.paste(tile, ((frame%columns)*cell_w, (frame//columns)*cell_h))
+    atlas.save(OUT/'turntable.webp', quality=77, method=6)

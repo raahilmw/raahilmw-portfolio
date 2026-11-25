@@ -82,7 +82,7 @@ def page(title,active,body,path='/',description=None):
     description = description or 'Raahil Muhammad Wildan — penetration testing, bug hunting, security automation, and published research.'
     output = OUT / path.lstrip('/') / 'index.html'
     output.parent.mkdir(parents=True,exist_ok=True)
-    extra = {'Home':f'<script defer src="{asset_url("flipper.js")}"></script>', 'About':f'<script src="/assets/matter.min.js" defer></script><script src="{asset_url("field.js")}" defer></script><script src="{asset_url("portrait-motion.js")}" defer></script>'}.get(active,'')
+    extra = {'Home':f'<script defer src="{asset_url("flipper.js")}"></script><script defer src="{asset_url("flipper-motion.js")}"></script>', 'About':f'<script src="/assets/matter.min.js" defer></script><script src="{asset_url("field.js")}" defer></script><script src="{asset_url("portrait-motion.js")}" defer></script>'}.get(active,'')
     if active == 'Home':
         extra += f'<script defer src="{asset_url("research-map.js")}"></script>'
     if active == 'Contact':
@@ -100,12 +100,19 @@ def page(title,active,body,path='/',description=None):
 <div class="identity-frame" aria-hidden="true"><span>raahilmw<span class="identity-period">.</span></span><span class="identity-state">Reading signature</span></div>
 <div class="identity-stage" aria-hidden="true">
   <div class="identity-reader"><div class="identity-glass"><i class="identity-ghost"></i><i class="identity-print"></i><i class="identity-beam"></i></div><i class="reader-corner"></i><i class="reader-corner"></i></div>
-  <div class="identity-copy"><span class="identity-prompt">~ / whoami</span><strong class="identity-handle">raahilmw</strong></div>
+  <div class="intro-terminal">
+    <div class="terminal-title"><b>raahilmw@observatory</b><span>/ bash</span></div>
+    <div class="terminal-session">
+      <div class="terminal-command command-one"><i>~ $</i> whoami</div>
+      <div class="terminal-output output-one">raahilmw</div>
+      <div class="terminal-command command-two"><i>~ $</i> sudo -u raahilmw ./open</div>
+      <div class="terminal-output output-two">Field notes mounted.</div>
+      <div class="terminal-ready">~/portfolio $ <i></i></div>
+    </div>
+  </div>
 </div>
 <div class="identity-footer"><button class="intro-skip" type="button" autofocus>Skip intro <kbd>Esc</kbd></button><div class="identity-meter" aria-hidden="true"><i></i></div></div>
 </dialog><script defer src="{asset_url('intro.js')}"></script>'''
-    if active == 'Home':
-        intro = ''  # On Home the device boots in place.
     output.write_text(f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>{escape(title)} — raahilmw</title><meta name="description" content="{escape(description,quote=True)}"><link rel="canonical" href="{ORIGIN}{path}"><script src="{asset_url('theme.js')}"></script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="{asset_url('assets/fonts.css')}"><link rel="stylesheet" href="{asset_url('style.css')}">{profile_css}<link rel="stylesheet" href="{asset_url('motion.css')}">{contact_css}{certificate_css}{case_css}{home_css}</head><body class="page-{active.lower()}">{header(active)}{intro}<main id="content">{body}</main>{footer()}<script src="{asset_url('app.js')}" defer></script><script src="{asset_url('motion.js')}" defer></script>{extra}</body></html>''')
 
@@ -164,12 +171,14 @@ def flipper_specimen():
     leaders = ''.join('<path class="part-leader" pathLength="1" marker-end="url(#part-arrow)"/>' for part in FLIPPER_PARTS)
     plain_notes = ''.join(f'<dt>{escape(title)}</dt><dd>{escape(desc)}</dd>' for _, title, desc in FLIPPER_PARTS)
     return f'''<figure class="flipper-specimen" id="flipper">
-      <div class="flipper-stage"><div class="flipper-pedestal" aria-hidden="true"></div><div class="device-plane">
-        <img class="device-product" src="{assembled}" width="960" height="540" alt="White Flipper Zero with orange controls and a pixel dolphin on its screen." fetchpriority="high" decoding="async">
-        <img class="device-overlay device-lcd" src="{asset_url('assets/flipper/screen-off.webp')}" width="960" height="540" alt="" aria-hidden="true" decoding="async">
-        <img class="device-overlay device-blink" src="{asset_url('assets/flipper/blink.webp')}" width="960" height="540" alt="" aria-hidden="true" decoding="async">
-      </div></div>
+      <div class="flipper-stage"><div class="flipper-pedestal" aria-hidden="true"></div><button type="button" class="device-plane" disabled aria-label="Scatter the Flipper Zero into particles">
+        <img class="device-product" src="{assembled}" width="960" height="540" alt="Ice-blue Flipper Zero with a pixel dolphin on the display." fetchpriority="high" decoding="async">
+        <canvas class="device-canvas" data-atlas="{asset_url('assets/flipper/turntable.webp')}" width="480" height="384" aria-hidden="true"></canvas>
+      </button></div>
       <figcaption class="specimen-caption"><span>Flipper Zero</span><i aria-hidden="true"></i>
+        <button type="button" class="rotation-toggle" hidden aria-label="Pause rotation" title="Pause rotation">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path class="pause-mark" d="M7 5v10m6-10v10"/><path class="play-mark" d="m7 4 8 6-8 6Z"/></svg>
+        </button>
         <button type="button" class="flipper-inspect" hidden aria-haspopup="dialog" aria-controls="flipper-inspector">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-5 9 5-9 5-9-5Zm1 5 8 4.5 8-4.5m-16 4 8 4 8-4"/></svg>Inspect</button>
       </figcaption>

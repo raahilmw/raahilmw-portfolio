@@ -1,74 +1,11 @@
-// The Home model boots in place. The detail view opens on demand.
+// The annotated cutaway loads on demand.
 (() => {
   const figure = document.getElementById('flipper');
   if (!figure) return;
-  const stage = figure.querySelector('.flipper-stage');
   const opener = figure.querySelector('.flipper-inspect');
   const viewer = document.getElementById('flipper-inspector');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  const fine = matchMedia('(hover:hover) and (pointer:fine)');
-  const product = figure.querySelector('.device-product');
-  let inputFrame = 0, pointer, bootTimer, bootRequest = 0;
-  function center() {
-    cancelAnimationFrame(inputFrame);
-    inputFrame = 0;
-    figure.style.removeProperty('--pitch');
-    figure.style.removeProperty('--yaw');
-  }
-  stage.addEventListener('pointermove', event => {
-    if (event.pointerType === 'touch' || !fine.matches || reduced.matches || document.hidden) return;
-    pointer = {x:event.clientX, y:event.clientY};
-    if (inputFrame) return;
-    inputFrame = requestAnimationFrame(() => {
-      inputFrame = 0;
-      const box = stage.getBoundingClientRect();
-      if (!box.width || !box.height) return;
-      const relative = (value, origin, length) => Math.max(-.5,Math.min(.5,(value-origin)/length-.5));
-      figure.style.setProperty('--pitch', (-7*relative(pointer.y,box.top,box.height)).toFixed(2)+'deg');
-      figure.style.setProperty('--yaw', (10*relative(pointer.x,box.left,box.width)).toFixed(2)+'deg');
-    });
-  }, {passive:true});
-  stage.addEventListener('pointerleave', center);
-  stage.addEventListener('pointercancel', center);
-  fine.addEventListener('change', center);
-  window.addEventListener('blur', center);
-
   const readImage = image => image.decode ? image.decode().catch(() => {}) : Promise.resolve();
-  function stopBoot() {
-    bootRequest++;
-    clearTimeout(bootTimer);
-    figure.classList.remove('is-booting','boot-pending');
-  }
-  async function boot(replay = false) {
-    stopBoot();
-    if (reduced.matches || document.hidden) return;
-    const request = bootRequest;
-    if (replay) {
-      figure.scrollIntoView({block:'center',behavior:'instant'});
-      opener.focus({preventScroll:true});
-    }
-    figure.classList.add('boot-pending');
-    await Promise.all([product, ...figure.querySelectorAll('.device-overlay')].map(readImage));
-    if (request !== bootRequest || reduced.matches || document.hidden || viewer.open) return;
-    // Start only after the artwork is ready, including a replay on a slow connection.
-    void figure.offsetWidth;
-    figure.classList.remove('boot-pending');
-    figure.classList.add('is-booting');
-    bootTimer = setTimeout(stopBoot, 1480);
-  }
-  const key = 'raahilmw-flipper-arrival';
-  let first = true;
-  try { first = !sessionStorage.getItem(key); } catch {}
-  if (first && !location.hash && !reduced.matches) {
-    try { sessionStorage.setItem(key,'1'); sessionStorage.setItem('raahilmw-signature-v1','1'); } catch {}
-    boot();
-  }
-  document.querySelector('.replay-arrival')?.addEventListener('click', () => boot(true));
-  reduced.addEventListener('change', () => { center(); stopBoot(); });
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { center(); stopBoot(); }
-  });
-
   if (!viewer || typeof viewer.showModal !== 'function') return;
   const stageDetail = viewer.querySelector('.cutaway-scene');
   const closer = viewer.querySelector('.flipper-reassemble');
@@ -119,7 +56,7 @@
   async function open() {
     if (viewer.open) return;
     try { viewer.showModal(); } catch { return; }
-    stopBoot(); center();
+    document.dispatchEvent(new Event('flipperinspectopen'));
     const request = ++openRequest;
     closing = false;
     viewer.classList.remove('has-image-error');
@@ -158,6 +95,7 @@
     if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) close();
   });
   viewer.addEventListener('close', () => {
+    document.dispatchEvent(new Event('flipperinspectclose'));
     closing = false; openRequest++;
     clearTimeout(loadingTimer); message.textContent = '';
     clearTimeout(closeTimer); cancelAnimationFrame(geometryFrame); geometryFrame = 0;
