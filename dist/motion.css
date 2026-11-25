@@ -76,7 +76,7 @@ body::before{content:'';position:fixed;inset:0;z-index:20;pointer-events:none;op
 .hero-arrived .hero-copy>p,.hero-arrived .hero-actions{animation:hero-support .9s .2s var(--settle) backwards}
 .hero-arrived .hero-actions{animation-delay:.28s}
 .hero-arrived .artifact-stage{animation:artifact-focus 1.5s var(--settle) backwards}
-.home-hero:has(.flipper-specimen.motion-visible) .scroll-cue i::after{animation:scroll-breathe 2.5s ease-in-out infinite}
+.home-hero:has(.inspection-lens.motion-visible) .scroll-cue i::after{animation:scroll-breathe 2.5s ease-in-out infinite}
 .research-card.has-entered .boundary-art i{animation:boundary-resolve 1.1s var(--settle) backwards}
 .research-card.has-entered .boundary-art i:nth-child(2){animation-delay:.1s}
 .research-card.has-entered .boundary-art i:nth-child(3){animation-delay:.2s}

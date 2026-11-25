@@ -17,7 +17,7 @@
   document.addEventListener('arrivalreveal',entrance);
   document.addEventListener('arrivalcomplete',entrance);
   document.addEventListener('arrivalstart',()=>hero?.classList.remove('hero-arrived'));
-  const observed=document.querySelectorAll('.home-connect,.research-card,.project-feature,.expertise-list,.research-map,.contact-record,.flipper-specimen,.social-orbits');
+  const observed=document.querySelectorAll('.home-connect,.research-card,.project-feature,.expertise-list,.research-map,.contact-record,.inspection-lens,.social-orbits');
   if('IntersectionObserver'in window){
     const observer=new IntersectionObserver(entries=>{
       entries.forEach(({target,isIntersecting})=>{

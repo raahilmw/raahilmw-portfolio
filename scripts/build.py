@@ -82,7 +82,7 @@ def page(title,active,body,path='/',description=None):
     description = description or 'Raahil Muhammad Wildan — penetration testing, bug hunting, security automation, and published research.'
     output = OUT / path.lstrip('/') / 'index.html'
     output.parent.mkdir(parents=True,exist_ok=True)
-    extra = {'Home':f'<script defer src="{asset_url("flipper.js")}"></script><script defer src="{asset_url("flipper-motion.js")}"></script>', 'About':f'<script src="/assets/matter.min.js" defer></script><script src="{asset_url("field.js")}" defer></script><script src="{asset_url("portrait-motion.js")}" defer></script>'}.get(active,'')
+    extra = {'Home':f'<script defer src="{asset_url("inspection-lens.js")}"></script>', 'About':f'<script src="/assets/matter.min.js" defer></script><script src="{asset_url("field.js")}" defer></script><script src="{asset_url("portrait-motion.js")}" defer></script>'}.get(active,'')
     if active == 'Home':
         extra += f'<script defer src="{asset_url("research-map.js")}"></script>'
     if active == 'Contact':
@@ -95,7 +95,7 @@ def page(title,active,body,path='/',description=None):
     certificate_css = f'<link rel="stylesheet" href="{asset_url("certifications.css")}">' if active == 'Certifications' else ''
     contact_css = f'<link rel="stylesheet" href="{asset_url("contact.css")}">' if active == 'Contact' else ''
     profile_css = f'<link rel="stylesheet" href="{asset_url("profile.css")}">' if active in ('Home','About','Contact') else ''
-    home_css = f'<link rel="stylesheet" href="{asset_url("flipper.css")}">' if active == 'Home' else ''
+    home_css = f'<link rel="stylesheet" href="{asset_url("inspection-lens.css")}">' if active == 'Home' else ''
     intro = f'''<dialog id="site-intro" aria-label="Portfolio introduction">
 <div class="identity-frame" aria-hidden="true"><span>raahilmw<span class="identity-period">.</span></span><span class="identity-state">Reading signature</span></div>
 <div class="identity-stage" aria-hidden="true">
@@ -148,62 +148,45 @@ def research_map():
       <path class="trail-guide" d="{trail}"/><path class="trail-ink" pathLength="1" d="{trail}"/>
     </svg>{points}</nav>'''
 
-FLIPPER_PARTS = [
-    ('shell', 'Top shell & buttons', 'The shell holds the buttons you use to navigate menus.'),
-    ('display', 'LCD screen', 'Shows menus, device status and the pixel dolphin.'),
-    ('board', 'Main board', 'Runs the software and connects the controls to the screen.'),
-    ('base', 'Bottom shell', 'Supports the board and protects the electronics inside.'),
-]
-
-
-def flipper_specimen():
-    assembled = asset_url('assets/flipper/assembled.webp')
-    rows = []
-    for index, (part, title, description) in enumerate(FLIPPER_PARTS):
-        image = asset_url(f'assets/flipper/{part}.webp')
-        rows.append(f'''<li class="part-row part-{part}" style="--fold:{150-100*index}%;--order:{index};--depth:{4-index}">
-          <div class="part-space" aria-hidden="true">
-            <div class="part-travel"><div class="part-sprite"><img data-part-src="{image}" alt="" width="960" height="540" decoding="async"></div></div>
-            <div class="part-registration"><i class="part-pin"></i></div>
-          </div>
-          <div class="part-note"><h3>{escape(title)}</h3><p>{escape(description)}</p></div>
-        </li>''')
-    leaders = ''.join('<path class="part-leader" pathLength="1" marker-end="url(#part-arrow)"/>' for part in FLIPPER_PARTS)
-    plain_notes = ''.join(f'<dt>{escape(title)}</dt><dd>{escape(desc)}</dd>' for _, title, desc in FLIPPER_PARTS)
-    return f'''<figure class="flipper-specimen" id="flipper">
-      <div class="flipper-stage"><div class="flipper-pedestal" aria-hidden="true"></div><button type="button" class="device-plane" disabled aria-label="Scatter the Flipper Zero into particles">
-        <img class="device-product" src="{assembled}" width="960" height="540" alt="Ice-blue Flipper Zero with a pixel dolphin on the display." fetchpriority="high" decoding="async">
-        <canvas class="device-canvas" data-atlas="{asset_url('assets/flipper/turntable.webp')}" width="480" height="384" aria-hidden="true"></canvas>
-      </button></div>
-      <figcaption class="specimen-caption"><span>Flipper Zero</span><i aria-hidden="true"></i>
-        <button type="button" class="rotation-toggle" hidden aria-label="Pause rotation" title="Pause rotation">
-          <svg viewBox="0 0 20 20" aria-hidden="true"><path class="pause-mark" d="M7 5v10m6-10v10"/><path class="play-mark" d="m7 4 8 6-8 6Z"/></svg>
-        </button>
-        <button type="button" class="flipper-inspect" hidden aria-haspopup="dialog" aria-controls="flipper-inspector">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-5 9 5-9 5-9-5Zm1 5 8 4.5 8-4.5m-16 4 8 4 8-4"/></svg>Inspect</button>
-      </figcaption>
-      <noscript><details class="plain-flipper"><summary>Inspect parts</summary><dl>{plain_notes}</dl></details></noscript>
-    </figure>
-    <dialog class="flipper-inspector" id="flipper-inspector" aria-labelledby="flipper-title">
-      <div class="inspection-panel">
-        <header class="inspection-head"><h2 id="flipper-title">Inside the Flipper Zero</h2>
-          <button type="button" class="flipper-reassemble" autofocus><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 14 9 5 9-5M3 10l9 5 9-5M9 4l3 3 3-3m-3-2v5"/></svg>Reassemble</button>
-        </header>
-        <p class="inspection-status" role="status"></p>
-        <div class="cutaway-scene">
-          <div class="cutaway-rest" aria-hidden="true"><div class="part-sprite"><img src="{assembled}" width="960" height="540" alt="" decoding="async"></div></div>
-          <ol class="parts-list">{''.join(rows)}</ol>
-          <svg class="part-arrows" aria-hidden="true"><defs><marker id="part-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="m1 1.3 5.6 2.7L1 6.7" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"/></marker></defs>{leaders}</svg>
+def inspection_lens():
+    # Both films use the same records so the magnified view stays registered.
+    roles = ('user', 'admin', 'user')
+    rows = ''.join(
+        f'<div class="sample-row"><span class="sample-route"><b>GET</b> /profile</span>'
+        f'<span class="sample-value">role={role}</span><span class="sample-status">200</span></div>'
+        for role in roles
+    )
+    controls = []
+    for i, role in enumerate(roles):
+        checked = ' checked' if i == 1 else ''
+        controls.append(
+            f'<label class="focus-stop" title="Focus on request {i+1}">'
+            f'<input type="radio" name="focus-request" value="{i}"{checked} '
+            f'aria-label="Request {i+1}, role {role}"><i aria-hidden="true"></i></label>'
+        )
+    return f'''<figure class="inspection-lens" aria-labelledby="lens-caption">
+      <div class="optic-stage" role="img" aria-label="An inspection lens over three sample requests. Two have the user role. The middle one has the admin role.">
+        <div class="sample-film" aria-hidden="true">{rows}</div>
+        <div class="optic-refraction" aria-hidden="true"><div class="sample-film">{rows}</div></div>
+        <div class="optic-loupe" aria-hidden="true">
+          <div class="optic-glass"><i class="glass-sweep"></i></div>
+          <img class="optic-bezel" src="{asset_url('assets/inspection-lens.webp')}" width="896" height="896" alt="" decoding="async" fetchpriority="high">
         </div>
       </div>
-    </dialog>'''
+      <figcaption class="optic-caption">
+        <span id="lens-caption">Inspection lens</span><span class="optic-ratio" aria-label="1.8 times magnification">1.8×</span>
+        <span class="optic-rule" aria-hidden="true"></span>
+        <span class="optic-hint" hidden><span>Move to focus</span><span>Tap a row</span></span>
+        <fieldset class="focus-stops" hidden><legend class="sr-only">Focus on a sample request</legend>{''.join(controls)}</fieldset>
+      </figcaption>
+    </figure>'''
 
 
 home = f'''
 <section class="home-hero"><div class="hero-layout shell">
 <div class="hero-copy"><h1><span class="hero-line">Finding what</span> <span class="hero-line">others <em>miss.</em></span></h1><p>I’m <strong>raahilmw</strong>, a penetration tester, bug hunter, and builder of security automation.</p>
 <div class="hero-actions"><a class="button primary" href="/writeups/">{icon('book')}Explore my writeups</a><a class="underlined" href="/about/">About me</a></div></div>
-{flipper_specimen()}
+{inspection_lens()}
 </div><div class="hero-baseline shell"><span>@raahilmw</span><a class="scroll-cue" href="#selected"><i aria-hidden="true"></i>Scroll to explore</a></div></section>
 <section class="shell home-connect" aria-labelledby="home-connect-title"><div><h2 id="home-connect-title">Connect.</h2></div>{social_deck()}</section>
 <section class="section shell" id="selected"><div class="section-heading"><div><h2>Selected research.</h2></div><a class="underlined" href="/writeups/">All writeups</a></div>{article_card()}</section>
