@@ -19,33 +19,11 @@
   apply(hasPreference ? saved : system.matches ? 'light' : 'dark');
   document.addEventListener('DOMContentLoaded', () => {
     apply(root.dataset.theme);
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let transition, target = root.dataset.theme, pulseTimer;
     document.querySelectorAll('.theme-toggle').forEach(button => button.addEventListener('click', () => {
-      target = (transition ? target : root.dataset.theme) === 'dark' ? 'light' : 'dark';
-      const next = target;
+      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
       hasPreference = true;
+      apply(next);
       try { localStorage.setItem(storageKey, next); } catch { /* Storage is optional. */ }
-      transition?.skipTransition();
-      if (reduced.matches) { apply(next); return; }
-
-      const bounds = button.getBoundingClientRect();
-      const x = bounds.left + bounds.width / 2, y = bounds.top + bounds.height / 2;
-      const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
-      root.style.setProperty('--eclipse-center', x + 'px ' + y + 'px');
-      root.style.setProperty('--eclipse-radius', Math.ceil(radius) + 'px');
-      if (document.startViewTransition) {
-        const active = document.startViewTransition(() => { if (next === target) apply(next); });
-        transition = active;
-        active.finished.finally(() => { if (transition === active) transition = null; });
-      } else {
-        apply(next);
-        root.classList.remove('theme-pulse');
-        void button.offsetWidth;
-        root.classList.add('theme-pulse');
-        clearTimeout(pulseTimer);
-        pulseTimer = setTimeout(() => root.classList.remove('theme-pulse'), 480);
-      }
     }));
   });
   system.addEventListener('change', event => { if (!hasPreference) apply(event.matches ? 'light' : 'dark'); });

@@ -11,7 +11,7 @@
   const step = 1000 / 60;
   const gutter = 6;
   let width = 0, height = 0, frame = 0, previousTime = 0, remainder = 0;
-  let dropped = false, visible = true, topLayer = 1;
+  let dropped = false, visible = false, topLayer = 1;
   let fadeDistance = Math.min(window.innerHeight * .72, 620);
   let scrollFrame = 0;
   let floor = null, lastScrollY = window.scrollY;
@@ -21,7 +21,7 @@
     const { position, angle } = tile.body;
     tile.el.style.transform = 'translate(' + (position.x - tile.w / 2) + 'px,' +
       (position.y - tile.h / 2) + 'px) rotate(' + angle + 'rad)';
-    tile.el.style.opacity = dropped ? clamp((height + fadeDistance - position.y) / fadeDistance, 0, 1) : 1;
+    if (dropped) tile.el.style.opacity = clamp((height + fadeDistance - position.y) / fadeDistance, 0, 1);
   }
   function clamp(value, low, high) {
     return Math.max(low, Math.min(value, high));
@@ -104,7 +104,13 @@
     if (intro?.open) return;
     remainder += Math.min(previousTime ? now - previousTime : step, 50);
     previousTime = now;
-    while (remainder >= step) {
+    // Keep the solver on its fixed step. Ambient drift only needs one paint per two steps.
+    const interval = dropped || tiles.some(tile => tile.hold) ? step : step * 2;
+    if (remainder + .001 < interval) {
+      frame = requestAnimationFrame(advance);
+      return;
+    }
+    while (remainder + .001 >= step) {
       if (!dropped) tiles.forEach(tile => drift(tile, engine.timing.timestamp / 1000));
       Engine.update(engine, step);
       remainder -= step;
@@ -145,6 +151,7 @@
   function reset() {
     if (!width) return;
     dropped = false;
+    tiles.forEach(tile => tile.el.style.opacity = '');
     engine.gravity.y = 0;
     if (floor) Composite.add(engine.world, floor);
     stop();
@@ -277,7 +284,7 @@
     }
   }
   window.addEventListener('scroll', () => {
-    if (!scrollFrame) scrollFrame = requestAnimationFrame(onScroll);
+    if (!scrollFrame && (visible || !dropped || window.scrollY <= 2)) scrollFrame = requestAnimationFrame(onScroll);
   }, { passive: true });
   document.addEventListener('visibilitychange', () => document.hidden ? stop() : run());
   reduced.addEventListener('change', () => { tiles.forEach(release); stop(); run(); });
@@ -288,8 +295,8 @@
   if (document.fonts) document.fonts.ready.then(layout);
   new IntersectionObserver(([entry]) => {
     visible = entry.isIntersecting;
-    if (visible) run(); else stop();
-  }, { rootMargin: window.innerHeight + 'px 0px ' + window.innerHeight + 'px 0px' }).observe(board);
+    if (visible) { onScroll(); run(); } else stop();
+  }, { rootMargin: '620px 0px 0px' }).observe(board);
   // Restored scroll positions should agree with a visit that scrolled here.
   onScroll();
 })();

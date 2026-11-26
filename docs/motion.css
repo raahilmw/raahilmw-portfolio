@@ -6,10 +6,13 @@ body{overflow-x:clip}
 h1,h2,h3{letter-spacing:-.04em}
 a,button{-webkit-tap-highlight-color:transparent}
 a,button,.copy-emblem{transition:color .22s,background-color .22s,border-color .22s,box-shadow .35s var(--settle)}
-body::before{content:'';position:fixed;inset:0;z-index:20;pointer-events:none;opacity:.035;background:url('/assets/grain.svg') repeat;mix-blend-mode:soft-light}
-[data-theme=light] body::before{opacity:.055;mix-blend-mode:multiply}
-.desktop-nav{position:relative}.desktop-nav a[aria-current=page]{text-decoration:none}
-.nav-tracker{position:absolute;bottom:6px;left:0;height:1px;background:var(--accent);pointer-events:none;transition:transform .5s var(--settle),width .5s var(--settle)}
+.desktop-nav a {position:relative}
+.desktop-nav a[aria-current=page] {text-decoration:none}
+.desktop-nav a::after {
+  content:"";position:absolute;inset:auto 0 6px;height:1px;background:var(--accent);
+  transform:scaleX(0);transform-origin:left;transition:transform .15s ease-out;
+}
+.desktop-nav a:is([aria-current=page],:hover,:focus-visible)::after {transform:scaleX(1)}
 .site-header .brand-star{display:inline-block;transition:transform .7s var(--settle)}
 .wordmark:hover .brand-star{transform:rotate(90deg)}
 .hero-copy h1{font-size:clamp(3.6rem,7.1vw,6rem);letter-spacing:-.04em;line-height:1.04}
@@ -95,7 +98,7 @@ body::before{content:'';position:fixed;inset:0;z-index:20;pointer-events:none;op
 }
 @media(max-width:530px){.expertise-list li{min-height:5.5rem;padding:14px;border:1px solid var(--edge);gap:18px}.stamp-art svg{width:24px;height:24px}.stamp-art{padding:8px}}
 @media(prefers-reduced-motion:reduce){
-.nav-tracker,.orb-disc,.boundary-art,.about-index a{transition:color .15s,background .15s}
+.orb-disc,.boundary-art,.about-index a{transition:color .15s,background .15s}
 }
 
 /* A signature resolves as the reader sweeps across its ridges. */
@@ -157,7 +160,6 @@ body::before{content:'';position:fixed;inset:0;z-index:20;pointer-events:none;op
  .mobile-nav a{transition:background-color .18s,color .18s}
  .button.primary:active,.icon-button:active{scale:.975}
 }
-@media(max-width:760px){body::before{display:none}}
 @media(prefers-reduced-motion:no-preference){
  .page-arrived .page-intro h1,.page-arrived .contact-page>h1,.page-arrived .reading-header h1{animation:chapter-settle .46s var(--settle) both}
  @keyframes chapter-settle{from{transform:translateY(5px);opacity:.8}}

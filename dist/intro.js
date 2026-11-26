@@ -44,5 +44,5 @@
   window.addEventListener('pagehide', finish);
   let seen = false;
   try { seen = !!sessionStorage.getItem(storageKey); } catch {}
-  if (!seen && !location.hash && !location.pathname.startsWith('/writeups/')) start();
+  if (!seen && !location.hash && location.pathname === '/') start();
 })();

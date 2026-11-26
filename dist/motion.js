@@ -63,23 +63,6 @@
   window.addEventListener('blur', resetSurface);
   fine.addEventListener('change', resetSurface);
   reduced.addEventListener('change', resetSurface);
-  // Hover navigation follows the link rather than moving the link itself.
-  const nav=document.querySelector('.desktop-nav');
-  if(nav){
-    const marker=document.createElement('i');marker.className='nav-tracker';marker.setAttribute('aria-hidden','true');nav.append(marker);
-    function follow(link){
-      if(!link)return;const b=link.getBoundingClientRect(),parent=nav.getBoundingClientRect();
-      marker.style.width=b.width+'px';marker.style.transform='translateX('+(b.left-parent.left)+'px)';
-    }
-    nav.querySelectorAll('a').forEach(link=>{
-      link.addEventListener('pointerenter',()=>follow(link));link.addEventListener('focus',()=>follow(link));
-    });
-    nav.addEventListener('pointerleave',()=>follow(nav.querySelector('[aria-current]')));
-    nav.addEventListener('focusout',()=>follow(nav.querySelector('[aria-current]')));
-    window.addEventListener('resize',()=>follow(nav.querySelector('[aria-current]')),{passive:true});
-    document.fonts?.ready.then(()=>follow(nav.querySelector('[aria-current]')));
-    follow(nav.querySelector('[aria-current]'));
-  }
   // A subtle sweep follows an actual copy operation, alongside the existing live announcement.
   document.querySelectorAll('[data-copy]').forEach(button=>button.addEventListener('click',()=>{
     if(reduced.matches)return;button.getAnimations().forEach(a=>a.cancel());
@@ -90,7 +73,7 @@
   if (index) {
     const links = [...index.querySelectorAll('a[href^="#"]')];
     const chapters = links.map(link => document.getElementById(link.hash.slice(1)));
-    let selected, scheduled = 0;
+    let selected, scheduled = 0, chapterTops;
     function highlight(link) {
       if (!link || link === selected) return;
       selected?.removeAttribute('aria-current');
@@ -100,6 +83,10 @@
     function updateChapter() {
       scheduled = 0;
       const page = document.scrollingElement || document.documentElement;
+      if (!chapterTops) {
+        chapterTops = chapters.map(section => section
+          ? page.scrollTop + section.getBoundingClientRect().top : Infinity);
+      }
       const height = document.documentElement.clientHeight;
       const bottom = page.scrollHeight - height;
       if (bottom > 0 && page.scrollTop >= bottom - 2) {
@@ -108,13 +95,17 @@
       }
       const line = Math.min(150, height * .30);
       let current = 0;
-      chapters.forEach((section, position) => {
-        if (section && section.getBoundingClientRect().top <= line) current = position;
+      chapterTops.forEach((top, position) => {
+        if (top <= page.scrollTop + line) current = position;
       });
       highlight(links[current]);
     }
     function scheduleChapter() {
       if (!scheduled) scheduled = requestAnimationFrame(updateChapter);
+    }
+    function remeasureChapters() {
+      chapterTops = null;
+      scheduleChapter();
     }
     function syncAnchor() {
       const link = links.find(item => item.hash === location.hash);
@@ -122,11 +113,15 @@
       scheduleChapter();
     }
     window.addEventListener('scroll', scheduleChapter, {passive:true});
-    window.addEventListener('resize', scheduleChapter);
+    window.addEventListener('resize', remeasureChapters);
     window.addEventListener('hashchange', syncAnchor);
     window.addEventListener('pageshow', syncAnchor);
-    document.fonts?.ready.then(scheduleChapter);
-    if ('ResizeObserver' in window) new ResizeObserver(scheduleChapter).observe(document.body);
+    document.fonts?.ready.then(remeasureChapters);
+    if ('ResizeObserver' in window) {
+      const sizes = new ResizeObserver(remeasureChapters);
+      sizes.observe(document.body);
+      chapters.forEach(section => { if (section) sizes.observe(section); });
+    }
     syncAnchor();
   }
 })();

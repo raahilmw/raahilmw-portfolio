@@ -1,5 +1,41 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>Image fetcher to arbitrary file read — raahilmw</title><meta name="description" content="A bug bounty writeup about an image-to-Base64 endpoint that exposed local files, with a reward response, privacy-edited screenshots, and clear reproduction notes."><link rel="canonical" href="https://raahilmw.com/writeups/image-fetcher-local-file-read/"><script src="/theme.js?v=93a597a6e635"></script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/fonts.css?v=7efc749776d1"><link rel="stylesheet" href="/style.css?v=196d68d9f3b6"><link rel="stylesheet" href="/motion.css?v=18bb7d3a0db4"><link rel="stylesheet" href="/case-study.css?v=216c05d9d79f"></head><body class="page-writeups"><a class="skip-link" href="#content">Skip to content</a><svg class="icon-library" aria-hidden="true"><defs>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>Image fetcher to arbitrary file read — raahilmw</title><meta name="description" content="A bug bounty writeup about an image-to-Base64 endpoint that exposed local files, with a reward response, privacy-edited screenshots, and clear reproduction notes."><link rel="canonical" href="https://raahilmw.com/writeups/image-fetcher-local-file-read/"><script>// Apply the saved appearance before the styles paint to avoid a theme flash.
+(() => {
+  const root = document.documentElement;
+  const storageKey = 'raahilmw-appearance';
+  const system = window.matchMedia('(prefers-color-scheme: light)');
+  let saved;
+  try { saved = localStorage.getItem(storageKey); } catch { /* Storage is optional. */ }
+  let hasPreference = saved === 'light' || saved === 'dark';
+  function apply(theme) {
+    root.dataset.theme = theme;
+    const target = theme === 'dark' ? 'light' : 'dark';
+    document.querySelectorAll('.theme-toggle').forEach(button => {
+      button.setAttribute('aria-label', `Switch to ${target} mode`);
+      button.setAttribute('title', `Switch to ${target} mode`);
+    });
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'light' ? '#eef3f8' : '#0b111b');
+    document.dispatchEvent(new CustomEvent('themechange', { detail: { theme } }));
+  }
+  apply(hasPreference ? saved : system.matches ? 'light' : 'dark');
+  document.addEventListener('DOMContentLoaded', () => {
+    apply(root.dataset.theme);
+    document.querySelectorAll('.theme-toggle').forEach(button => button.addEventListener('click', () => {
+      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      hasPreference = true;
+      apply(next);
+      try { localStorage.setItem(storageKey, next); } catch { /* Storage is optional. */ }
+    }));
+  });
+  system.addEventListener('change', event => { if (!hasPreference) apply(event.matches ? 'light' : 'dark'); });
+  window.addEventListener('storage', event => {
+    if (event.key !== storageKey && event.key !== null) return;
+    saved = event.key === null ? null : event.newValue;
+    hasPreference = saved === 'light' || saved === 'dark';
+    apply(hasPreference ? saved : system.matches ? 'light' : 'dark');
+  });
+})();
+</script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/fonts.css?v=7efc749776d1"><link rel="stylesheet" href="/style.css?v=438cc505952e"><link rel="stylesheet" href="/motion.css?v=cbc4dd210054"><link rel="stylesheet" href="/case-study.css?v=216c05d9d79f"><script type="speculationrules">{"prefetch":[{"where":{"selector_matches":".desktop-nav a, .mobile-nav a"},"eagerness":"moderate"}]}</script></head><body class="page-writeups"><a class="skip-link" href="#content">Skip to content</a><svg class="icon-library" aria-hidden="true"><defs>
 <symbol id="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></symbol>
 <symbol id="moon" viewBox="0 0 24 24"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></symbol>
 <symbol id="copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="13" rx="1"/><path d="M16 8V4H3v12h5"/></symbol>
@@ -26,7 +62,7 @@
   </div>
 </div>
 <div class="identity-footer"><button class="intro-skip" type="button" autofocus>Skip intro <kbd>Esc</kbd></button><div class="identity-meter" aria-hidden="true"><i></i></div></div>
-</dialog><script defer src="/intro.js?v=3622fd4bd387"></script><main id="content"><header class="reading-header">
+</dialog><script defer src="/intro.js?v=7d9ebd619c0a"></script><main id="content"><header class="reading-header">
 <a class="underlined reading-back" href="/writeups/">All writeups</a>
 <h1>How an image fetcher let me read <em>server files.</em></h1>
 <p class="reading-subtitle">I started with an image URL and found a way to read files from the application's UAT server.</p>
@@ -35,7 +71,7 @@
 <article class="reading-article">
 <p class="reading-lead">The security team accepted the finding and confirmed that they had fixed it. Their reply also explained the reward process and asked me to retest.</p>
 <figure class="reading-figure reading-reward">
-<a href="/assets/writeups/image-fetcher/reward-email.png?v=959636ff3961" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/reward-email.png?v=959636ff3961" width="1277" height="666" alt="The security team's email confirms a fix, asks for a retest, and explains the reward process and planned Hall of Fame recognition." decoding="async" fetchpriority="high"><span class="image-expand" aria-hidden="true">View larger</span></a>
+<a href="/assets/writeups/image-fetcher/reward-email.png?v=959636ff3961" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/reward-email-680.webp?v=4471b7d0b0a2" srcset="/assets/writeups/image-fetcher/reward-email-680.webp?v=4471b7d0b0a2 680w, /assets/writeups/image-fetcher/reward-email-1200.webp?v=f27c48ba6ef2 1200w" sizes="(max-width: 720px) calc(100vw - 40px), 680px" width="1277" height="666" alt="The security team's email confirms a fix, asks for a retest, and explains the reward process and planned Hall of Fame recognition." decoding="async" fetchpriority="high"><span class="image-expand" aria-hidden="true">View larger</span></a>
 <figcaption>The team's response confirming a fix and outlining the reward process.</figcaption>
 </figure>
 <section id="overview" class="reading-section">
@@ -77,22 +113,22 @@
 <h2>Confirming a server-side request</h2>
 <p>I first supplied an HTTP URL for a service that reports where a request came from. The endpoint returned a Base64 response. After decoding it, I could see an origin address for the server-side request.</p>
 <p>This confirmed <a class="reading-link" href="https://portswigger.net/web-security/ssrf" target="_blank" rel="noreferrer">server-side request forgery (SSRF)</a>: I could make the backend fetch a URL I chose. I could also read the fetched response through the API.</p>
-<figure class="reading-figure"><a href="/assets/writeups/image-fetcher/http-ssrf.png?v=0fd119162d6b" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/http-ssrf.png?v=0fd119162d6b" width="1688" height="774" alt="Burp Suite capture of the HTTP SSRF check and the API response." loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">View larger</span></a><figcaption>The external response returned through the image endpoint.</figcaption></figure>
+<figure class="reading-figure"><a href="/assets/writeups/image-fetcher/http-ssrf.png?v=0fd119162d6b" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/http-ssrf-680.webp?v=a9b07aae3040" srcset="/assets/writeups/image-fetcher/http-ssrf-680.webp?v=a9b07aae3040 680w, /assets/writeups/image-fetcher/http-ssrf-1200.webp?v=99ce58a40bc3 1200w" sizes="(max-width: 720px) calc(100vw - 40px), 680px" width="1688" height="774" alt="Burp Suite capture of the HTTP SSRF check and the API response." loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">View larger</span></a><figcaption>The external response returned through the image endpoint.</figcaption></figure>
 </section>
 <section id="local-read" class="reading-section">
 <h2>Changing the URL to a local file</h2>
 <p>Next, I replaced the HTTP URL with <code>file:///etc/hostname</code>. The <code>file://</code> scheme refers to a file on the machine handling the request.</p>
 <p>The endpoint accepted it. Decoding the returned data gave me the UAT server's hostname. I also read <code>/etc/os-release</code> to confirm the behavior with another system-identification file.</p>
-<figure class="reading-figure"><a href="/assets/writeups/image-fetcher/local-file-read.png?v=5805da29fe7e" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/local-file-read.png?v=5805da29fe7e" width="1803" height="778" alt="Burp Suite capture of image=file:///etc/hostname and the Base64 response." loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">View larger</span></a><figcaption>The same endpoint returned a local file through a file URL.</figcaption></figure>
+<figure class="reading-figure"><a href="/assets/writeups/image-fetcher/local-file-read.png?v=5805da29fe7e" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/local-file-read-680.webp?v=d51a2232aded" srcset="/assets/writeups/image-fetcher/local-file-read-680.webp?v=d51a2232aded 680w, /assets/writeups/image-fetcher/local-file-read-1200.webp?v=f3c0ebdeba39 1200w" sizes="(max-width: 720px) calc(100vw - 40px), 680px" width="1803" height="778" alt="Burp Suite capture of image=file:///etc/hostname and the Base64 response." loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">View larger</span></a><figcaption>The same endpoint returned a local file through a file URL.</figcaption></figure>
 <p>The response still used a <code>data:image/png;base64</code> prefix. That label did not mean the bytes were a PNG. Base64 is an encoding, so decoding it recovered the file contents.</p>
 </section>
 <section id="filter-gap" class="reading-section">
 <h2>Working around the path filter</h2>
 <p>A direct request for <code>/etc/passwd</code> returned <code>403 Forbidden</code>. I then tried different spellings of the path, including a dot segment, a repeated slash, and an encoded character.</p>
 <p>Those variants returned <code>200 OK</code>. During testing, I decoded account-file entries from the response. The encoded request below was one of the successful variants.</p>
-<figure class="reading-figure"><a href="/assets/writeups/image-fetcher/encoded-path.png?v=d1c516baaeed" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/encoded-path.png?v=d1c516baaeed" width="1541" height="779" alt="Burp Suite capture of an encoded file path returning HTTP/2 200 OK." loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">View larger</span></a><figcaption>An encoded path returned HTTP 200.</figcaption></figure>
+<figure class="reading-figure"><a href="/assets/writeups/image-fetcher/encoded-path.png?v=d1c516baaeed" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/encoded-path-680.webp?v=0c0707f342f2" srcset="/assets/writeups/image-fetcher/encoded-path-680.webp?v=0c0707f342f2 680w, /assets/writeups/image-fetcher/encoded-path-1200.webp?v=604837486719 1200w" sizes="(max-width: 720px) calc(100vw - 40px), 680px" width="1541" height="779" alt="Burp Suite capture of an encoded file path returning HTTP/2 200 OK." loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">View larger</span></a><figcaption>An encoded path returned HTTP 200.</figcaption></figure>
 <p>I also tested <code>file:///proc/./version</code>. The screenshot shows another successful request using a dot segment.</p>
-<figure class="reading-figure"><a href="/assets/writeups/image-fetcher/normalized-path.png?v=7390d87fa944" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/normalized-path.png?v=7390d87fa944" width="1561" height="880" alt="Burp Suite capture of file:///proc/./version returning HTTP/2 200 OK. The response body is outside the capture." loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">View larger</span></a><figcaption>A dot-segment path returned HTTP 200. The response body is outside the capture.</figcaption></figure>
+<figure class="reading-figure"><a href="/assets/writeups/image-fetcher/normalized-path.png?v=7390d87fa944" target="_blank" rel="noreferrer" data-evidence-image><img src="/assets/writeups/image-fetcher/normalized-path-680.webp?v=031d724aea64" srcset="/assets/writeups/image-fetcher/normalized-path-680.webp?v=031d724aea64 680w, /assets/writeups/image-fetcher/normalized-path-1200.webp?v=2ab4c23034d3 1200w" sizes="(max-width: 720px) calc(100vw - 40px), 680px" width="1561" height="880" alt="Burp Suite capture of file:///proc/./version returning HTTP/2 200 OK. The response body is outside the capture." loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">View larger</span></a><figcaption>A dot-segment path returned HTTP 200. The response body is outside the capture.</figcaption></figure>
 <p>The results showed that the filter did not consistently block paths that the file loader could resolve. I did not have server-side instrumentation, so I could not determine the exact decoding order.</p>
 <details class="reading-details"><summary>The path variants in the report</summary><pre><code>file:///etc/./passwd
 file:///etc//passwd
@@ -113,4 +149,4 @@ file:///etc/pass%2577d</code></pre><p>These are the path variants recorded in my
 <footer class="reading-end"><nav class="reading-end-actions" aria-label="Writeup actions"><a class="reading-return" href="/writeups/"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>Back to writeups</a><a href="https://medium.com/@raahil.mw/how-i-got-paid-for-turning-an-image-fetcher-into-an-arbitrary-file-read-0d15679bae00" target="_blank" rel="noreferrer">On Medium</a><button type="button" data-copy="https://raahilmw.com/writeups/image-fetcher-local-file-read/" data-message="Writeup link copied."><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V4H3v12h5"/></svg>Copy link</button></nav></footer>
 </article>
 <dialog class="evidence-viewer" id="evidence-viewer" aria-labelledby="evidence-viewer-title"><div class="evidence-viewer-head"><h2 id="evidence-viewer-title">Screenshot</h2><button type="button" class="icon-button" data-evidence-close aria-label="Close image"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><div class="evidence-viewer-body"><img alt=""></div><p class="evidence-viewer-caption"></p><a class="underlined evidence-file-link" href="#" target="_blank" rel="noreferrer" data-evidence-file>Open image file</a></dialog>
-</main><footer class="site-footer shell"><a class="wordmark" href="/" aria-label="raahilmw home"><span class="brand-star" aria-hidden="true">✦</span>raahilmw<span class="brand-dot">.</span></a><span>2026 raahilmw</span><a href="https://medium.com/@raahil.mw" target="_blank" rel="noreferrer">Medium</a><a href="/contact/">Contact</a><button type="button" class="replay-arrival" aria-label="Replay opening animation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6M4 10a8 8 0 1 1 1 7"/></svg><span>Replay arrival</span></button></footer><div class="toast" role="status" aria-live="polite" id="toast"></div><script src="/app.js?v=ebc061259cd2" defer></script><script src="/motion.js?v=f6c497fcb15f" defer></script><script defer src="/case-study.js?v=914b65c20e3d"></script></body></html>
+</main><footer class="site-footer shell"><a class="wordmark" href="/" aria-label="raahilmw home"><span class="brand-star" aria-hidden="true">✦</span>raahilmw<span class="brand-dot">.</span></a><span>2026 raahilmw</span><a href="https://medium.com/@raahil.mw" target="_blank" rel="noreferrer">Medium</a><a href="/contact/">Contact</a><button type="button" class="replay-arrival" aria-label="Replay opening animation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6M4 10a8 8 0 1 1 1 7"/></svg><span>Replay arrival</span></button></footer><div class="toast" role="status" aria-live="polite" id="toast"></div><script src="/app.js?v=4c569c4162f6" defer></script><script src="/motion.js?v=eda333a125e6" defer></script><script defer src="/case-study.js?v=914b65c20e3d"></script></body></html>

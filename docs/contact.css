@@ -27,7 +27,7 @@
 
 .picker-open{overflow:hidden}
 .mail-picker{width:min(540px,calc(100% - 32px));padding:0;border:1px solid var(--edge);border-radius:14px;background:var(--panel);color:var(--ink);box-shadow:0 26px 70px #0006}
-.mail-picker::backdrop{background:#040811bb;backdrop-filter:blur(4px)}
+.mail-picker::backdrop{background:#040811bb}
 .mail-picker-head{padding:clamp(20px,3vw,29px) clamp(20px,3vw,29px) 15px;border-bottom:1px solid var(--line)}
 .mail-picker-head .mono{color:var(--muted);overflow-wrap:anywhere}
 .mail-picker h2{font-size:clamp(1.6rem,3vw,2.3rem);margin-top:8px}

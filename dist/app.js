@@ -3,58 +3,14 @@
   document.querySelectorAll('[data-year]').forEach(node => node.textContent = new Date().getFullYear());
   const menu = document.querySelector('.menu-toggle');
   const nav = document.querySelector('.mobile-nav');
-  const lines = menu.querySelectorAll('.menu-signal path');
-  let target = 0, position = 0, velocity = 0, frame = 0, previous = 0;
-
-  function drawMenu() {
-    const p = position;
-    const bend = Math.sin(Math.PI * Math.max(0, Math.min(p, 1))) * 5;
-    // Both strokes bow out, pass one another and settle into the close mark.
-    lines.forEach((path, index) => {
-      const side = index === 0 ? -1 : 1;
-      const leftY = 16 + side * (4 + 4 * p);
-      const rightY = 16 + side * (4 - 12 * p);
-      path.setAttribute('d', 'M' + (5 + 3*p) + ' ' + leftY +
-        ' Q' + (16 - side*bend) + ' ' + (16 + side*(4 - 4*p + bend)) +
-        ' ' + (27 - 3*p) + ' ' + rightY);
-    });
-    nav.style.setProperty('--unfold', p.toFixed(4));
-  }
-  function finishMenu() {
-    cancelAnimationFrame(frame);
-    position = target;
-    velocity = frame = previous = 0;
-    drawMenu();
-    nav.hidden = !target;
-  }
-  function stepMenu(time) {
-    const dt = Math.min((time - (previous || time - 16)) / 1000, .032);
-    previous = time;
-    // Two short integration steps keep the spring consistent on slower devices.
-    for (let i = 0; i < 2; i++) {
-      velocity += ((target - position) * 380 - velocity * 29) * dt / 2;
-      position += velocity * dt / 2;
-    }
-    if (Math.abs(target - position) < .001 && Math.abs(velocity) < .025) {
-      finishMenu();
-      return;
-    }
-    drawMenu();
-    frame = requestAnimationFrame(stepMenu);
-  }
-  function setMenu(open, immediate = false) {
-    if (target === Number(open) && !immediate) return;
-    target = Number(open);
+  function setMenu(open) {
+    if (nav.hidden === !open) return;
     menu.setAttribute('aria-expanded', String(open));
     menu.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
-    nav.inert = !open;
-    if (immediate || reduced.matches) { finishMenu(); return; }
-    nav.hidden = false;
-    if (!frame) frame = requestAnimationFrame(stepMenu);
+    nav.hidden = !open;
   }
-  reduced.addEventListener('change', () => { if (reduced.matches) finishMenu(); });
   menu.addEventListener('click', () => setMenu(menu.getAttribute('aria-expanded') !== 'true'));
-  nav.querySelectorAll('a').forEach(link => link.addEventListener('click', () => setMenu(false, true)));
+  nav.querySelectorAll('a').forEach(link => link.addEventListener('click', () => setMenu(false)));
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && menu.getAttribute('aria-expanded') === 'true') {
       setMenu(false);
@@ -65,7 +21,7 @@
     if (!nav.contains(event.target) && !menu.contains(event.target)) setMenu(false);
   });
   matchMedia('(max-width: 980px)').addEventListener('change', event => {
-    if (!event.matches) setMenu(false, true);
+    if (!event.matches) setMenu(false);
   });
 
   let toastTimer;

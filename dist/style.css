@@ -102,29 +102,6 @@ svg{width:1.2em;height:1.2em;fill:none;stroke:currentColor;stroke-width:1.5;stro
 .contact-record strong a[href^="mailto:"]{overflow-wrap:anywhere}
 @media(max-width:480px){.contact-record:has(a[href^="mailto:"]){grid-template-columns:1fr;justify-items:start;row-gap:7px}}
 
-/* The new palette opens like an iris from the appearance switch. */
-@media (prefers-reduced-motion: no-preference) {
-  ::view-transition-old(root), ::view-transition-new(root) {
-    mix-blend-mode: normal;
-    animation: none;
-  }
-  ::view-transition-new(root) {
-    animation: eclipse-reveal .59s cubic-bezier(.22,.65,.19,1) both;
-  }
-  @keyframes eclipse-reveal {
-    from {clip-path: circle(19px at var(--eclipse-center))}
-    to {clip-path: circle(var(--eclipse-radius) at var(--eclipse-center))}
-  }
-  .theme-pulse body::after {
-    content: ""; position: fixed; inset: 0; z-index: 18; pointer-events: none;
-    background: radial-gradient(circle at var(--eclipse-center),var(--accent), transparent 70%);
-    animation: eclipse-glimmer .46s ease-out both;
-  }
-  @keyframes eclipse-glimmer {
-    from {opacity: .27; clip-path: circle(20px at var(--eclipse-center))}
-    to {opacity: 0; clip-path: circle(var(--eclipse-radius) at var(--eclipse-center))}
-  }
-}
 .theme-toggle {position: relative; isolation: isolate}
 .theme-toggle span {position: absolute; inset: 0; transition: transform .4s ease, opacity .3s}
 .theme-toggle .theme-moon, [data-theme=light] .theme-toggle .theme-sun {
@@ -135,23 +112,19 @@ svg{width:1.2em;height:1.2em;fill:none;stroke:currentColor;stroke-width:1.5;stro
 @media(max-width:980px) {
   .menu-signal {width: 26px; height: 26px; stroke-width: 1.75; overflow: visible}
   .mobile-nav {
-    --unfold: 0;
     left: auto; right: 4.5vw; width: min(300px,91vw); max-height: calc(100dvh - var(--header));
     overflow-y: auto; overscroll-behavior: contain; padding: 10px;
-    border-radius: 21px 11px 21px 21px; transform-origin: 95% -15px;
-    opacity: clamp(0,calc(var(--unfold) * 2),1);
-    transform: translateY(calc((1 - var(--unfold)) * -15px))
-      rotate(calc((1 - var(--unfold)) * 3deg))
-      scale(calc(.84 + var(--unfold) * .16),calc(.68 + var(--unfold) * .32));
+    border-radius: 21px 11px 21px 21px; transform-origin: top right;
   }
-  .mobile-nav[inert] {pointer-events: none}
-  .mobile-nav a {
-    --arrive: clamp(0,calc(var(--unfold) * 1.7 - var(--delay,0)),1);
-    opacity: var(--arrive); transform: translateX(calc((1 - var(--arrive)) * 12px));
-  }
-  .mobile-nav a:nth-child(2) {--delay: .1}
-  .mobile-nav a:nth-child(3) {--delay: .2}
-  .mobile-nav a:nth-child(4) {--delay: .3}
-  .mobile-nav a:nth-child(5) {--delay: .4}
-  .mobile-nav a:nth-child(6) {--delay: .5}
+  .menu-signal path {transform-box:fill-box;transform-origin:center}
+  .menu-toggle[aria-expanded=true] path:first-child {transform:translateY(4px) rotate(45deg)}
+  .menu-toggle[aria-expanded=true] path:last-child {transform:translateY(-4px) rotate(-45deg)}
+}
+@media(max-width:980px) and (prefers-reduced-motion:no-preference) {
+  .menu-signal path {transition:transform .15s ease-out}
+  .mobile-nav:not([hidden]) {animation:menu-open .15s ease-out}
+  @keyframes menu-open {from {opacity:.5;transform:translateY(-4px) scale(.99)}}
+}
+@media(pointer:coarse) {
+  .field-tile {touch-action:pan-y pinch-zoom}
 }

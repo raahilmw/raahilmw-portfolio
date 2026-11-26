@@ -16,8 +16,8 @@
   let contact = null, bridges = [], found = false;
 
   function draw() {
-    stage.style.setProperty('--lens-x', (x * 100).toFixed(3) + '%');
-    stage.style.setProperty('--lens-y', (y * 100).toFixed(3) + '%');
+    stage.style.setProperty('--lens-x', (x * 100).toFixed(3) + 'cqw');
+    stage.style.setProperty('--lens-y', (y * 100).toFixed(3) + 'cqw');
   }
 
   function stopFrames() {
@@ -91,8 +91,6 @@
   }
 
   function sweep() {
-    stage.classList.remove('is-revealing');
-    void stage.offsetWidth;
     stage.classList.add('is-revealing');
     clearTimeout(glintTimer);
     glintTimer = setTimeout(() => stage.classList.remove('is-revealing'), 1340);

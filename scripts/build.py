@@ -99,6 +99,8 @@ def page(title,active,body,path='/',description=None):
     contact_css = f'<link rel="stylesheet" href="{asset_url("contact.css")}">' if active == 'Contact' else ''
     profile_css = f'<link rel="stylesheet" href="{asset_url("profile.css")}">' if active in ('Home','About','Contact') else ''
     home_css = f'<link rel="stylesheet" href="{asset_url("inspection-lens.css")}">' if active == 'Home' else ''
+    # Let supporting browsers fetch a destination when a visitor shows intent.
+    nav_prefetch = '<script type="speculationrules">{"prefetch":[{"where":{"selector_matches":".desktop-nav a, .mobile-nav a"},"eagerness":"moderate"}]}</script>'
     intro = f'''<dialog id="site-intro" aria-label="Portfolio introduction">
 <div class="identity-frame" aria-hidden="true"><span>raahilmw<span class="identity-period">.</span></span><span class="identity-state">Reading signature</span></div>
 <div class="identity-stage" aria-hidden="true">
@@ -117,7 +119,7 @@ def page(title,active,body,path='/',description=None):
 <div class="identity-footer"><button class="intro-skip" type="button" autofocus>Skip intro <kbd>Esc</kbd></button><div class="identity-meter" aria-hidden="true"><i></i></div></div>
 </dialog><script defer src="{asset_url('intro.js')}"></script>'''
     output.write_text(f'''<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>{escape(title)} — raahilmw</title><meta name="description" content="{escape(description,quote=True)}"><link rel="canonical" href="{ORIGIN}{path}"><script src="{asset_url('theme.js')}"></script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="{asset_url('assets/fonts.css')}"><link rel="stylesheet" href="{asset_url('style.css')}">{profile_css}<link rel="stylesheet" href="{asset_url('motion.css')}">{contact_css}{certificate_css}{case_css}{home_css}</head><body class="page-{active.lower()}">{header(active)}{intro}<main id="content">{body}</main>{footer()}<script src="{asset_url('app.js')}" defer></script><script src="{asset_url('motion.js')}" defer></script>{extra}</body></html>''')
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>{escape(title)} — raahilmw</title><meta name="description" content="{escape(description,quote=True)}"><link rel="canonical" href="{ORIGIN}{path}"><script>{(OUT / "theme.js").read_text()}</script><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="{asset_url('assets/fonts.css')}"><link rel="stylesheet" href="{asset_url('style.css')}">{profile_css}<link rel="stylesheet" href="{asset_url('motion.css')}">{contact_css}{certificate_css}{case_css}{home_css}{nav_prefetch}</head><body class="page-{active.lower()}">{header(active)}{intro}<main id="content">{body}</main>{footer()}<script src="{asset_url('app.js')}" defer></script><script src="{asset_url('motion.js')}" defer></script>{extra}</body></html>''')
 
 def portrait():
     photo = 'assets/raahil-portrait.webp'
@@ -311,6 +313,12 @@ page('Writeups','Writeups',writeups,'/writeups/')
 article_body = (ROOT / 'content/writeups/image-fetcher.html').read_text().replace('{{REPORT_URL}}', REPORT).replace('{{ARTICLE_URL}}', ORIGIN + ARTICLE)
 for evidence in (OUT / 'assets/writeups/image-fetcher').glob('*.png'):
     local_path = '/' + evidence.relative_to(OUT).as_posix()
+    small = asset_url(f'assets/writeups/image-fetcher/{evidence.stem}-680.webp')
+    large = asset_url(f'assets/writeups/image-fetcher/{evidence.stem}-1200.webp')
+    article_body = article_body.replace(
+        f'src="{local_path}"',
+        f'src="{small}" srcset="{small} 680w, {large} 1200w" sizes="(max-width: 720px) calc(100vw - 40px), 680px"'
+    )
     article_body = article_body.replace('"' + local_path + '"', '"' + asset_url(local_path.lstrip('/')) + '"')
 page('Image fetcher to arbitrary file read','Writeups',article_body,ARTICLE,'A bug bounty writeup about an image-to-Base64 endpoint that exposed local files, with a reward response, privacy-edited screenshots, and clear reproduction notes.')
 

@@ -53,7 +53,7 @@
 .credential-record .text-link{font-size:.83rem;min-height:44px}
 .certificate-viewer{width:min(1200px,calc(100% - 28px));max-width:none;max-height:calc(100dvh - 28px);overflow-y:auto;overscroll-behavior:contain;padding:0;background:var(--panel);color:var(--ink);border:1px solid var(--edge);border-radius:12px;box-shadow:0 25px 80px #02081166}
 .certificate-viewer:not([open]){display:none}
-.certificate-viewer::backdrop{background:#030712c9;backdrop-filter:blur(5px)}
+.certificate-viewer::backdrop{background:#030712c9}
 .certificate-viewer-head{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:12px 18px;border-bottom:1px solid var(--edge)}
 .certificate-viewer-head h2{font-size:1.16rem;letter-spacing:-.025em}
 .certificate-viewer-head .icon-button{flex-shrink:0;width:40px;height:40px}
