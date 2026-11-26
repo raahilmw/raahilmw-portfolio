@@ -119,16 +119,3 @@
     });
   }
 })();
-
-(() => {
-  const tracks = document.querySelectorAll('.career-track');
-  if (!tracks.length || !('IntersectionObserver' in window)) return;
-  const observer = new IntersectionObserver(entries => {
-    for (const entry of entries) {
-      if (!entry.isIntersecting) continue;
-      entry.target.classList.add('is-visible');
-      observer.unobserve(entry.target);
-    }
-  }, { threshold: .12 });
-  tracks.forEach(track => observer.observe(track));
-})();

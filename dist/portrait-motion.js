@@ -54,10 +54,7 @@
 })();
 
 // A short pulse follows the visible logos. Each seal can replay independently.
-(() => {
-  const list = document.querySelector('.experience-list');
-  if (!list) return;
-
+document.querySelectorAll('.experience-list').forEach(list => {
   const motion = matchMedia('(prefers-reduced-motion: no-preference)');
   const rows = Array.from(list.children);
   let observer;
@@ -98,4 +95,4 @@
 
   motion.addEventListener('change', syncMotion);
   syncMotion();
-})();
+});

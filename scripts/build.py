@@ -217,13 +217,21 @@ roles = [
     ('rework', 'ReWork Academy', 'Bootcamp CyberSecurity', '2026-10', '2026-12'),
 ]
 
-def month_label(iso_month):
-    year, month = iso_month.split('-')
-    return f'<time datetime="{iso_month}">{month_name[int(month)]} {year}</time>'
+education = [
+    ('aeu', 'Asia e University', 'Bachelor of Information and Communication Technology (Honours)', '2024', None),
+    ('cep-ccit', 'CEP-CCIT FTUI', 'Information Technology in Cyber Security', '2024', '2026'),
+]
 
-def experience_row(entry):
-    brand, company, role, start, end = entry
-    logo = asset_url(f'assets/experience/{brand}.webp')
+def timeline_date(value):
+    if value is None:
+        return 'Present'
+    year, _, month = value.partition('-')
+    label = f'{month_name[int(month)]} {year}' if month else year
+    return f'<time datetime="{value}">{label}</time>'
+
+def timeline_row(section, entry):
+    brand, organization, detail, start, end = entry
+    logo = asset_url(f'assets/{section}/{brand}.webp')
     logo_detail = ''
     if brand == 'asnet':
         logo_detail = '<span class="asnet-domain">www.as.net.id</span>'
@@ -232,13 +240,17 @@ def experience_row(entry):
         logo_detail = f'<img class="rework-dark" src="{dark_logo}" alt="" loading="lazy" decoding="async">'
     return f'''<li>
       <span class="experience-stop" aria-hidden="true"></span>
-      <button type="button" class="experience-logo" disabled aria-label="Replay {escape(company, quote=True)} logo animation">
+      <button type="button" class="experience-logo" disabled aria-label="Replay {escape(organization, quote=True)} logo animation">
         <span class="logo-rim" aria-hidden="true"></span>
         <span class="logo-face logo-{brand}" aria-hidden="true"><img src="{logo}" alt="" loading="lazy" decoding="async">{logo_detail}</span>
       </button>
-      <div class="experience-job"><h3>{escape(company)}</h3><p>{escape(role)}</p></div>
-      <p class="experience-dates">{month_label(start)} – {month_label(end)}</p>
+      <div class="experience-job"><h3>{escape(organization)}</h3><p>{escape(detail)}</p></div>
+      <p class="experience-dates">{timeline_date(start)} – {timeline_date(end)}</p>
     </li>'''
+
+def timeline_section(section, title, entries):
+    rows = ''.join(timeline_row(section, entry) for entry in entries)
+    return f'<section id="{section}" class="about-chapter profile-timeline" aria-labelledby="{section}-title"><h2 id="{section}-title">{title}</h2><ol class="experience-list">{rows}</ol></section>'
 
 # Three small pixel stamps cut on a common 16 by 16 grid.
 expertise = [
@@ -264,14 +276,6 @@ def expertise_stamp(entry):
     return f'<li class="stamp-{motif}"><span class="stamp-art">{art}</span><span>{name}</span></li>'
 
 tool_names = ['Burp Suite', 'Dalfox', 'Nuclei', 'Nmap', 'Wireshark', 'Python', 'Bash']
-education = [
-    ('From 2024','Bachelor of Technology in Information Technology','Asia e University'),
-    ('From 2024','Diploma in Informatics and Information Technology','CEP-CCIT FTUI · Cyber Security'),
-]
-
-def timeline(entries):
-    items = ''.join(f'<li><span class="year">{date}</span><div><h3>{title}</h3><p>{detail}</p></div></li>' for date, title, detail in entries)
-    return f'<ol class="career-track">{items}</ol>'
 
 about_parts = [('about-me','About me'),('expertise','Expertise'),('tools','Tools'),('experience','Experience'),('education','Education')]
 index_links = ''.join(f'<a href="#{anchor}">{escape(name)}</a>' for anchor,name in about_parts)
@@ -293,8 +297,8 @@ about = f'''
 <div class="about-chapters">
 <section id="expertise" class="about-chapter"><h2>Expertise</h2><ul class="expertise-list">{''.join(map(expertise_stamp, expertise))}</ul></section>
 <section id="tools" class="about-chapter"><h2>Tools</h2><ul class="tool-list">{''.join(f'<li>{name}</li>' for name in tool_names)}</ul></section>
-<section id="experience" class="about-chapter" aria-labelledby="experience-title"><h2 id="experience-title">Experience</h2><ol class="experience-list">{''.join(map(experience_row, roles))}</ol></section>
-<section id="education" class="about-chapter"><h2>Education</h2>{timeline(education)}</section>
+{timeline_section('experience', 'Experience', roles)}
+{timeline_section('education', 'Education', education)}
 </div></div>'''
 page('About','About',about,'/about/')
 
