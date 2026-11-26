@@ -219,7 +219,7 @@ roles = [
 
 education = [
     ('aeu', 'Asia e University', 'Bachelor of Information and Communication Technology (Honours)', '2024', None),
-    ('cep-ccit', 'CEP-CCIT FTUI', 'Information Technology in Cyber Security', '2024', '2026'),
+    ('cep-ccit', 'CEP-CCIT FTUI', 'Information Technology in Cyber Security\nCWAP : 3.44 (4-Scale)', '2024', '2026'),
 ]
 
 def timeline_date(value):
@@ -231,6 +231,7 @@ def timeline_date(value):
 
 def timeline_row(section, entry):
     brand, organization, detail, start, end = entry
+    paragraphs = ''.join(f'<p>{escape(line)}</p>' for line in detail.splitlines())
     logo = asset_url(f'assets/{section}/{brand}.webp')
     logo_detail = ''
     if brand == 'asnet':
@@ -244,7 +245,7 @@ def timeline_row(section, entry):
         <span class="logo-rim" aria-hidden="true"></span>
         <span class="logo-face logo-{brand}" aria-hidden="true"><img src="{logo}" alt="" loading="lazy" decoding="async">{logo_detail}</span>
       </button>
-      <div class="experience-job"><h3>{escape(organization)}</h3><p>{escape(detail)}</p></div>
+      <div class="experience-job"><h3>{escape(organization)}</h3>{paragraphs}</div>
       <p class="experience-dates">{timeline_date(start)} – {timeline_date(end)}</p>
     </li>'''
 
