@@ -2,6 +2,8 @@
 
 Raahil Muhammad Wildan’s security research portfolio. Run `python scripts/build.py` to regenerate the eight static pages in `dist/`.
 
+Coding agents working in this checkout use Ponytail’s project rules from the root [AGENTS.md](AGENTS.md). [Ponytail v5.3.3](https://github.com/DietrichGebert/ponytail/tree/v5.3.3) · [MIT license](licenses/ponytail-MIT.txt).
+
 ## Hosting
 
 Upload the contents of `dist/` to the root of a static website. The host should serve each directory's `index.html`, so routes such as `/about/` and `/writeups/` work. No server runtime or package installation is required.

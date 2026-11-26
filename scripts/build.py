@@ -1,5 +1,6 @@
 from pathlib import Path
 from hashlib import sha256
+from functools import lru_cache
 from html import escape
 from calendar import month_name
 import os
@@ -74,6 +75,7 @@ def social_deck():
 def footer():
     return f'''<footer class="site-footer shell">{wordmark()}<span>2026 raahilmw</span><a href="{MEDIUM}" target="_blank" rel="noreferrer">Medium</a><a href="/contact/">Contact</a><button type="button" class="replay-arrival" aria-label="Replay opening animation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6M4 10a8 8 0 1 1 1 7"/></svg><span>Replay arrival</span></button></footer><div class="toast" role="status" aria-live="polite" id="toast"></div>'''
 
+@lru_cache(maxsize=None)
 def asset_url(name):
     revision = sha256((OUT / name).read_bytes()).hexdigest()[:12]
     return f'/{name}?v={revision}'
