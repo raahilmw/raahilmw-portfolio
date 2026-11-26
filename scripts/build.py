@@ -1,6 +1,7 @@
 from pathlib import Path
 from hashlib import sha256
 from html import escape
+from calendar import month_name
 import os
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -208,12 +209,33 @@ def tile(entry):
     text, mark, angle = entry
     return f'<button type="button" class="field-tile tile-{mark}" data-angle="{angle}" aria-describedby="field-keys"><span aria-hidden="true">{glyph[mark]}</span>{text}</button>'
 
-# Dates and roles are from the owner's public LinkedIn profile.
 roles = [
-    ('Dec 2023 – May 2024','Data Center Engineering Intern','PT Usaha Adi Sanggoro (ASNET)'),
-    ('From Jul 2026','Penetration Testing Intern','JAH Training Center'),
-    ('From Sep 2026','Offensive Security Intern','VINIX7'),
+    ('lintasarta', 'Lintasarta', 'IT Service Management Intern', '2023-07', '2023-11'),
+    ('asnet', 'PT Usaha Adi Sanggoro (ASNET)', 'Data Center Infrastructure Engineer Intern', '2023-12', '2024-05'),
+    ('jah', 'JAH Training Centre', 'Penetration Testing Intern', '2026-07', '2026-10'),
+    ('vinix7', 'Vinix7', 'Cybersecurity Ethical Hacker Intern', '2026-09', '2026-12'),
+    ('rework', 'ReWork Academy', 'Bootcamp CyberSecurity', '2026-10', '2026-12'),
 ]
+
+def month_label(iso_month):
+    year, month = iso_month.split('-')
+    return f'<time datetime="{iso_month}">{month_name[int(month)]} {year}</time>'
+
+def experience_row(entry):
+    brand, company, role, start, end = entry
+    logo = asset_url(f'assets/experience/{brand}.webp')
+    logo_detail = ''
+    if brand == 'asnet':
+        logo_detail = '<span class="asnet-domain">www.as.net.id</span>'
+    elif brand == 'rework':
+        dark_logo = asset_url('assets/experience/rework-dark.webp')
+        logo_detail = f'<img class="rework-dark" src="{dark_logo}" alt="" loading="lazy" decoding="async">'
+    return f'''<li>
+      <span class="experience-logo logo-{brand}" aria-hidden="true"><img src="{logo}" alt="" loading="lazy" decoding="async">{logo_detail}</span>
+      <div class="experience-job"><h3>{escape(company)}</h3><p>{escape(role)}</p></div>
+      <p class="experience-dates">{month_label(start)} – {month_label(end)}</p>
+    </li>'''
+
 # Three small pixel stamps cut on a common 16 by 16 grid.
 expertise = [
     ('Penetration Testing', 'scope', [
@@ -267,7 +289,7 @@ about = f'''
 <div class="about-chapters">
 <section id="expertise" class="about-chapter"><h2>Expertise</h2><ul class="expertise-list">{''.join(map(expertise_stamp, expertise))}</ul></section>
 <section id="tools" class="about-chapter"><h2>Tools</h2><ul class="tool-list">{''.join(f'<li>{name}</li>' for name in tool_names)}</ul></section>
-<section id="experience" class="about-chapter"><h2>Experience</h2>{timeline((date, org, role) for date, role, org in roles)}</section>
+<section id="experience" class="about-chapter" aria-labelledby="experience-title"><h2 id="experience-title">Experience</h2><ol class="experience-list">{''.join(map(experience_row, roles))}</ol></section>
 <section id="education" class="about-chapter"><h2>Education</h2>{timeline(education)}</section>
 </div></div>'''
 page('About','About',about,'/about/')

@@ -121,7 +121,7 @@
 })();
 
 (() => {
-  const tracks = document.querySelectorAll('.career-track');
+  const tracks = document.querySelectorAll('.career-track, .experience-list');
   if (!tracks.length || !('IntersectionObserver' in window)) return;
   const observer = new IntersectionObserver(entries => {
     for (const entry of entries) {
