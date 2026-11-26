@@ -42,9 +42,5 @@
     root.classList.remove('certificate-open');
     trigger.focus({ preventScroll: true });
   });
-  viewer.addEventListener('click', event => {
-    if (event.target !== viewer) return;
-    const rect = viewer.getBoundingClientRect();
-    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) close();
-  });
+
 })();

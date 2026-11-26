@@ -12,7 +12,7 @@
   --glass:rgba(246,250,255,.87); --edge:rgba(92,115,154,.38); --air:#889bb3;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:20px}
+html{scrollbar-gutter:stable;scroll-behavior:smooth;scroll-padding-top:20px}
 body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.65 var(--sans);-webkit-font-smoothing:antialiased}
 h1,h2,h3,p,figure,dl{margin:0}
 h1,h2,h3{font-weight:500;line-height:1.07;letter-spacing:-.056em;text-wrap:balance}

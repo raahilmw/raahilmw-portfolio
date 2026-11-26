@@ -371,7 +371,7 @@ certs=f'''<section class="page-intro shell credential-intro"><h1>Certifications<
 <details class="course-skills" open><summary>Course skills <span class="skills-chevron" aria-hidden="true"></span></summary><ul>{''.join(f'<li>{escape(skill)}</li>' for skill in course_skills)}</ul></details>
 <div class="credential-record"><div><span>Certificate ID</span><code>{certificate_id}</code></div><button class="text-link" type="button" data-copy="{certificate_id}" data-message="Certificate ID copied.">{icon('copy')}Copy ID</button></div>
 </section>
-<dialog class="certificate-viewer" id="certificate-viewer" aria-labelledby="certificate-viewer-title"><div class="certificate-viewer-head"><h2 id="certificate-viewer-title">CyberOps Associate</h2><button class="icon-button" type="button" data-certificate-close aria-label="Close certificate preview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><div class="certificate-viewer-image"><img data-full-image width="2325" height="1575" alt="Original CyberOps Associate course certificate awarded to Raahil Muhammad Wildan." decoding="async"></div><div class="certificate-viewer-foot"><a class="underlined" href="{certificate_pdf}" target="_blank" rel="noreferrer">View original PDF</a><a class="underlined" href="{certificate_png}" download="raahilmw-cyberops-associate.png">Download PNG</a></div></dialog>'''
+<dialog class="certificate-viewer" closedby="any" id="certificate-viewer" aria-labelledby="certificate-viewer-title"><div class="certificate-viewer-head"><h2 id="certificate-viewer-title">CyberOps Associate</h2><button class="icon-button" type="button" data-certificate-close aria-label="Close certificate preview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><div class="certificate-viewer-image"><img data-full-image width="2325" height="1575" alt="Original CyberOps Associate course certificate awarded to Raahil Muhammad Wildan." decoding="async"></div><div class="certificate-viewer-foot"><a class="underlined" href="{certificate_pdf}" target="_blank" rel="noreferrer">View original PDF</a><a class="underlined" href="{certificate_png}" download="raahilmw-cyberops-associate.png">Download PNG</a></div></dialog>'''
 page('Certifications','Certifications',certs,'/certifications/')
 
 ARROW = '<svg class="cta-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M9 6h9v9"/></svg>'
@@ -409,7 +409,7 @@ contact=f'''<section class="contact-page shell">
 </div>
 </section>
 
-<dialog id="mail-picker" class="mail-picker" aria-labelledby="mail-picker-title">
+<dialog id="mail-picker" closedby="any" class="mail-picker" aria-labelledby="mail-picker-title">
 <div class="mail-picker-head"><span class="mono">SEND TO {EMAIL}</span><h2 id="mail-picker-title">Pick where to write<span class="red">.</span></h2></div>
 <ul class="mail-options">{mail_options}</ul>
 <div class="mail-picker-foot"><button class="text-link" type="button" data-copy="{EMAIL}" data-message="Email copied." data-close>{icon('copy')}Or just copy the address</button><button class="text-link" type="button" data-close>Cancel</button></div>

@@ -18,7 +18,13 @@ const link = new Control();
 const breakpoint = new Control();
 panel.hidden = true;
 panel.querySelectorAll = () => [link];
-document.querySelectorAll = () => [];
+const legacyDialog = new Control();
+const nativeDialog = new Control();
+nativeDialog.closedBy = 'any';
+legacyDialog.open = true;
+legacyDialog.close = () => { legacyDialog.open = false; };
+legacyDialog.getBoundingClientRect = () => ({left:20, right:200, top:30, bottom:120});
+document.querySelectorAll = selector => selector === 'dialog[closedby="any"]' ? [legacyDialog, nativeDialog] : [];
 document.querySelector = name => ({ '.menu-toggle': menu, '.mobile-nav': panel })[name];
 vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../dist/app.js'), 'utf8'), {
   document, matchMedia: () => breakpoint
@@ -44,3 +50,15 @@ for (const [control, event] of [[link, 'click'], [document, 'click'], [breakpoin
   expectOpen(false);
 }
 console.log('Menu visibility, rapid clicks, Escape focus, outside click, link and breakpoint passed.');
+
+function backdropClick(dialog, x, y) {
+  dialog.dispatchEvent(Object.assign(new Event('click'), {clientX:x, clientY:y}));
+}
+backdropClick(legacyDialog, 100, 80);
+assert.equal(legacyDialog.open, true);
+backdropClick(legacyDialog, 5, 80);
+assert.equal(legacyDialog.open, false);
+nativeDialog.open = true;
+backdropClick(nativeDialog, 5, 80);
+assert.equal(nativeDialog.open, true, 'Native dismissal stays under browser control');
+console.log('Native delegation and legacy backdrop hit testing passed.');

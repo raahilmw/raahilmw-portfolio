@@ -145,9 +145,5 @@
   closeButton.addEventListener('click',close);
   viewer.addEventListener('cancel',event=>{event.preventDefault();close();});
   viewer.addEventListener('close',()=>{root.classList.remove('evidence-open');trigger?.focus({preventScroll:true});document.dispatchEvent(new CustomEvent('request-trace-modal',{detail:{open:false}}));});
-  viewer.addEventListener('click',event=>{
-    if(event.target!==viewer)return;
-    const b=viewer.getBoundingClientRect();
-    if(event.clientX<b.left||event.clientX>b.right||event.clientY<b.top||event.clientY>b.bottom)close();
-  });
+
 })();

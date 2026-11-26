@@ -47,11 +47,6 @@
   }));
   picker.addEventListener('close', unlock);
   picker.addEventListener('cancel', event => { event.preventDefault(); close(); });
-  // Only clicks on the backdrop close the picker, not whitespace inside it.
-  picker.addEventListener('click', event => {
-    if (event.target !== picker) return;
-    const rect = picker.getBoundingClientRect();
-    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) close();
-  });
+
   picker.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', close));
 })();

@@ -24,6 +24,18 @@
     if (!event.matches) setMenu(false);
   });
 
+  // Older dialog implementations need a backdrop hit test for light dismissal.
+  document.querySelectorAll('dialog[closedby="any"]').forEach(dialog => {
+    if ('closedBy' in dialog) return;
+    dialog.addEventListener('click', event => {
+      if (event.target !== dialog || !dialog.open) return;
+      const {left, right, top, bottom} = dialog.getBoundingClientRect();
+      if (event.clientX < left || event.clientX > right || event.clientY < top || event.clientY > bottom) {
+        dialog.close();
+      }
+    });
+  });
+
   let toastTimer;
   function notify(message){const toast=document.querySelector('#toast');toast.textContent=message;toast.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('visible'),3400);}
   document.querySelectorAll('[data-copy]').forEach(button=>button.addEventListener('click',async()=>{
