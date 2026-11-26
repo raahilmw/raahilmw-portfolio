@@ -288,7 +288,7 @@
 /* A terrain diagram for the three paths out of the researcher introduction. */
 .research-map {
   --trail: #9acfc6; position: relative; isolation: isolate; align-self: center;
-  width: 100%; aspect-ratio: 500/262; min-height: 205px;
+  width: 100%; min-width: 0; aspect-ratio: 500/262; min-height: min(205px,47vw);
 }
 [data-theme=light] .research-map {--trail: #365f60}
 .map-contours {

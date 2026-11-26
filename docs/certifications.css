@@ -4,7 +4,7 @@
 .credential-intro>p{font-size:clamp(1.05rem,1.6vw,1.35rem)}
 .credential-feature{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);gap:clamp(35px,6vw,85px);align-items:center;padding-bottom:clamp(3rem,6vw,6rem)}
 .credential-visual{isolation:isolate;position:relative;min-width:0;padding:35px 10px 0}
-.credential-orbit{position:absolute;inset:-3% -4% 7%;z-index:-1;pointer-events:none}
+.credential-orbit{position:absolute;inset:-3% 0 7%;overflow:clip;z-index:-1;pointer-events:none}
 .credential-orbit i{position:absolute;inset:0 6%;border:1px solid color-mix(in srgb,var(--accent) 19%,transparent);border-radius:50%;transform:rotate(-27deg) scaleY(.67)}
 .credential-orbit i:nth-child(2){inset:2% -2%;border-style:dashed;opacity:.5;transform:rotate(23deg) scaleY(.68)}
 .credential-orbit i:nth-child(3){inset:10% 1%;border-color:transparent;border-top-color:var(--accent);transform:rotate(-27deg) scaleY(.67);opacity:.5}
@@ -70,7 +70,7 @@
  .course-notes.is-seen .course-focus>span:nth-child(3) svg{animation-delay:.2s}
  .certificate-viewer[open]{animation:document-view .28s var(--settle) backwards}
  @keyframes document-register{from{opacity:.3;transform:perspective(1000px) translateY(15px) rotateY(-9deg) rotateZ(-5deg)}}
- @keyframes document-orbit{from{opacity:.2;transform:scale(.93) rotate(-8deg)}}
+ @keyframes document-orbit{from{opacity:.2;transform:scale(.93)}}
  @keyframes signal-draw{from{stroke-dasharray:90;stroke-dashoffset:90}to{stroke-dasharray:90;stroke-dashoffset:0}}
  @keyframes document-view{from{opacity:.3;translate:0 10px;scale:.98}}
 }
