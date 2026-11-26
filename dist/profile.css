@@ -123,36 +123,97 @@
   margin: 0 0 1rem;
 }
 .experience-list {
+  --seal: 3.75rem;
+  --rail-x: .375rem;
+  --gutter: 1.6rem;
   list-style: none;
   padding: 0;
   margin: 0;
   border-top: 1px solid var(--edge);
 }
 .experience-list li {
+  position: relative;
   display: grid;
-  grid-template-columns: 4.75rem minmax(0, 1fr);
+  grid-template-columns: var(--seal) minmax(0, 1fr);
   grid-template-areas: 'logo job' 'logo dates';
   align-items: center;
   gap: .24rem 1rem;
-  padding: .85rem 0;
+  padding: .75rem 0 .75rem var(--gutter);
 }
-.experience-list li + li {border-top: 1px solid var(--line)}
+.experience-list li + li {
+  background: linear-gradient(var(--line), var(--line)) right top / calc(100% - var(--gutter) - var(--seal) - 1rem) 1px no-repeat;
+}
+.experience-list li::before, .experience-list li::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 var(--rail-x);
+  width: 1px;
+  pointer-events: none;
+}
+.experience-list li::before {background: var(--edge)}
+.experience-list li::after {
+  opacity: 0;
+  background: linear-gradient(transparent, var(--accent) 80%, var(--ink));
+  background-size: 100% 1.15rem;
+  background-repeat: no-repeat;
+}
+.experience-list li:first-child::before, .experience-list li:first-child::after {top: 50%}
+.experience-list li:last-child::before, .experience-list li:last-child::after {bottom: 50%}
+.experience-stop {
+  position: absolute;
+  z-index: 1;
+  left: var(--rail-x);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: .58rem;
+  height: .58rem;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  background: var(--bg);
+}
+.experience-list li:last-child .experience-stop {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--raised);
+}
 .experience-logo {
   grid-area: logo;
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  width: var(--seal);
+  height: var(--seal);
+  padding: 4px;
+  border: 1px solid var(--edge);
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--accent);
+  touch-action: manipulation;
+}
+.experience-logo:disabled {cursor: default; opacity: 1}
+.experience-logo:enabled:is(:hover, :focus-visible) {border-color: var(--accent)}
+.logo-rim {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background: conic-gradient(from 7deg, transparent 0deg 234deg, var(--air) 281deg, var(--accent) 301deg 312deg, transparent 313deg 326deg, var(--accent) 327deg 331deg, transparent 332deg);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1.5px));
+}
+.logo-face {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 100%;
-  height: 3.125rem;
-  padding: .35rem;
-  border-radius: .45rem;
+  min-width: 0;
+  min-height: 0;
+  padding: .24rem;
+  border-radius: 50%;
   background: #fff;
-  box-shadow: inset 0 0 0 1px #22324a20;
   overflow: hidden;
 }
-.experience-logo img {display: block; width: 100%; height: 100%; min-height: 0; object-fit: contain}
+.logo-face img {display: block; width: 100%; height: 100%; min-height: 0; object-fit: contain}
 .logo-asnet {background: #111927; align-content: center; grid-template-rows: 1.18rem auto}
 .asnet-domain {color: #fff; font: 500 .46rem/1.1 var(--sans); letter-spacing: .035em}
-.logo-jah {background: var(--panel); border: 1px solid var(--line); padding: .17rem}
+.logo-jah {background: var(--panel); padding: .07rem}
 .logo-rework {
   background-color: #080b08;
   background-image: radial-gradient(circle at 12% 8%, #6a9862, #233721 24%, transparent 25%),
@@ -175,23 +236,36 @@
 @container (min-width: 42rem) {
   .experience-list li {
     grid-template-areas: 'logo job dates';
-    grid-template-columns: 4.75rem minmax(0, 1fr) auto;
+    grid-template-columns: var(--seal) minmax(0, 1fr) auto;
   }
   .experience-dates {text-align: end}
 }
 @container (max-width: 23rem) {
-  .experience-list li {grid-template-columns: 3.6rem minmax(0, 1fr); column-gap: .65rem}
-  .experience-logo {height: 2.625rem}
+  .experience-list {--seal: 3.2rem; --gutter: 1.2rem}
+  .experience-list li {column-gap: .65rem}
 }
 @media (prefers-reduced-motion: no-preference) {
-  .experience-list.is-visible li {animation: experience-arrive .38s cubic-bezier(.2,.75,.25,1) backwards}
-  .experience-list.is-visible li:nth-child(2) {animation-delay: 35ms}
-  .experience-list.is-visible li:nth-child(3) {animation-delay: 70ms}
-  .experience-list.is-visible li:nth-child(4) {animation-delay: 105ms}
-  .experience-list.is-visible li:nth-child(5) {animation-delay: 140ms}
-  @keyframes experience-arrive {
-    from {opacity: .25; transform: translateY(.32rem)}
-    to {opacity: 1; transform: translateY(0)}
+  .experience-list .is-tracing::after {animation: experience-signal .26s linear var(--delay, 0ms) both}
+  .is-tracing .experience-stop {animation: experience-ping .55s ease-out calc(var(--delay, 0ms) + .1s)}
+  .is-tracing .logo-rim {animation: experience-orbit 1s cubic-bezier(.24,.72,.26,1) calc(var(--delay, 0ms) + .1s)}
+  .is-tracing .logo-face {animation: experience-focus .66s ease-out calc(var(--delay, 0ms) + .1s)}
+  @keyframes experience-signal {
+    0% {opacity: 0; background-position: center -1.15rem}
+    14%, 85% {opacity: 1}
+    100% {opacity: 0; background-position: center calc(100% + 1.15rem)}
+  }
+  @keyframes experience-ping {
+    12% {background: var(--accent); box-shadow: 0 0 0 0 var(--accent)}
+    90% {box-shadow: 0 0 0 6px transparent}
+  }
+  @keyframes experience-orbit {
+    0% {transform: rotate(0turn)}
+    73% {transform: rotate(1.055turn)}
+    100% {transform: rotate(1turn)}
+  }
+  @keyframes experience-focus {
+    24% {transform: scale(.91)}
+    68% {transform: scale(1.035)}
   }
 }
 @media(prefers-reduced-motion:no-preference){

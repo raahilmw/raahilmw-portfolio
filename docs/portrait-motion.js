@@ -52,3 +52,50 @@
     center();
   });
 })();
+
+// A short pulse follows the visible logos. Each seal can replay independently.
+(() => {
+  const list = document.querySelector('.experience-list');
+  if (!list) return;
+
+  const motion = matchMedia('(prefers-reduced-motion: no-preference)');
+  const rows = Array.from(list.children);
+  let observer;
+
+  function trace(row, delay = 0) {
+    if (!motion.matches || row.classList.contains('is-tracing')) return;
+    row.style.setProperty('--delay', delay + 'ms');
+    row.classList.add('is-tracing');
+  }
+
+  for (const row of rows) {
+    const seal = row.querySelector('.experience-logo');
+    seal.addEventListener('pointerenter', event => {
+      if (event.pointerType === 'mouse') trace(row);
+    });
+    seal.addEventListener('click', () => trace(row));
+    row.addEventListener('animationend', event => {
+      if (event.animationName === 'experience-orbit') row.classList.remove('is-tracing');
+    });
+  }
+
+  function syncMotion() {
+    observer?.disconnect();
+    for (const row of rows) {
+      row.classList.remove('is-tracing');
+      row.querySelector('.experience-logo').disabled = !motion.matches;
+    }
+    if (!motion.matches || !('IntersectionObserver' in window)) return;
+    observer = new IntersectionObserver(entries => {
+      const visible = entries.filter(entry => entry.isIntersecting && entry.intersectionRatio >= .4);
+      visible.forEach((entry, index) => {
+        trace(entry.target, index * 260);
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: .4 });
+    rows.forEach(row => observer.observe(row));
+  }
+
+  motion.addEventListener('change', syncMotion);
+  syncMotion();
+})();

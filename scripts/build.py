@@ -231,7 +231,11 @@ def experience_row(entry):
         dark_logo = asset_url('assets/experience/rework-dark.webp')
         logo_detail = f'<img class="rework-dark" src="{dark_logo}" alt="" loading="lazy" decoding="async">'
     return f'''<li>
-      <span class="experience-logo logo-{brand}" aria-hidden="true"><img src="{logo}" alt="" loading="lazy" decoding="async">{logo_detail}</span>
+      <span class="experience-stop" aria-hidden="true"></span>
+      <button type="button" class="experience-logo" disabled aria-label="Replay {escape(company, quote=True)} logo animation">
+        <span class="logo-rim" aria-hidden="true"></span>
+        <span class="logo-face logo-{brand}" aria-hidden="true"><img src="{logo}" alt="" loading="lazy" decoding="async">{logo_detail}</span>
+      </button>
       <div class="experience-job"><h3>{escape(company)}</h3><p>{escape(role)}</p></div>
       <p class="experience-dates">{month_label(start)} – {month_label(end)}</p>
     </li>'''
