@@ -47,3 +47,20 @@ The SSRF / local-file-read writeup lives in `content/writeups/image-fetcher.html
 ### Screenshot provenance
 
 All five PNGs in `dist/assets/writeups/image-fetcher/` are extracted unchanged from the supplied `wu.docx`. The author explicitly requested the original, already-blurred Burp captures without additional masks. Their byte hashes match the embedded files. No image generation or additional redaction is applied to these published files. Findings and payloads follow the original text report. Captions keep the `/proc/./version` status capture separate from the unpictured configuration-file check.
+
+## About toolkit artwork
+
+The About page serves small local WebP versions of the project marks.
+
+- [Bash](https://bashlogo.com/apple-touch-icon.png)
+- [Burp Suite](https://portswigger.net/_home/rc3/logos/ps-pro-icon.svg)
+- [Dalfox](https://raw.githubusercontent.com/hahwul/dalfox/HEAD/docs/static/images/logo_solo.png)
+- [ffuf](https://raw.githubusercontent.com/ffuf/ffuf/HEAD/_img/ffuf_run_logo_600.png)
+- [Hermes Agent](https://raw.githubusercontent.com/NousResearch/hermes-agent/main/apps/desktop/assets/appx/Square44x44Logo.targetsize-256_altform-unplated.png)
+- [httpx](https://raw.githubusercontent.com/projectdiscovery/httpx/HEAD/static/httpx-logo.png)
+- [Nmap](https://nmap.org/images/sitelogo-2x.png)
+- [Nuclei](https://raw.githubusercontent.com/projectdiscovery/nuclei/HEAD/static/nuclei-logo.png)
+- [OpenBot](https://openbot.run/apple-touch-icon.png)
+- [Python](https://raw.githubusercontent.com/python/cpython/main/Lib/profiling/sampling/_assets/python-logo-only.png)
+- [SQLmap](https://sqlmap.org/sqlmap-tarsier.png)
+- [Subfinder](https://raw.githubusercontent.com/projectdiscovery/subfinder/HEAD/static/subfinder-logo.png)

@@ -257,32 +257,58 @@ def timeline_section(section, title, entries):
     rows = ''.join(timeline_row(section, entry) for entry in entries)
     return f'<section id="{section}" class="about-chapter profile-timeline" aria-labelledby="{section}-title"><h2 id="{section}-title">{title}</h2><ol class="experience-list">{rows}</ol></section>'
 
-# Three small pixel stamps cut on a common 16 by 16 grid.
+# Pixel stamps share a common 16 by 16 grid.
 expertise = [
-    ('Penetration Testing', 'scope', [
+    ('Web Application Penetration Testing', 'scope', [
         '      ####', '       ##', '    ########', '   ##  ##  ##', '  ##        ##',
         '  #    ##    #', '###### ## ######', '###### ## ######', '  #    ##    #',
         '  ##        ##', '   ##  ##  ##', '    ########', '       ##', '      ####']),
-    ('Web Exploitation', 'web', [
+    ('Vulnerability Research & Validation', 'web', [
         '   ##########', '  ##   ##   ##', ' ##   #  #   ##', ' ##   #  #   ##',
         ' ##############', ' ##   #  #   ##', ' ##   #', ' ##   #   ##',
         '  ########  ##', '   ##   ##    ##', '    ######  #####', '          ## ##',
         '              ##']),
-    ('Security Automation', 'pulse', [
+    ('Reconnaissance & Attack Surface Mapping', 'scope', [
+        '      ####', '     ##  ##', '     ##  ##', '      ####',
+        '       ##', '   ##########', '   ##      ##', '   ##      ##',
+        ' #####    #####', ' ## ##    ## ##', ' #####    #####']),
+    ('Security Automation & AI-Assisted Workflow', 'pulse', [
         '        #####', '       #####', '      #####', '     #####', '    #####',
         '   ##########', '  ##########', '       ####', '      ####', '     ###',
         '    ###', '   ##', '  #']),
+    ('Technical Reporting (PoC, CVSS, remediation)', 'web', [
+        '   ########', '   ##    ###', '   ##    ####', '   ##    #####',
+        '   ##       ##', '   ## ####  ##', '   ##       ##', '   ## ##### ##',
+        '   ##       ##', '   ## ###   ##', '   ##       ##', '   ###########']),
 ]
 
 def expertise_stamp(entry):
     name, motif, pixels = entry
     cells = ' '.join(f'M{x} {y}h1v1h-1z' for y, row in enumerate(pixels) for x, pixel in enumerate(row) if pixel == '#')
     art = f'<svg viewBox="-1 -1 18 17" aria-hidden="true" shape-rendering="crispEdges"><path d="{cells}"/></svg>'
-    return f'<li class="stamp-{motif}"><span class="stamp-art">{art}</span><span>{name}</span></li>'
+    return f'<li class="stamp-{motif}"><span class="stamp-art">{art}</span><span>{escape(name)}</span></li>'
 
-tool_names = ['Burp Suite', 'Dalfox', 'Nuclei', 'Nmap', 'Wireshark', 'Python', 'Bash']
+def tool_items(entries, *, ordered=False):
+    tag = 'ol' if ordered else 'ul'
+    items = []
+    for slug, name in entries:
+        source = asset_url(f'assets/toolkit/{slug}.webp')
+        items.append(f'<li><span class="kit-mark kit-{slug}"><img src="{source}" alt="" width="48" height="48" loading="lazy" decoding="async"></span><span>{escape(name)}</span></li>')
+    return f'<{tag} class="kit-items">{"".join(items)}</{tag}>'
 
-about_parts = [('about-me','About me'),('expertise','Expertise'),('tools','Tools'),('experience','Experience'),('education','Education')]
+
+recon_tools = [('subfinder', 'Subfinder'), ('nmap', 'Nmap'), ('httpx', 'httpx')]
+tool_groups = [
+    ('Recon', recon_tools),
+    ('Web testing', [('burp', 'Burp Suite'), ('ffuf', 'ffuf')]),
+    ('Vulnerability testing', [('nuclei', 'Nuclei'), ('dalfox', 'Dalfox (XSS)'), ('sqlmap', 'SQLmap (SQLi)')]),
+]
+tools_markup = ''.join(f'<div class="kit-group"><h3>{title}</h3>{tool_items(entries)}</div>' for title, entries in tool_groups)
+assistant_tools = [('hermes', 'Hermes'), ('openbot', 'OpenBot')]
+scanning_tools = [('subfinder', 'Subfinder'), ('httpx', 'httpx'), ('nuclei', 'Nuclei')]
+scripting_tools = [('python', 'Python'), ('bash', 'Bash')]
+
+about_parts = [('about-me','About me'),('expertise','Expertise'),('tools','Tools'),('automation','Automation'),('experience','Experience'),('education','Education')]
 index_links = ''.join(f'<a href="#{anchor}">{escape(name)}</a>' for anchor,name in about_parts)
 about = f'''
 <section class="field-scroll" aria-label="Interactive research interests"><div class="field-sticky"><div class="field-card"><div class="field-board">
@@ -301,7 +327,14 @@ about = f'''
 <div class="shell about-index-layout"><nav class="about-index" aria-label="On this page">{label('On this page')}{index_links}</nav>
 <div class="about-chapters">
 <section id="expertise" class="about-chapter"><h2>Expertise</h2><ul class="expertise-list">{''.join(map(expertise_stamp, expertise))}</ul></section>
-<section id="tools" class="about-chapter"><h2>Tools</h2><ul class="tool-list">{''.join(f'<li>{name}</li>' for name in tool_names)}</ul></section>
+<section id="tools" class="about-chapter kit-chapter" aria-labelledby="tools-title"><h2 id="tools-title">Tools</h2>
+<div class="kit-shelf">{tools_markup}</div></section>
+<section id="automation" class="about-chapter kit-chapter" aria-labelledby="automation-title"><h2 id="automation-title">Automation</h2>
+<div class="automation-board">
+<div class="auto-row"><h3>AI-assisted recon &amp; triage</h3>{tool_items(assistant_tools)}</div>
+<div class="auto-row auto-pipeline"><h3>Automated scanning pipeline</h3>{tool_items(scanning_tools, ordered=True)}</div>
+<div class="auto-row"><h3>Scripting</h3>{tool_items(scripting_tools)}</div>
+</div></section>
 {timeline_section('experience', 'Experience', roles)}
 {timeline_section('education', 'Education', education)}
 </div></div>'''
