@@ -13,8 +13,16 @@ a,button,.copy-emblem{transition:color .22s,background-color .22s,border-color .
   transform:scaleX(0);transform-origin:left;transition:transform .15s ease-out;
 }
 .desktop-nav a:is([aria-current=page],:hover,:focus-visible)::after {transform:scaleX(1)}
-.site-header .brand-star{display:inline-block;transition:transform .7s var(--settle)}
-.wordmark:hover .brand-star{transform:rotate(90deg)}
+.wordmark:is(:hover,:focus-visible){color:var(--ink)}
+.wordmark:is(:hover,:focus-visible) .signature-dot{fill:var(--accent)}
+@media(prefers-reduced-motion:no-preference){
+  .wordmark:is(:hover,:focus-visible) .signature-dot,
+  #site-intro[open] .signature-dot{transform-box:fill-box;transform-origin:center;animation:signature-tap .48s ease-out}
+  #site-intro[open] .signature-dot{animation-delay:2.62s}
+  #site-intro[open] .brand-art{animation:signature-read .68s var(--settle) both}
+  @keyframes signature-tap{35%{transform:translateY(-.5em) scale(.83);fill:var(--accent)}}
+  @keyframes signature-read{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0)}}
+}
 .hero-copy h1{font-size:clamp(3.6rem,7.1vw,6rem);letter-spacing:-.04em;line-height:1.04}
 .hero-line{display:block;white-space:nowrap}
 .hero-copy h1 em{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-weight:400;letter-spacing:-.035em;font-size:1.19em;line-height:.8;color:var(--accent)}
@@ -102,7 +110,7 @@ a,button,.copy-emblem{transition:color .22s,background-color .22s,border-color .
 [data-theme=light] #site-intro{background:radial-gradient(ellipse at 36% 45%,#e3eaf9,#edf1f9 50%,#f6f8fc);color:#1b3144}
 .identity-frame,.identity-footer{position:absolute;inset-inline:clamp(1.3rem,5vw,6rem);display:flex;align-items:center;justify-content:space-between}
 .identity-frame{top:clamp(1rem,4vh,3rem);padding-bottom:.7rem;border-bottom:1px solid var(--edge)}
-.identity-frame>span:first-child{font:600 1.3rem var(--sans);letter-spacing:-.07em}.identity-period{color:var(--accent)}
+.identity-frame .brand-art{width:7.25rem}
 .identity-state,.identity-footer{font:400 .78rem/1.5 var(--mono)}
 .identity-state{color:var(--phosphor)}.identity-state::before{content:'';display:inline-block;margin-right:.65em;width:.42em;height:.42em;border-radius:50%;background:currentColor}
 .identity-stage {
