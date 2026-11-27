@@ -52,14 +52,10 @@ a,button,.copy-emblem{transition:color .22s,background-color .22s,border-color .
 .orb-disc img{transition:transform .5s var(--settle)}
 .orb-disc:after{animation-play-state:paused}
 .motion-visible .orb-disc:after{animation-play-state:running}
-.expertise-list li{border:1px solid var(--edge);clip-path:none;border-radius:3px 16px 3px 16px;background:var(--panel);min-height:10.5rem;padding:20px}
 .expertise-list li::after{opacity:.22;transform:perspective(400px) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg));transition:opacity .5s}
 .expertise-list li:hover::after{opacity:.8}
-.stamp-art{border:1px solid color-mix(in srgb,var(--stamp) 25%,transparent);padding:9px;border-radius:50%;transition:background .4s,transform .65s var(--settle)}
-.stamp-art svg{width:30px;height:30px}
+.stamp-art{border:1px solid color-mix(in srgb,var(--stamp) 25%,transparent);border-radius:50%;transition:background .4s,transform .65s var(--settle)}
 .expertise-list li:hover .stamp-art{background:color-mix(in srgb,var(--stamp) 10%,transparent);transform:rotate(-9deg)}
-.tool-list li{transition:background .2s,color .2s,border-color .2s}
-.tool-list li:hover{color:var(--accent);border-color:var(--accent);background:var(--raised)}
 .about-index a{position:relative;transition:color .3s,padding-left .4s var(--settle)}
 .about-index a[aria-current=location]{color:var(--accent);padding-left:14px}
 .about-index a[aria-current=location]::before{content:'';position:absolute;left:0;top:50%;width:5px;height:5px;background:var(--accent);transform:rotate(45deg)}
@@ -96,7 +92,6 @@ a,button,.copy-emblem{transition:color .22s,background-color .22s,border-color .
 .research-cover,.project-art{min-height:260px}
 .site-footer{gap:14px 20px}.replay-arrival{margin-left:auto}
 }
-@media(max-width:530px){.expertise-list li{min-height:5.5rem;padding:14px;border:1px solid var(--edge);gap:18px}.stamp-art svg{width:24px;height:24px}.stamp-art{padding:8px}}
 @media(prefers-reduced-motion:reduce){
 .orb-disc,.boundary-art,.about-index a{transition:color .15s,background .15s}
 }

@@ -268,15 +268,15 @@ expertise = [
         ' ##############', ' ##   #  #   ##', ' ##   #', ' ##   #   ##',
         '  ########  ##', '   ##   ##    ##', '    ######  #####', '          ## ##',
         '              ##']),
-    ('Reconnaissance & Attack Surface Mapping', 'scope', [
+    ('Recon & Attack Surface Mapping', 'scope', [
         '      ####', '     ##  ##', '     ##  ##', '      ####',
         '       ##', '   ##########', '   ##      ##', '   ##      ##',
         ' #####    #####', ' ## ##    ## ##', ' #####    #####']),
-    ('Security Automation & AI-Assisted Workflow', 'pulse', [
+    ('AI-Assisted Security Automation', 'pulse', [
         '        #####', '       #####', '      #####', '     #####', '    #####',
         '   ##########', '  ##########', '       ####', '      ####', '     ###',
         '    ###', '   ##', '  #']),
-    ('Technical Reporting (PoC, CVSS, remediation)', 'web', [
+    ('Technical Reporting', 'web', [
         '   ########', '   ##    ###', '   ##    ####', '   ##    #####',
         '   ##       ##', '   ## ####  ##', '   ##       ##', '   ## ##### ##',
         '   ##       ##', '   ## ###   ##', '   ##       ##', '   ###########']),
@@ -288,25 +288,28 @@ def expertise_stamp(entry):
     art = f'<svg viewBox="-1 -1 18 17" aria-hidden="true" shape-rendering="crispEdges"><path d="{cells}"/></svg>'
     return f'<li class="stamp-{motif}"><span class="stamp-art">{art}</span><span>{escape(name)}</span></li>'
 
-def tool_items(entries, *, ordered=False):
-    tag = 'ol' if ordered else 'ul'
-    items = []
-    for slug, name in entries:
-        source = asset_url(f'assets/toolkit/{slug}.webp')
-        items.append(f'<li><span class="kit-mark kit-{slug}"><img src="{source}" alt="" width="48" height="48" loading="lazy" decoding="async"></span><span>{escape(name)}</span></li>')
-    return f'<{tag} class="kit-items">{"".join(items)}</{tag}>'
+def tool_pill(slug, name, href):
+    source = asset_url(f'assets/toolkit/{slug}.webp')
+    return f'<a class="kit-pill" href="{escape(href, quote=True)}" target="_blank" rel="noopener noreferrer"><img src="{source}" alt="" width="20" height="20" loading="lazy" decoding="async"><span>{escape(name)}</span></a>'
 
+def pill_items(entries):
+    return ''.join(f'<li>{tool_pill(*entry)}</li>' for entry in entries)
 
-recon_tools = [('subfinder', 'Subfinder'), ('nmap', 'Nmap'), ('httpx', 'httpx')]
-tool_groups = [
-    ('Recon', recon_tools),
-    ('Web testing', [('burp', 'Burp Suite'), ('ffuf', 'ffuf')]),
-    ('Vulnerability testing', [('nuclei', 'Nuclei'), ('dalfox', 'Dalfox (XSS)'), ('sqlmap', 'SQLmap (SQLi)')]),
+tools = [
+    ('subfinder', 'Subfinder', 'https://github.com/projectdiscovery/subfinder'),
+    ('nmap', 'Nmap', 'https://nmap.org/'),
+    ('httpx', 'httpx', 'https://github.com/projectdiscovery/httpx'),
+    ('burp', 'Burp Suite', 'https://portswigger.net/burp'),
+    ('ffuf', 'ffuf', 'https://github.com/ffuf/ffuf'),
+    ('nuclei', 'Nuclei', 'https://github.com/projectdiscovery/nuclei'),
+    ('dalfox', 'Dalfox', 'https://github.com/hahwul/dalfox'),
+    ('sqlmap', 'SQLmap', 'https://sqlmap.org/'),
 ]
-tools_markup = ''.join(f'<div class="kit-group"><h3>{title}</h3>{tool_items(entries)}</div>' for title, entries in tool_groups)
-assistant_tools = [('hermes', 'Hermes'), ('openbot', 'OpenBot')]
-scanning_tools = [('subfinder', 'Subfinder'), ('httpx', 'httpx'), ('nuclei', 'Nuclei')]
-scripting_tools = [('python', 'Python'), ('bash', 'Bash')]
+assistants = [
+    ('hermes', 'Hermes', 'https://github.com/NousResearch/hermes-agent'),
+    ('openbot', 'OpenBot', 'https://openbot.run/'),
+]
+languages = [('python', 'Python', 'https://www.python.org/'), ('bash', 'Bash', 'https://www.gnu.org/software/bash/')]
 
 about_parts = [('about-me','About me'),('expertise','Expertise'),('tools','Tools'),('automation','Automation'),('experience','Experience'),('education','Education')]
 index_links = ''.join(f'<a href="#{anchor}">{escape(name)}</a>' for anchor,name in about_parts)
@@ -328,13 +331,11 @@ about = f'''
 <div class="about-chapters">
 <section id="expertise" class="about-chapter"><h2>Expertise</h2><ul class="expertise-list">{''.join(map(expertise_stamp, expertise))}</ul></section>
 <section id="tools" class="about-chapter kit-chapter" aria-labelledby="tools-title"><h2 id="tools-title">Tools</h2>
-<div class="kit-shelf">{tools_markup}</div></section>
+<ul class="kit-pills">{pill_items(tools)}</ul></section>
 <section id="automation" class="about-chapter kit-chapter" aria-labelledby="automation-title"><h2 id="automation-title">Automation</h2>
-<div class="automation-board">
-<div class="auto-row"><h3>AI-assisted recon &amp; triage</h3>{tool_items(assistant_tools)}</div>
-<div class="auto-row auto-pipeline"><h3>Automated scanning pipeline</h3>{tool_items(scanning_tools, ordered=True)}</div>
-<div class="auto-row"><h3>Scripting</h3>{tool_items(scripting_tools)}</div>
-</div></section>
+<ul class="kit-pills">{pill_items(assistants)}
+<li><details class="script-tools"><summary class="kit-pill">{icon('code')}Scripting</summary>
+<ul class="kit-pills" aria-label="Scripting languages">{pill_items(languages)}</ul></details></li></ul></section>
 {timeline_section('experience', 'Experience', roles)}
 {timeline_section('education', 'Education', education)}
 </div></div>'''
