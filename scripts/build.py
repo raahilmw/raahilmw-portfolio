@@ -1,13 +1,16 @@
 from pathlib import Path
-from hashlib import sha256
+from hashlib import sha256, sha384
 from functools import lru_cache
 from html import escape
 from calendar import month_name
 import os
+import re
+from base64 import b64encode
+from shutil import copytree
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'dist'
-ORIGIN = os.environ.get('SITE_ORIGIN', 'https://raahilmw-security-lab.team-8535.chatgpt.site').rstrip('/')
+ORIGIN = os.environ.get('SITE_ORIGIN', 'https://raahilmw.com').rstrip('/')
 MEDIUM = 'https://medium.com/@raahil.mw'
 REPORT = MEDIUM + '/how-i-got-paid-for-turning-an-image-fetcher-into-an-arbitrary-file-read-0d15679bae00'
 ARTICLE = '/writeups/image-fetcher-local-file-read/'
@@ -85,6 +88,27 @@ def asset_url(name):
     return f'/{name}?v={revision}'
 
 
+
+def secure_html(document):
+    def add_integrity(match):
+        name = match.group(2).split('?', 1)[0].lstrip('/')
+        digest = b64encode(sha384((OUT / name).read_bytes()).digest()).decode()
+        return f'<script{match.group(1)} src="{match.group(2)}" integrity="sha384-{digest}" crossorigin="anonymous"{match.group(3)}>'
+    document = re.sub(r'<script([^>]*?) src="([^"]+)"([^>]*)>', add_integrity, document)
+    inline = re.findall(r'<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>', document, re.S)
+    hashes = ' '.join("'sha384-" + b64encode(sha384(code.encode()).digest()).decode() + "'" for code in inline)
+    # Inline style attributes carry animation parameters and pixel tile positions.
+    policy = (
+        "default-src 'none'; base-uri 'none'; object-src 'none'; "
+        f"script-src 'self' {hashes}; script-src-attr 'none'; "
+        "style-src 'self'; style-src-attr 'unsafe-inline'; "
+        "img-src 'self' data:; font-src 'self'; connect-src 'self'; "
+        "frame-src 'none'; form-action 'none'; upgrade-insecure-requests"
+    )
+    metadata = f'<meta http-equiv="Content-Security-Policy" content="{escape(policy, quote=True)}"><meta name="referrer" content="strict-origin-when-cross-origin">'
+    return document.replace('<meta charset="utf-8">', '<meta charset="utf-8">' + metadata, 1)
+
+
 def page(title,active,body,path='/',description=None):
     description = description or 'Raahil Muhammad Wildan — penetration testing, bug hunting, security automation, and published research.'
     output = OUT / path.lstrip('/') / 'index.html'
@@ -122,8 +146,8 @@ def page(title,active,body,path='/',description=None):
 </div>
 <div class="identity-footer"><button class="intro-skip" type="button" autofocus>Skip intro <kbd>Esc</kbd></button><div class="identity-meter" aria-hidden="true"><i></i></div></div>
 </dialog><script defer src="{asset_url('intro.js')}"></script>'''
-    output.write_text(f'''<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>{escape(title)} — raahilmw</title><meta name="description" content="{escape(description,quote=True)}"><link rel="canonical" href="{ORIGIN}{path}"><script>{(OUT / "theme.js").read_text()}</script><link rel="icon" href="{asset_url('assets/favicon.svg')}" type="image/svg+xml"><link rel="stylesheet" href="{asset_url('assets/fonts.css')}"><link rel="stylesheet" href="{asset_url('style.css')}">{profile_css}<link rel="stylesheet" href="{asset_url('motion.css')}">{contact_css}{certificate_css}{case_css}{home_css}{nav_prefetch}</head><body class="page-{active.lower()}">{header(active)}{intro}<main id="content">{body}</main>{footer()}<script src="{asset_url('app.js')}" defer></script><script src="{asset_url('motion.js')}" defer></script>{extra}</body></html>''')
+    output.write_text(secure_html(f'''<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b111b"><meta name="color-scheme" content="dark light"><title>{escape(title)} — raahilmw</title><meta name="description" content="{escape(description,quote=True)}"><link rel="canonical" href="{ORIGIN}{path}"><script>{(OUT / "theme.js").read_text()}</script><link rel="icon" href="{asset_url('assets/favicon.svg')}" type="image/svg+xml"><link rel="stylesheet" href="{asset_url('assets/fonts.css')}"><link rel="stylesheet" href="{asset_url('style.css')}">{profile_css}<link rel="stylesheet" href="{asset_url('motion.css')}">{contact_css}{certificate_css}{case_css}{home_css}{nav_prefetch}</head><body class="page-{active.lower()}">{header(active)}{intro}<main id="content">{body}</main>{footer()}<script src="{asset_url('app.js')}" defer></script><script src="{asset_url('motion.js')}" defer></script>{extra}</body></html>'''))
 
 def portrait():
     photo = 'assets/raahil-portrait.webp'
@@ -454,4 +478,5 @@ contact=f'''<section class="contact-page shell">
 </dialog>'''
 
 page('Contact','Contact',contact,'/contact/')
-print('Built 8 portfolio pages.')
+copytree(OUT, ROOT / 'docs', dirs_exist_ok=True)
+print('Built and synchronized 8 portfolio pages.')

@@ -1,0 +1,6 @@
+; Add these records to the existing Rumahweb zone.
+; The owner confirmed that this domain sends and receives no email.
+raahilmw.com.        3600 IN TXT "v=spf1 -all"
+raahilmw.com.        3600 IN MX 0 .
+_dmarc.raahilmw.com.  3600 IN TXT "v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s"
+raahilmw.com.        3600 IN CAA 0 issue "letsencrypt.org"
